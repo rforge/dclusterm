@@ -1,15 +1,8 @@
 DetectClustersModel<-function(stfdf, thegrid=NULL, radius=Inf, step=NULL,
-fractpop, alpha, iscluster, typeCluster, minDateUser=NULL, maxDateUser=NULL){
+fractpop, alpha, typeCluster, minDateUser=min(time(stfdf@time)), maxDateUser=max(time(stfdf@time)), modelCluster="poisson"){
 
-idMinDateCluster<-NULL
-idMaxDateCluster<-NULL
 sortDates<-sort(unique(time(stfdf@time)))
 
-if(typeCluster == "S"){
-idMinDateCluster<-which.min(sortDates)
-idMaxDateCluster<-which.max(sortDates)
-}else{
-if(typeCluster == "ST"){
 # Check minDateUser and maxDateUser make sense
 minDateData<-min(time(stfdf@time))
 maxDateData<-max(time(stfdf@time))
@@ -28,7 +21,7 @@ return(0)
 # Closest dates to minDateUser and maxDateUser
 idMinDateCluster<-min(which(sortDates >= minDateUser))
 idMaxDateCluster<-max(which(sortDates <= maxDateUser))
-}}
+
 
 # If grid is null, create a new grid
 if(is.null(thegrid)){
@@ -39,8 +32,8 @@ CreateGridDClusterm(stfdf, radius, step)
 rr<-radius*radius
 
 # Statistic of each cluster
-statsAllClusters<-CalcStatsAllClusters(thegrid, CalcStatClusterGivenCenter, stfdf, rr, iscluster,
-typeCluster, sortDates, idMinDateCluster, idMaxDateCluster, fractpop)
+statsAllClusters<-CalcStatsAllClusters(thegrid, CalcStatClusterGivenCenter, stfdf, rr,
+typeCluster, sortDates, idMinDateCluster, idMaxDateCluster, fractpop, modelCluster)
 
 # Remove rows where sizeCluster == -1
 idRemove<-which(statsAllClusters$sizeCluster == -1)

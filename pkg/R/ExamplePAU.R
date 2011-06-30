@@ -1,9 +1,11 @@
+setwd("C:/GSOC11/GSOCJune21")
 
 library(spdep)
 library(RColorBrewer)
 library(splancs)
 library(spacetime)
 library(DCluster)
+library(pscl)
 
 
 load("NY8.RData")
@@ -47,16 +49,18 @@ Expected = c(NY8$Exp),
 SMR      = c(NY8$SMR))
 stfdf = STFDF(sp, time, mydata)
 
+
 # Create column with ID. Unique identifier
 stfdf[['ID']]<-1:length(stfdf[['Observed']])
 
-
 # Call method to detect clusters
 # typeCluster="ST" (Spatio-temporal) or "S" (Spatial)
+# modelCluster="poisson" (glm family poisson) or modelCluster="zip" (zeroinfl)
+
+# if modelCluster="zip", stfdf$Observed<-round(stfdf$Observed)
 
 statsAllClusters<-DetectClustersModel(stfdf=stfdf, thegrid=as.data.frame(stfdf@sp), radius=Inf, step=NULL, fractpop=0.15, alpha=0.05,
-iscluster=glm.iscluster,
-typeCluster="ST", minDateUser=time(stfdf@time)[1], maxDateUser=time(stfdf@time)[1])
+typeCluster="S", minDateUser=time(stfdf@time)[1], maxDateUser=time(stfdf@time)[1], modelCluster="zip")
 statsAllClusters
 
 # Select clusters that do not overlap
