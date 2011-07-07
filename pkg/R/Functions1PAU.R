@@ -1,5 +1,5 @@
 DetectClustersModel<-function(stfdf, thegrid=NULL, radius=Inf, step=NULL,
-fractpop, alpha, typeCluster, minDateUser=min(time(stfdf@time)), maxDateUser=max(time(stfdf@time)), modelCluster="poisson"){
+fractpop, alpha, typeCluster, minDateUser=min(time(stfdf@time)), maxDateUser=max(time(stfdf@time)), modelCluster="poisson", R=NULL){
 
 sortDates<-sort(unique(time(stfdf@time)))
 
@@ -39,7 +39,6 @@ typeCluster, sortDates, idMinDateCluster, idMaxDateCluster, fractpop, modelClust
 idRemove<-which(statsAllClusters$sizeCluster == -1)
 if(length(idRemove)>0){
 statsAllClusters<-statsAllClusters[-idRemove, ]
-print("remove")
 }
 
 # If there are no clusters return "No clusters found"
@@ -51,15 +50,50 @@ return("No clusters found")
 # p-value of each cluster
 vecpvalue<-matrix(NA,dim(statsAllClusters)[1],1)
 veccluster<-matrix(NA,dim(statsAllClusters)[1],1)
+
+
+##############################################################################################
+
+# 1. p-value without Monte Carlo
+if(is.null(R)){
 for(i in 1:(dim(statsAllClusters)[1])){
 vecpvalue[i]<- 1-pchisq(2*statsAllClusters$statistic[i], 1)
 veccluster[i]<-vecpvalue[i]<alpha
+}}else{
+
+# 2. p-value with Monte Carlo
+maxStatisticRReplicas<-matrix(NA,R,1)
+for(i in 1:R){
+# Generate data set under H_0
+stfdfMC<-stfdf
+stfdfMC$Observed<-rpois(length(stfdf$Observed), lambda = stfdf$Expected)
+# Statistic of each cluster
+statsAllClustersMC<-CalcStatsAllClusters(thegrid, CalcStatClusterGivenCenter, stfdfMC, rr,
+typeCluster, sortDates, idMinDateCluster, idMaxDateCluster, fractpop, modelCluster)
+maxStatisticRReplicas[i]<-max(statsAllClustersMC$statistic)
+print(paste("replica",i))
 }
+
+# p-value according to rank
+for(i in 1:(dim(statsAllClusters)[1])){
+vecpvalue[i]<-(sum(maxStatisticRReplicas > statsAllClusters$statistic[i]) + 1)/(R + 1)
+veccluster[i]<-vecpvalue[i]<alpha
+}}
+
+##############################################################################################
+
 statsAllClusters<-cbind(statsAllClusters,veccluster,vecpvalue)
 colnames(statsAllClusters)<-c("x", "y", "sizeCluster", "minDateCluster", "maxDateCluster", "statistic", "cluster", "pvalue")
 
+print(statsAllClusters[rev(order(statsAllClusters$statistic)), ])
 # Selection of significant clusters
 statsAllClusters<-statsAllClusters[statsAllClusters$pvalue < alpha, ]
+
+# If there are no clusters return "No clusters found"
+if(dim(statsAllClusters)[1] == 0){
+print(paste("No significant clusters found with alpha =",alpha))
+return("No clusters found")
+}
 
 # Ordered results by statistic value
 statsAllClusters<-statsAllClusters[rev(order(statsAllClusters$statistic)), ]
