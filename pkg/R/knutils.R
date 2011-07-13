@@ -1,6 +1,11 @@
 
 
-#This function makes binary variables from the clusters
+##' Make binary variables from the clusters
+##'
+##' @param d whatever d is
+##' @param knresults whatever knresults is
+
+##' @return whatever the return is
 knbinary<-function(d, knresults)
 {
 	clusters<-get.knclusters(d, knresults)
@@ -22,15 +27,20 @@ knbinary<-function(d, knresults)
 }
 
 
-#This function slims the number of clusters down.
-#The spatial scan statistic is known to detect duplicated
-#clusters. This function aims to reduce the number of clusters
-#by removing duplicated and overlapping clusters.
-#
-#The main criteria to choose the 'primary' clusters is the
-#is the likelihood ratio
+##' Slims the number of clusters down.
+##' 
+##' The spatial scan statistic is known to detect duplicated
+##' clusters. This function aims to reduce the number of clusters
+##' by removing duplicated and overlapping clusters.
+##'
+##' The main criteria to choose the 'primary' clusters 
+##' is the likelihood ratio
 
+##' @param d whatever d is
+##' @param knresults whatever knresults is
+##' @param minsize whateverthe minsize
 
+##' @return whatever this does
 slimknclusters<-function(d, knresults, minsize=1)
 {
 	#Filter by minsize
