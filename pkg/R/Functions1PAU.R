@@ -1,6 +1,9 @@
 DetectClustersModel<-function(stfdf, thegrid=NULL, radius=Inf, step=NULL,
 fractpop, alpha, typeCluster, minDateUser=min(time(stfdf@time)), maxDateUser=max(time(stfdf@time)), modelCluster="poisson", R=NULL){
 
+# Create column with ID. Unique identifier
+stfdf[['ID']]<-1:length(stfdf[['Observed']])
+
 sortDates<-sort(unique(time(stfdf@time)))
 
 # Check minDateUser and maxDateUser make sense

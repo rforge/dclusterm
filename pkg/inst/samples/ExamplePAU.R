@@ -96,12 +96,9 @@ stfdf = STFDF(sp, time, mydata)
 # if modelCluster="zip", stfdf$Observed<-round(stfdf$Observed)
 
 
-# Create column with ID. Unique identifier
-stfdf[['ID']]<-1:length(stfdf[['Observed']])
-
 # Call method to detect clusters
 statsAllClusters<-DetectClustersModel(stfdf=stfdf, thegrid=as.data.frame(stfdf@sp), radius=Inf, step=NULL, fractpop=0.15, alpha=0.05,
-typeCluster="S", minDateUser=time(stfdf@time)[1], maxDateUser=time(stfdf@time)[19], modelCluster="poisson", R=NULL)
+typeCluster="ST", minDateUser=time(stfdf@time)[1], maxDateUser=time(stfdf@time)[2], modelCluster="poisson", R=NULL)
 statsAllClusters
 
 # Select clusters that do not overlap

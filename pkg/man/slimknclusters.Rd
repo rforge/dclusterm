@@ -1,8 +1,8 @@
 \name{slimknclusters}
 \alias{slimknclusters}
-\title{This function slims the number of clusters down.}
+\title{Slims the number of clusters down.}
 \usage{slimknclusters(d, knresults, minsize=1)}
-\description{This function slims the number of clusters down.}
+\description{Slims the number of clusters down.}
 \details{The spatial scan statistic is known to detect duplicated
 clusters. This function aims to reduce the number of clusters
 by removing duplicated and overlapping clusters.

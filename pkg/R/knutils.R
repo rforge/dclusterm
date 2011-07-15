@@ -131,7 +131,7 @@ overlapindex<-function(d, knresults0, knresults1)
 }
 
 #RETURN names of areas in cluster as a list
-clusternames<-function(d, knresults, namescol)
+clusternames<-function(xx, knresults, namescol)
 {
 	knbin<-knbinary(xx@data, knresults)
 	apply(knbin, 2, function(X){

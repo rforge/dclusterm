@@ -1,6 +1,6 @@
 glmAndZIP.iscluster<-function(stfdf, idx, idxorder, minDateCluster, maxDateCluster, fractpop, modelCluster){
 # Args:
-# stdf: data
+# stfdf: data
 # idTime, idSpace: indexes corresponding to the time and locations inside the cluster
 # Returns:
 
@@ -23,7 +23,7 @@ return(c(sizeCluster, minDateCluster, maxDateCluster, difL))
 
 for(i in 1:length(idxorder)){
 idSpace<-idxorder[1:i]
-d0$CLUSTER<-SetVbleCluster(stdf,idTime,idSpace)
+d0$CLUSTER<-SetVbleCluster(stfdf,idTime,idSpace)
 
 # cluster size must be smaller than fractpop of the total
 # 2 is the index for CLUSTER coefficient
@@ -49,9 +49,9 @@ return(c(sizeCluster, minDateCluster, maxDateCluster, difL))
 
 
 
-SetVbleCluster<-function(stdf,idTime,idSpace){
+SetVbleCluster<-function(stfdf,idTime,idSpace){
 # Args:
-# stdf: data
+# stfdf: data
 # idTime, idSpace: indexes corresponding to the time and locations inside the cluster
 # Returns:
 # vbleCluster, vbleCluster[i] = 1 if position i corresponds to space and time inside the cluster, 0 otherwise
