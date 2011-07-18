@@ -1,4 +1,13 @@
 \name{CreateGridDClusterm}
 \alias{CreateGridDClusterm}
-\title{CreateGridDClusterm}
+\title{Creates grid over the study area.}
 \usage{CreateGridDClusterm(stfdf, radius, step)}
+\description{Creates grid over the study area.}
+\details{If the argument thegrid of DetectClustersModel() is null, this function is
+used to create a rectangular grid with a given step.
+If step is NULL the step used is equal to 0.2*radius.
+The grid contains the coordinates of the centers of the clusters explored.}
+\value{two columns matrix where each row represents a point of the grid.}
+\arguments{\item{stfdf}{spatio-temporal class object containing the data.}
+\item{radius}{maximum radius of the clusters.}
+\item{step}{step of the grid.}}

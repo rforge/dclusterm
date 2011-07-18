@@ -1,5 +1,41 @@
+##' Detects clusters and computes their significance.
+##' 
+##' Searches all possible clusters with start and end dates within minDateUser
+##' and maxDateUser, so that the maximum fraction of the total population inside
+##' the cluster is less than fractpop, and the maximum distance to the center is
+##' less than radius.
+##' The search can be done for spatial or spatio-temporal clusters.
+##' The significance of the clusters is obtained with a Monte Carlo procedure or
+##' based on the chi-square distribution.
+##'
+##' @param stfdf spatio-temporal class object containing the data. See
+##' STFDF-class {spacetime} for details. It contains an object of class
+##' Spatial with the coordinates, a POSIXct object with the time, and a
+##' data.frame with the Observed, Expected and SMR in each location and time.
+##' @param thegrid two-columns matrix containing the points of the grid to be
+##' used. If it is null, a rectangular grid is built.
+##' @param radius maximum radius of the clusters.
+##' @param step step of the thegrid built.
+##' @param fractpop maximum fraction of the total population inside the cluster.
+##' @param alpha significance level used to determine the existence of clusters.
+##' @param typeCluster type of clusters to be detected. "ST" for spatio-temporal
+##' or "S" spatial clusters.
+##' @param minDateUser start date of the clusters.
+##' @param maxDateUser end date of the clusters.
+##' @param modelCluster type of probability model used to fit the data. If
+##' "poisson" generalized linear models with poisson family are used (glm {stats}).
+##' If "zip" zero-inflated models are used (zeroinfl {pscl}).
+##' @param R If the cluster's significance is calculated based on the chi-square
+##' distribution, R is NULL. If the cluster's significance is calculated using a Monte Carlo procedure, R represents the number replicates under the null hypothesis.
+##'
+##' @return data frame with information of the detected clusters ordered by its
+##' log-likelihood ratio value. Each row represents the information of one of
+##' the clusters. It contains the coordinates of the center, the size, the start
+##' and end dates, the log-likelihood ratio, a boolean indicating if it is a
+##' cluster (TRUE in all cases), and the p-value of the cluster.
 DetectClustersModel<-function(stfdf, thegrid=NULL, radius=Inf, step=NULL,
-fractpop, alpha, typeCluster, minDateUser=min(time(stfdf@time)), maxDateUser=max(time(stfdf@time)), modelCluster="poisson", R=NULL){
+fractpop, alpha, typeCluster, minDateUser=min(time(stfdf@time)), maxDateUser=max(time(stfdf@time)),
+modelCluster="poisson", R=NULL){
 
 # Create column with ID. Unique identifier
 stfdf[['ID']]<-1:length(stfdf[['Observed']])
@@ -53,7 +89,6 @@ return("No clusters found")
 # p-value of each cluster
 vecpvalue<-matrix(NA,dim(statsAllClusters)[1],1)
 veccluster<-matrix(NA,dim(statsAllClusters)[1],1)
-
 
 ##############################################################################################
 
@@ -110,7 +145,20 @@ return(statsAllClusters)
 
 
 
-SelectStatsAllClustersNoOverlap<-function(stfdf,statsAllClusters){
+
+##' Removes the overlapping clusters.
+##' 
+##' Function DetectClustersModel() detects duplicated clusters.
+##' This function reduces the number of clusters by removing the overlapping
+##' clusters.
+##'
+##' @param stfdf spatio-temporal class object containing the data.
+##' @param statsAllClusters data frame with information of the detected
+##' clusters obtained with DetectClustersModel().
+##'
+##' @return data frame with the same information than statsAllClusters but only
+##' for clusters that do not overlap.
+SelectStatsAllClustersNoOverlap<-function(stfdf, statsAllClusters){
 # statsAllClusters is ordered by statistic value
 coordx<-as.data.frame(coordinates(stfdf@sp))[['x']]
 coordy<-as.data.frame(coordinates(stfdf@sp))[['y']]

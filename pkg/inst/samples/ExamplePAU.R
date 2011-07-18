@@ -98,7 +98,7 @@ stfdf = STFDF(sp, time, mydata)
 
 # Call method to detect clusters
 statsAllClusters<-DetectClustersModel(stfdf=stfdf, thegrid=as.data.frame(stfdf@sp), radius=Inf, step=NULL, fractpop=0.15, alpha=0.05,
-typeCluster="ST", minDateUser=time(stfdf@time)[1], maxDateUser=time(stfdf@time)[2], modelCluster="poisson", R=NULL)
+typeCluster="S", minDateUser=time(stfdf@time)[1], maxDateUser=time(stfdf@time)[1], modelCluster="poisson", R=NULL)
 statsAllClusters
 
 # Select clusters that do not overlap
@@ -107,7 +107,7 @@ statsAllClustersNoOverlap
 
 
 # Plot detected clusters
-datasetExample<-nmf
+datasetExample<-brain
 knslim<-statsAllClustersNoOverlap[1, ]
 
 knbinslim<-as.data.frame(knbinary(as(datasetExample, "data.frame"), knslim))

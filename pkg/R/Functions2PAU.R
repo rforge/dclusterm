@@ -1,3 +1,15 @@
+##' Creates grid over the study area.
+##' 
+##' If the argument thegrid of DetectClustersModel() is null, this function is
+##' used to create a rectangular grid with a given step.
+##' If step is NULL the step used is equal to 0.2*radius.
+##' The grid contains the coordinates of the centers of the clusters explored.
+##'
+##' @param stfdf spatio-temporal class object containing the data.
+##' @param radius maximum radius of the clusters.
+##' @param step step of the grid.
+##'
+##' @return two columns matrix where each row represents a point of the grid.
 CreateGridDClusterm<-function(stfdf, radius, step){
 # Return: thegrid
 if(is.null(step)){
@@ -17,11 +29,41 @@ return(thegrid)
 }
 
 
+
+
+
+##' Obtains clusters with the maximum log-likelihood ratio for each center and
+##' start and end dates.
+##' 
+##' This function explores all possible clusters changing their center and start
+##' and end dates. For each center and time periods, it obtains the cluster with
+##' the maximum log-likelihood ratio so that the maximum fraction of the total
+##' population inside the cluster is less than fractpop, and the maximum
+##' distance to the center is less than radius.
+##'
+##' @param thegrid grid with the coordinates of the centers of the clusters
+##' explored.
+##' @param CalcStatClusterGivenCenter function to obtain the cluster with the
+##' maximum log-likelihood ratio of all the clusters with the same center and
+##' start and end dates
+##' @param stfdf spatio-temporal class object containing the data.
+##' @param rr square of the maximum radius of the cluster. 
+##' @param typeCluster type of clusters to be detected. "ST" for spatio-temporal
+##' clusters or "S" spatial clusters.
+##' @param sortDates sorted vector of the times where disease cases occurred.
+##' @param idMinDateCluster index of the closest date to the start date of the
+##' cluster in the vector sortDates
+##' @param idMaxDateCluster index of the closest date to the end date of the
+##' cluster in the vector sortDates
+##' @param fractpop maximum fraction of the total population inside the cluster.
+##' @param modelCluster type of probability model used to fit the data. If
+##' "poisson" generalized linear models with poisson family are used (glm {stats}). If "zip" zero-inflated models are used (zeroinfl {pscl}).
+##'
+##' @return data frame with information of the clusters with the maximum
+##' log-likelihood ratio for each center and start and end dates. It contains the coordinates of the center, the size, the start and end dates, and the log-likelihood ratio of each of the clusters.
 CalcStatsAllClusters<-function(thegrid, CalcStatClusterGivenCenter, stfdf, rr,
 typeCluster, sortDates, idMinDateCluster, idMaxDateCluster, fractpop, modelCluster){
-# Return
-# statsAllClusters
-# Temporal dimension here, spatial dimension inside opgamModel
+# Temporal dimension here, spatial dimension inside glmAndZIP.iscluster
 
 if(typeCluster == "ST"){
 statsAllClusters<-NULL
@@ -46,6 +88,31 @@ return(as.data.frame(statsAllClusters))
 }
 
 
+
+
+
+##' Calls the function to obtain the cluster with the maximum log-likelihood
+##' ratio of all the clusters with the same center and start and end dates.
+##' 
+##' This function orders the regions according to the distance to a given center
+##' and selects the regions with distance to the center less than sqrt(rr).
+##' Then it calls glmAndZIP.iscluster() to obtain the cluster with the maximum
+##' log-likelihood ratio of all the clusters with the same center and start and
+##' end dates, and where the maximum fraction of the total population inside the
+##' cluster is less than fractpop.
+##'
+##' @param point vector with the coordinates of the center of the cluster.
+##' @param stfdf spatio-temporal class object containing the data.
+##' @param rr square of the maximum radius of the cluster. 
+##' @param minDateCluster start date of the cluster.
+##' @param maxDateCluster end date of the cluster.
+##' @param fractpop maximum fraction of the total population inside the cluster.
+##' @param modelCluster type of probability model used to fit the data. If
+##' "poisson" generalized linear models with poisson family are used (glm {stats}).
+##' If "zip" zero-inflated models are used (zeroinfl {pscl}).
+##'
+##' @return vector containing the coordinates of the center, the size, the
+##' start and end dates, and the log-likelihood ratio of the cluster with the maximum log-likelihood ratio.
 CalcStatClusterGivenCenter<-function(point, stfdf, rr, minDateCluster, maxDateCluster, fractpop, modelCluster){
 coordx<-as.data.frame(coordinates(stfdf@sp))[['x']]
 coordy<-as.data.frame(coordinates(stfdf@sp))[['y']]
@@ -55,6 +122,12 @@ dist<-xd*xd+yd*yd
 #
 idx<-(dist <= rr)
 idxorder<-order(dist)
-cl<-glmAndZIP.iscluster(stfdf=stfdf, idx=idx, idxorder=idxorder, minDateCluster, maxDateCluster, fractpop, modelCluster)
+
+# Only the regions with distance less than radius can be part of the cluster
+idxorder<-idxorder[idx[idxorder]]
+
+cl<-glmAndZIP.iscluster(stfdf=stfdf, idxorder=idxorder, minDateCluster, maxDateCluster, fractpop, modelCluster)
 return(c(point, cl))
 }
+
+
