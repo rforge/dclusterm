@@ -57,20 +57,28 @@ return(thegrid)
 ##' cluster in the vector sortDates
 ##' @param fractpop maximum fraction of the total population inside the cluster.
 ##' @param modelCluster type of probability model used to fit the data. If
-##' "poisson" generalized linear models with poisson family are used (glm {stats}). If "zip" zero-inflated models are used (zeroinfl {pscl}).
+##' "poisson" generalized linear models with poisson family are used (glm {stats}).
+##' If "zip" zero-inflated models are used (zeroinfl {pscl}).
+##' @param numCPUS Number of cpus used when using snowfall to run the method.
+##' If snowfall is not used numCPUS is NULL.
 ##'
 ##' @return data frame with information of the clusters with the maximum
 ##' log-likelihood ratio for each center and start and end dates. It contains the coordinates of the center, the size, the start and end dates, and the log-likelihood ratio of each of the clusters.
 CalcStatsAllClusters<-function(thegrid, CalcStatClusterGivenCenter, stfdf, rr,
-typeCluster, sortDates, idMinDateCluster, idMaxDateCluster, fractpop, modelCluster){
+typeCluster, sortDates, idMinDateCluster, idMaxDateCluster, fractpop, modelCluster, numCPUS){
 # Temporal dimension here, spatial dimension inside glmAndZIP.iscluster
 
 if(typeCluster == "ST"){
 statsAllClusters<-NULL
 for (i in idMinDateCluster:idMaxDateCluster){
 for (j in i: idMaxDateCluster){
+if(is.null(numCPUS)){
 statClusterGivenCenter<-apply(thegrid, 1, CalcStatClusterGivenCenter, stfdf, rr,
 minDateCluster=sortDates[i], maxDateCluster=sortDates[j], fractpop, modelCluster)
+}else{
+statClusterGivenCenter<-sfApply(thegrid, 1, CalcStatClusterGivenCenter, stfdf, rr,
+minDateCluster=sortDates[i], maxDateCluster=sortDates[j], fractpop, modelCluster)
+}
 statsAllClusters<-rbind(statsAllClusters,t(statClusterGivenCenter))
 print(c(i,j))
 }}}
@@ -78,8 +86,13 @@ print(c(i,j))
 if(typeCluster == "S"){
 i<-idMinDateCluster
 j<-idMaxDateCluster
+if(is.null(numCPUS)){
 statsAllClusters<-apply(thegrid, 1, CalcStatClusterGivenCenter, stfdf, rr,
 minDateCluster=sortDates[i], maxDateCluster=sortDates[j], fractpop, modelCluster)
+}else{
+statsAllClusters<-sfApply(thegrid, 1, CalcStatClusterGivenCenter, stfdf, rr,
+minDateCluster=sortDates[i], maxDateCluster=sortDates[j], fractpop, modelCluster)
+}
 statsAllClusters<-t(statsAllClusters)
 print(c(i,j))
 }

@@ -3,7 +3,7 @@
 \title{Obtains clusters with the maximum log-likelihood ratio for each center and...}
 \usage{CalcStatsAllClusters(thegrid, CalcStatClusterGivenCenter, stfdf, rr,
     typeCluster, sortDates, idMinDateCluster, idMaxDateCluster,
-    fractpop, modelCluster)}
+    fractpop, modelCluster, numCPUS)}
 \description{Obtains clusters with the maximum log-likelihood ratio for each center and
 start and end dates.}
 \details{This function explores all possible clusters changing their center and start
@@ -29,4 +29,7 @@ cluster in the vector sortDates}
 cluster in the vector sortDates}
 \item{fractpop}{maximum fraction of the total population inside the cluster.}
 \item{modelCluster}{type of probability model used to fit the data. If
-"poisson" generalized linear models with poisson family are used (glm {stats}). If "zip" zero-inflated models are used (zeroinfl {pscl}).}}
+"poisson" generalized linear models with poisson family are used (glm {stats}).
+If "zip" zero-inflated models are used (zeroinfl {pscl}).}
+\item{numCPUS}{Number of cpus used when using snowfall to run the method.
+If snowfall is not used numCPUS is NULL.}}

@@ -6,6 +6,7 @@ library(splancs)
 library(spacetime)
 library(DCluster)
 library(pscl)
+library(snowfall)
 
 # Functions
 source("R/Functions1PAU.R")
@@ -87,38 +88,26 @@ stfdf = STFDF(sp, time, mydata)
 
 
 
-# Method to detect clusters
+
 # typeCluster="ST" (Spatio-temporal) or "S" (Spatial)
 # modelCluster="poisson" (glm family poisson) or modelCluster="zip" (zeroinfl)
 # R=NULL (p-value calculated with 1-pchisq(2*statsAllClusters$statistic[i], 1)) or
 # R=number (p-value calculated with Monte Carlo)
-
 # if modelCluster="zip", stfdf$Observed<-round(stfdf$Observed)
 
 
 # Call method to detect clusters
 statsAllClusters<-DetectClustersModel(stfdf=stfdf, thegrid=as.data.frame(stfdf@sp), radius=Inf, step=NULL, fractpop=0.15, alpha=0.05,
-typeCluster="S", minDateUser=time(stfdf@time)[1], maxDateUser=time(stfdf@time)[1], modelCluster="poisson", R=NULL)
+typeCluster="ST", minDateUser=time(stfdf@time)[1], maxDateUser=time(stfdf@time)[1], modelCluster="poisson", R=NULL, numCPUS=4)
 statsAllClusters
 
 # Select clusters that do not overlap
-statsAllClustersNoOverlap<-SelectStatsAllClustersNoOverlap(stfdf,statsAllClusters)
+statsAllClustersNoOverlap<-SelectStatsAllClustersNoOverlap(stfdf, statsAllClusters)
 statsAllClustersNoOverlap
 
-
 # Plot detected clusters
-datasetExample<-brain
-knslim<-statsAllClustersNoOverlap[1, ]
-
-knbinslim<-as.data.frame(knbinary(as(datasetExample, "data.frame"), knslim))
-names(knbinslim)<-paste("CL", 1:ncol(knbinslim), sep="")
-datasetExample@data<-cbind(datasetExample@data, knbinslim)
-datasetExample$clusters<-mergeknclusters(as(datasetExample, "data.frame"), knslim)
-
-pal<-c("white", brewer.pal(12, "Set3"))
-spplot(datasetExample, "clusters",  col="gray",  col.regions=pal[1:nlevels(datasetExample$clusters)],
-sp.layout=list(list("sp.points", kn2SPDF(knslim), pch=19), list("sp.text", as.matrix(knslim[,1:2]), levels(datasetExample$clusters)[-1],
-font=2, cex=1, col="black")))
-
+colors<-brewer.pal(12, "Set3")
+map<-brain
+PlotClustersNoOverlap(statsAllClustersNoOverlap, colors, map)
 
 

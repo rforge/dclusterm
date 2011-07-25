@@ -26,7 +26,10 @@
 ##' "poisson" generalized linear models with poisson family are used (glm {stats}).
 ##' If "zip" zero-inflated models are used (zeroinfl {pscl}).
 ##' @param R If the cluster's significance is calculated based on the chi-square
-##' distribution, R is NULL. If the cluster's significance is calculated using a Monte Carlo procedure, R represents the number replicates under the null hypothesis.
+##' distribution, R is NULL. If the cluster's significance is calculated using a
+##' Monte Carlo procedure, R represents the number replicates under the null hypothesis.
+##' @param numCPUS Number of cpus used when using snowfall to run the method.
+##' If snowfall is not used numCPUS is NULL.
 ##'
 ##' @return data frame with information of the detected clusters ordered by its
 ##' log-likelihood ratio value. Each row represents the information of one of
@@ -35,7 +38,7 @@
 ##' cluster (TRUE in all cases), and the p-value of the cluster.
 DetectClustersModel<-function(stfdf, thegrid=NULL, radius=Inf, step=NULL,
 fractpop, alpha, typeCluster, minDateUser=min(time(stfdf@time)), maxDateUser=max(time(stfdf@time)),
-modelCluster="poisson", R=NULL){
+modelCluster="poisson", R=NULL, numCPUS=NULL){
 
 # Create column with ID. Unique identifier
 stfdf[['ID']]<-1:length(stfdf[['Observed']])
@@ -70,9 +73,23 @@ CreateGridDClusterm(stfdf, radius, step)
 # Radius
 rr<-radius*radius
 
+# Init snowfall
+if(!is.null(numCPUS)){
+sfInit( parallel=TRUE, cpus=numCPUS )
+sfLibrary(spdep)
+sfLibrary(splancs)
+sfLibrary(spacetime)
+sfLibrary(DCluster)
+sfLibrary(pscl)
+sfSource("R/Functions1PAU.R")
+sfSource("R/Functions2PAU.R")
+sfSource("R/glm.isclusterPAU.R")
+sfSource("R/knutils.R")
+}
+
 # Statistic of each cluster
 statsAllClusters<-CalcStatsAllClusters(thegrid, CalcStatClusterGivenCenter, stfdf, rr,
-typeCluster, sortDates, idMinDateCluster, idMaxDateCluster, fractpop, modelCluster)
+typeCluster, sortDates, idMinDateCluster, idMaxDateCluster, fractpop, modelCluster, numCPUS)
 
 # Remove rows where sizeCluster == -1
 idRemove<-which(statsAllClusters$sizeCluster == -1)
@@ -107,7 +124,7 @@ stfdfMC<-stfdf
 stfdfMC$Observed<-rpois(length(stfdf$Observed), lambda = stfdf$Expected)
 # Statistic of each cluster
 statsAllClustersMC<-CalcStatsAllClusters(thegrid, CalcStatClusterGivenCenter, stfdfMC, rr,
-typeCluster, sortDates, idMinDateCluster, idMaxDateCluster, fractpop, modelCluster)
+typeCluster, sortDates, idMinDateCluster, idMaxDateCluster, fractpop, modelCluster, numCPUS)
 maxStatisticRReplicas[i]<-max(statsAllClustersMC$statistic)
 print(paste("replica",i))
 }
@@ -120,16 +137,21 @@ veccluster[i]<-vecpvalue[i]<alpha
 
 ##############################################################################################
 
+# End snowfall
+if(!is.null(numCPUS)){
+sfStop()
+}
+
 statsAllClusters<-cbind(statsAllClusters,veccluster,vecpvalue)
 colnames(statsAllClusters)<-c("x", "y", "sizeCluster", "minDateCluster", "maxDateCluster", "statistic", "cluster", "pvalue")
 
-print(statsAllClusters[rev(order(statsAllClusters$statistic)), ])
+#print(statsAllClusters[rev(order(statsAllClusters$statistic)), ])
 # Selection of significant clusters
 statsAllClusters<-statsAllClusters[statsAllClusters$pvalue < alpha, ]
 
 # If there are no clusters return "No clusters found"
 if(dim(statsAllClusters)[1] == 0){
-print(paste("No significant clusters found with alpha =",alpha))
+print(paste("No significant clusters found with alpha =", alpha))
 return("No clusters found")
 }
 

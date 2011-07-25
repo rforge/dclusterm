@@ -3,7 +3,8 @@
 \title{Detects clusters and computes their significance.}
 \usage{DetectClustersModel(stfdf, thegrid, radius=Inf, step, fractpop, alpha,
     typeCluster, minDateUser=min(time(stfdf@time)),
-    maxDateUser=max(time(stfdf@time)), modelCluster="poisson", R)}
+    maxDateUser=max(time(stfdf@time)), modelCluster="poisson", R,
+    numCPUS)}
 \description{Detects clusters and computes their significance.}
 \details{Searches all possible clusters with start and end dates within minDateUser
 and maxDateUser, so that the maximum fraction of the total population inside
@@ -35,4 +36,7 @@ or "S" spatial clusters.}
 "poisson" generalized linear models with poisson family are used (glm {stats}).
 If "zip" zero-inflated models are used (zeroinfl {pscl}).}
 \item{R}{If the cluster's significance is calculated based on the chi-square
-distribution, R is NULL. If the cluster's significance is calculated using a Monte Carlo procedure, R represents the number replicates under the null hypothesis.}}
+distribution, R is NULL. If the cluster's significance is calculated using a
+Monte Carlo procedure, R represents the number replicates under the null hypothesis.}
+\item{numCPUS}{Number of cpus used when using snowfall to run the method.
+If snowfall is not used numCPUS is NULL.}}
