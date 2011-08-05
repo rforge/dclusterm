@@ -6,6 +6,7 @@ library(splancs)
 library(spacetime)
 library(DCluster)
 library(pscl)
+library(lme4)
 library(snowfall)
 
 # Functions
@@ -26,21 +27,17 @@ return(dataframe)
 # Datasets
 
 load("data/NY8.RData")
-# Calculate SMR
-NY8$Exp<- NY8$POP8 * sum(NY8$Cases)/sum(NY8$POP8)
-NY8$Observed<-NY8$Cases
-NY8$Expected<-NY8$Exp
-NY8$SMR<-NY8$Observed/NY8$Expected
-
 # Brain cancer in New Mexico, 1973-1991
 load("data/nmf.RData")
-
 # Brain cancer in Navarra, Spain
 load("data/Navarra.RData")
 
 
 
 # Example 1 (NY8)
+NY8$Exp<- NY8$POP8 * sum(NY8$Cases)/sum(NY8$POP8)
+NY8$SMR<-NY8$Cases/NY8$Exp
+
 # STFDF object: sp, time and mydata
 NY8<-AddCoordinatesToDataframe(NY8)
 sp<-SpatialPoints(cbind(x = NY8$x, y = NY8$y))
@@ -87,18 +84,49 @@ stfdf = STFDF(sp, time, mydata)
 
 
 
+# Example 4 (SIDS)
+nc_file <- system.file("etc/shapes/sids.shp", package = "spdep")[1]
+nc <- readShapeSpatial(nc_file, ID = "FIPSNO", proj4string = CRS("+proj=longlat +datum=NAD27"))
+nc$EXPECTED<-nc$BIR74*sum(nc$SID74)/sum(nc$BIR74)
+nc$SIR<-nc$SID74/nc$EXPECTED
+
+# STFDF object: sp, time and mydata
+nc<-AddCoordinatesToDataframe(nc)
+sp<-SpatialPoints(cbind(x = nc$x, y = nc$y))
+# time must be ordered
+time<-as.POSIXct(strptime(c("1990-01-01"), "%Y-%m-%d"), tz = "GMT")
+mydata<-data.frame(
+Observed = c(nc$SID74),
+Expected = c(nc$EXPECTED),
+SMR      = c(nc$SIR))
+stfdf = STFDF(sp, time, mydata)
+
+
+
+
+
+
+
+
+
 
 
 # typeCluster="ST" (Spatio-temporal) or "S" (Spatial)
-# modelCluster="poisson" (glm family poisson) or modelCluster="zip" (zeroinfl)
+# modelType="glm", "zeroinfl" or "glmer"
 # R=NULL (p-value calculated with 1-pchisq(2*statsAllClusters$statistic[i], 1)) or
 # R=number (p-value calculated with Monte Carlo)
-# if modelCluster="zip", stfdf$Observed<-round(stfdf$Observed)
+# if modelType="zip", stfdf$Observed<-round(stfdf$Observed)
 
 
 # Call method to detect clusters
+
 statsAllClusters<-DetectClustersModel(stfdf=stfdf, thegrid=as.data.frame(stfdf@sp), radius=Inf, step=NULL, fractpop=0.15, alpha=0.05,
-typeCluster="ST", minDateUser=time(stfdf@time)[1], maxDateUser=time(stfdf@time)[1], modelCluster="poisson", R=NULL, numCPUS=4)
+typeCluster="S", minDateUser=time(stfdf@time)[1], maxDateUser=time(stfdf@time)[1], R=NULL, numCPUS=NULL,
+modelType="glm",
+modelFormula="Observed ~ offset(log(Expected)) ",
+modelFamilyGlmGlmer=poisson(link = "log"),
+modelDistZeroinfl="poisson", modelLinkZeroinfl="logit")
+
 statsAllClusters
 
 # Select clusters that do not overlap
@@ -107,7 +135,7 @@ statsAllClustersNoOverlap
 
 # Plot detected clusters
 colors<-brewer.pal(12, "Set3")
-map<-brain
+map<-nc
 PlotClustersNoOverlap(statsAllClustersNoOverlap, colors, map)
 
 

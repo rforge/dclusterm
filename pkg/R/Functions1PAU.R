@@ -11,7 +11,7 @@
 ##' @param stfdf spatio-temporal class object containing the data. See
 ##' STFDF-class {spacetime} for details. It contains an object of class
 ##' Spatial with the coordinates, a POSIXct object with the time, and a
-##' data.frame with the Observed, Expected and SMR in each location and time.
+##' data.frame with vectors Observed, Expected and potential covariates in each location and time.
 ##' @param thegrid two-columns matrix containing the points of the grid to be
 ##' used. If it is null, a rectangular grid is built.
 ##' @param radius maximum radius of the clusters.
@@ -22,24 +22,30 @@
 ##' or "S" spatial clusters.
 ##' @param minDateUser start date of the clusters.
 ##' @param maxDateUser end date of the clusters.
-##' @param modelCluster type of probability model used to fit the data. If
-##' "poisson" generalized linear models with poisson family are used (glm {stats}).
-##' If "zip" zero-inflated models are used (zeroinfl {pscl}).
 ##' @param R If the cluster's significance is calculated based on the chi-square
 ##' distribution, R is NULL. If the cluster's significance is calculated using a
 ##' Monte Carlo procedure, R represents the number replicates under the null hypothesis.
 ##' @param numCPUS Number of cpus used when using snowfall to run the method.
 ##' If snowfall is not used numCPUS is NULL.
+##' @param modelType character specification of the type of probability model used to fit the data.
+##' This can be "glm" for generalized linear models (glm {stats}),
+##' "glmer" for generalized linear mixed model (glmer {lme4}), or
+##' "zeroinfl" for zero-inflated models (zeroinfl {pscl}).
+##' @param modelFormula character specification of the symbolic description of the model.
+##' @param modelFamilyGlmGlmer family function to be used in the model if modelType is "glm" or "glmer".
+##' @param modelDistZeroinfl character specification of count model family if modelType is "zeroinfl".
+##' @param modelLinkZeroinfl character specification of link function in the binary zero-inflation model if modelType is "zeroinfl".
 ##'
 ##' @return data frame with information of the detected clusters ordered by its
 ##' log-likelihood ratio value. Each row represents the information of one of
 ##' the clusters. It contains the coordinates of the center, the size, the start
 ##' and end dates, the log-likelihood ratio, a boolean indicating if it is a
 ##' cluster (TRUE in all cases), and the p-value of the cluster.
-DetectClustersModel<-function(stfdf, thegrid=NULL, radius=Inf, step=NULL,
-fractpop, alpha, typeCluster, minDateUser=min(time(stfdf@time)), maxDateUser=max(time(stfdf@time)),
-modelCluster="poisson", R=NULL, numCPUS=NULL){
-
+##'
+DetectClustersModel<-function(stfdf, thegrid=NULL, radius=Inf, step=NULL, fractpop, alpha,
+typeCluster, minDateUser=min(time(stfdf@time)), maxDateUser=max(time(stfdf@time)), R=NULL, numCPUS=NULL,
+modelType="glm", modelFormula="Observed ~ 1", modelFamilyGlmGlmer=poisson(link = "log"),
+modelDistZeroinfl="poisson", modelLinkZeroinfl="logit"){
 # Create column with ID. Unique identifier
 stfdf[['ID']]<-1:length(stfdf[['Observed']])
 
@@ -89,7 +95,8 @@ sfSource("R/knutils.R")
 
 # Statistic of each cluster
 statsAllClusters<-CalcStatsAllClusters(thegrid, CalcStatClusterGivenCenter, stfdf, rr,
-typeCluster, sortDates, idMinDateCluster, idMaxDateCluster, fractpop, modelCluster, numCPUS)
+typeCluster, sortDates, idMinDateCluster, idMaxDateCluster, fractpop, modelType,
+modelFormula, modelFamilyGlmGlmer, modelDistZeroinfl, modelLinkZeroinfl, numCPUS)
 
 # Remove rows where sizeCluster == -1
 idRemove<-which(statsAllClusters$sizeCluster == -1)
@@ -124,7 +131,8 @@ stfdfMC<-stfdf
 stfdfMC$Observed<-rpois(length(stfdf$Observed), lambda = stfdf$Expected)
 # Statistic of each cluster
 statsAllClustersMC<-CalcStatsAllClusters(thegrid, CalcStatClusterGivenCenter, stfdfMC, rr,
-typeCluster, sortDates, idMinDateCluster, idMaxDateCluster, fractpop, modelCluster, numCPUS)
+typeCluster, sortDates, idMinDateCluster, idMaxDateCluster, fractpop, modelType,
+modelFormula, modelFamilyGlmGlmer, modelDistZeroinfl, modelLinkZeroinfl, numCPUS)
 maxStatisticRReplicas[i]<-max(statsAllClustersMC$statistic)
 print(paste("replica",i))
 }
@@ -180,6 +188,7 @@ return(statsAllClusters)
 ##'
 ##' @return data frame with the same information than statsAllClusters but only
 ##' for clusters that do not overlap.
+##'
 SelectStatsAllClustersNoOverlap<-function(stfdf, statsAllClusters){
 # statsAllClusters is ordered by statistic value
 coordx<-as.data.frame(coordinates(stfdf@sp))[['x']]

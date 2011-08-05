@@ -17,17 +17,28 @@
 ##' @param minDateCluster start date of the cluster.
 ##' @param maxDateCluster end date of the cluster.
 ##' @param fractpop maximum fraction of the total population inside the cluster.
-##' @param modelCluster type of probability model used to fit the data. If
-##' "poisson" generalized linear models with poisson family are used (glm {stats}). If "zip" zero-inflated models are used (zeroinfl {pscl}).
+##' @param modelType character specification of the type of probability model used to fit the data.
+##' This can be "glm" for generalized linear models (glm {stats}),
+##' "glmer" for generalized linear mixed model (glmer {lme4}), or
+##' "zeroinfl" for zero-inflated models (zeroinfl {pscl}).
+##' @param modelFormula character specification of the symbolic description of the model.
+##' @param modelFamilyGlmGlmer family function to be used in the model if modelType is "glm" or "glmer".
+##' @param modelDistZeroinfl character specification of count model family if modelType is "zeroinfl".
+##' @param modelLinkZeroinfl character specification of link function in the binary zero-inflation model if modelType is "zeroinfl".
 ##'
 ##' @return vector containing the size, the start and end dates, and the
 ##' log-likelihood ratio of the cluster with the maximum log-likelihood ratio.
-glmAndZIP.iscluster<-function(stfdf, idxorder, minDateCluster, maxDateCluster, fractpop, modelCluster){
+##'
+glmAndZIP.iscluster<-function(stfdf, idxorder, minDateCluster, maxDateCluster, fractpop, modelType,
+modelFormula, modelFamilyGlmGlmer, modelDistZeroinfl, modelLinkZeroinfl){
+
 # Fit null model
 d0<-stfdf@data
-switch(modelCluster,
-poisson={m0<-glm(     Observed ~ 1,   offset=log(Expected), data=d0, family=poisson())}, 
-zip=    {m0<-zeroinfl(Observed ~ 1|1, offset=log(Expected), data=d0)})
+switch(modelType,
+glm={m0<-glm(          formula(modelFormula), data=d0, family=modelFamilyGlmGlmer)}, 
+glmer={m0<-glmer(      formula(modelFormula), data=d0, family=modelFamilyGlmGlmer)},
+zeroinfl={m0<-zeroinfl(formula(modelFormula), data=d0, dist=modelDistZeroinfl, link=modelLinkZeroinfl)})
+
 
 # difLaux is always >= 0. In the first iteration (i = 1) ncluster<-1 and difL<-difLaux for model i = 1.
 sizeCluster<- -1
@@ -49,10 +60,17 @@ d0$CLUSTER<-SetVbleCluster(stfdf,idTime,idSpace)
 
 if((sum(d0$CLUSTER*stfdf[['Expected']])-fractpop*sum(stfdf[['Expected']]))<0){
 
-switch(modelCluster,
-poisson={m1<-glm(     Observed ~ CLUSTER,   offset=log(Expected), data=d0, family=m0$family)
-difLaux<-ifelse(coef(m1)[2]>0, (deviance(m0)-deviance(m1))/2,0) }, 
-zip    ={m1<-zeroinfl(Observed ~ CLUSTER|1, offset=log(Expected), data=d0)
+newformula<-formula(paste( strsplit(modelFormula, "~")[[1]][1], "~ CLUSTER +", strsplit(modelFormula, "~")[[1]][2]))
+
+switch(modelType,
+glm={
+m1<-glm(     newformula, data=d0, family=modelFamilyGlmGlmer)
+difLaux<-ifelse(coef(m1)[2]>0, (deviance(m0)-deviance(m1))/2, 0) }, 
+glmer={
+m1<-glmer(   newformula, data=d0, family=modelFamilyGlmGlmer)
+difLaux<-ifelse(((coef(m1))[[1]][, 2])[1] > 0, (deviance(m0)-deviance(m1))/2, 0) },
+zeroinfl={
+m1<-zeroinfl(newformula, data=d0, dist=modelDistZeroinfl, link=modelLinkZeroinfl)
 difLaux<-ifelse(coef(m1)[2]>0, (-2*logLik(m0)+2*logLik(m1))/2, 0) })
 
 if(difLaux > difL){
@@ -86,6 +104,7 @@ return(c(sizeCluster, minDateCluster, maxDateCluster, difL))
 ##'
 ##' @return vector with 1's or 0's that indicates the locations and times that
 ##' pertain to a cluster.
+##'
 SetVbleCluster<-function(stfdf,idTime,idSpace){
 # vbleCluster, vbleCluster[i] = 1 if position i corresponds to space and time inside the cluster, 0 otherwise
 vbleCluster<-rep(0,length(stfdf[['Observed']]))

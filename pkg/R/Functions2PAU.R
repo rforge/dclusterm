@@ -10,6 +10,7 @@
 ##' @param step step of the grid.
 ##'
 ##' @return two columns matrix where each row represents a point of the grid.
+##'
 CreateGridDClusterm<-function(stfdf, radius, step){
 # Return: thegrid
 if(is.null(step)){
@@ -56,16 +57,25 @@ return(thegrid)
 ##' @param idMaxDateCluster index of the closest date to the end date of the
 ##' cluster in the vector sortDates
 ##' @param fractpop maximum fraction of the total population inside the cluster.
-##' @param modelCluster type of probability model used to fit the data. If
-##' "poisson" generalized linear models with poisson family are used (glm {stats}).
-##' If "zip" zero-inflated models are used (zeroinfl {pscl}).
+##' @param modelType character specification of the type of probability model used to fit the data.
+##' This can be "glm" for generalized linear models (glm {stats}),
+##' "glmer" for generalized linear mixed model (glmer {lme4}), or
+##' "zeroinfl" for zero-inflated models (zeroinfl {pscl}).
+##' @param modelFormula character specification of the symbolic description of the model.
+##' @param modelFamilyGlmGlmer family function to be used in the model if modelType is "glm" or "glmer".
+##' @param modelDistZeroinfl character specification of count model family if modelType is "zeroinfl".
+##' @param modelLinkZeroinfl character specification of link function in the binary zero-inflation model if modelType is "zeroinfl".
 ##' @param numCPUS Number of cpus used when using snowfall to run the method.
 ##' If snowfall is not used numCPUS is NULL.
 ##'
 ##' @return data frame with information of the clusters with the maximum
-##' log-likelihood ratio for each center and start and end dates. It contains the coordinates of the center, the size, the start and end dates, and the log-likelihood ratio of each of the clusters.
+##' log-likelihood ratio for each center and start and end dates. It contains the coordinates of the center,
+##' the size, the start and end dates, and the log-likelihood ratio of each of the clusters.
+##'
 CalcStatsAllClusters<-function(thegrid, CalcStatClusterGivenCenter, stfdf, rr,
-typeCluster, sortDates, idMinDateCluster, idMaxDateCluster, fractpop, modelCluster, numCPUS){
+typeCluster, sortDates, idMinDateCluster, idMaxDateCluster, fractpop, modelType,
+modelFormula, modelFamilyGlmGlmer, modelDistZeroinfl, modelLinkZeroinfl,
+numCPUS){
 # Temporal dimension here, spatial dimension inside glmAndZIP.iscluster
 
 if(typeCluster == "ST"){
@@ -74,10 +84,12 @@ for (i in idMinDateCluster:idMaxDateCluster){
 for (j in i: idMaxDateCluster){
 if(is.null(numCPUS)){
 statClusterGivenCenter<-apply(thegrid, 1, CalcStatClusterGivenCenter, stfdf, rr,
-minDateCluster=sortDates[i], maxDateCluster=sortDates[j], fractpop, modelCluster)
+minDateCluster=sortDates[i], maxDateCluster=sortDates[j], fractpop, modelType,
+modelFormula, modelFamilyGlmGlmer, modelDistZeroinfl, modelLinkZeroinfl)
 }else{
 statClusterGivenCenter<-sfApply(thegrid, 1, CalcStatClusterGivenCenter, stfdf, rr,
-minDateCluster=sortDates[i], maxDateCluster=sortDates[j], fractpop, modelCluster)
+minDateCluster=sortDates[i], maxDateCluster=sortDates[j], fractpop, modelType,
+modelFormula, modelFamilyGlmGlmer, modelDistZeroinfl, modelLinkZeroinfl)
 }
 statsAllClusters<-rbind(statsAllClusters,t(statClusterGivenCenter))
 print(c(i,j))
@@ -88,10 +100,12 @@ i<-idMinDateCluster
 j<-idMaxDateCluster
 if(is.null(numCPUS)){
 statsAllClusters<-apply(thegrid, 1, CalcStatClusterGivenCenter, stfdf, rr,
-minDateCluster=sortDates[i], maxDateCluster=sortDates[j], fractpop, modelCluster)
+minDateCluster=sortDates[i], maxDateCluster=sortDates[j], fractpop, modelType,
+modelFormula, modelFamilyGlmGlmer, modelDistZeroinfl, modelLinkZeroinfl)
 }else{
 statsAllClusters<-sfApply(thegrid, 1, CalcStatClusterGivenCenter, stfdf, rr,
-minDateCluster=sortDates[i], maxDateCluster=sortDates[j], fractpop, modelCluster)
+minDateCluster=sortDates[i], maxDateCluster=sortDates[j], fractpop, modelType,
+modelFormula, modelFamilyGlmGlmer, modelDistZeroinfl, modelLinkZeroinfl)
 }
 statsAllClusters<-t(statsAllClusters)
 print(c(i,j))
@@ -120,13 +134,20 @@ return(as.data.frame(statsAllClusters))
 ##' @param minDateCluster start date of the cluster.
 ##' @param maxDateCluster end date of the cluster.
 ##' @param fractpop maximum fraction of the total population inside the cluster.
-##' @param modelCluster type of probability model used to fit the data. If
-##' "poisson" generalized linear models with poisson family are used (glm {stats}).
-##' If "zip" zero-inflated models are used (zeroinfl {pscl}).
+##' @param modelType character specification of the type of probability model used to fit the data.
+##' This can be "glm" for generalized linear models (glm {stats}),
+##' "glmer" for generalized linear mixed model (glmer {lme4}), or
+##' "zeroinfl" for zero-inflated models (zeroinfl {pscl}).
+##' @param modelFormula character specification of the symbolic description of the model.
+##' @param modelFamilyGlmGlmer family function to be used in the model if modelType is "glm" or "glmer".
+##' @param modelDistZeroinfl character specification of count model family if modelType is "zeroinfl".
+##' @param modelLinkZeroinfl character specification of link function in the binary zero-inflation model if modelType is "zeroinfl".
 ##'
 ##' @return vector containing the coordinates of the center, the size, the
 ##' start and end dates, and the log-likelihood ratio of the cluster with the maximum log-likelihood ratio.
-CalcStatClusterGivenCenter<-function(point, stfdf, rr, minDateCluster, maxDateCluster, fractpop, modelCluster){
+##'
+CalcStatClusterGivenCenter<-function(point, stfdf, rr, minDateCluster, maxDateCluster, fractpop, modelType,
+modelFormula, modelFamilyGlmGlmer, modelDistZeroinfl, modelLinkZeroinfl){
 coordx<-as.data.frame(coordinates(stfdf@sp))[['x']]
 coordy<-as.data.frame(coordinates(stfdf@sp))[['y']]
 xd<-(coordx-point[1])
@@ -139,7 +160,8 @@ idxorder<-order(dist)
 # Only the regions with distance less than radius can be part of the cluster
 idxorder<-idxorder[idx[idxorder]]
 
-cl<-glmAndZIP.iscluster(stfdf=stfdf, idxorder=idxorder, minDateCluster, maxDateCluster, fractpop, modelCluster)
+cl<-glmAndZIP.iscluster(stfdf=stfdf, idxorder=idxorder, minDateCluster, maxDateCluster, fractpop, modelType,
+modelFormula, modelFamilyGlmGlmer, modelDistZeroinfl, modelLinkZeroinfl)
 return(c(point, cl))
 }
 
