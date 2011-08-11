@@ -27,14 +27,10 @@
 ##' Monte Carlo procedure, R represents the number replicates under the null hypothesis.
 ##' @param numCPUS Number of cpus used when using snowfall to run the method.
 ##' If snowfall is not used numCPUS is NULL.
-##' @param modelType character specification of the type of probability model used to fit the data.
+##' @param model0 Initial model (including covariates).
 ##' This can be "glm" for generalized linear models (glm {stats}),
 ##' "glmer" for generalized linear mixed model (glmer {lme4}), or
 ##' "zeroinfl" for zero-inflated models (zeroinfl {pscl}).
-##' @param modelFormula character specification of the symbolic description of the model.
-##' @param modelFamilyGlmGlmer family function to be used in the model if modelType is "glm" or "glmer".
-##' @param modelDistZeroinfl character specification of count model family if modelType is "zeroinfl".
-##' @param modelLinkZeroinfl character specification of link function in the binary zero-inflation model if modelType is "zeroinfl".
 ##'
 ##' @return data frame with information of the detected clusters ordered by its
 ##' log-likelihood ratio value. Each row represents the information of one of
@@ -43,11 +39,10 @@
 ##' cluster (TRUE in all cases), and the p-value of the cluster.
 ##'
 DetectClustersModel<-function(stfdf, thegrid=NULL, radius=Inf, step=NULL, fractpop, alpha,
-typeCluster, minDateUser=min(time(stfdf@time)), maxDateUser=max(time(stfdf@time)), R=NULL, numCPUS=NULL,
-modelType="glm", modelFormula="Observed ~ 1", modelFamilyGlmGlmer=poisson(link = "log"),
-modelDistZeroinfl="poisson", modelLinkZeroinfl="logit"){
+typeCluster, minDateUser=min(time(stfdf@time)), maxDateUser=max(time(stfdf@time)), R=NULL, numCPUS=NULL, model0){
+
 # Create column with ID. Unique identifier
-stfdf[['ID']]<-1:length(stfdf[['Observed']])
+stfdf[['ID']]<-1:nrow(stfdf@data)
 
 sortDates<-sort(unique(time(stfdf@time)))
 
@@ -95,8 +90,8 @@ sfSource("R/knutils.R")
 
 # Statistic of each cluster
 statsAllClusters<-CalcStatsAllClusters(thegrid, CalcStatClusterGivenCenter, stfdf, rr,
-typeCluster, sortDates, idMinDateCluster, idMaxDateCluster, fractpop, modelType,
-modelFormula, modelFamilyGlmGlmer, modelDistZeroinfl, modelLinkZeroinfl, numCPUS)
+typeCluster, sortDates, idMinDateCluster, idMaxDateCluster, fractpop, model0, 
+  numCPUS)
 
 # Remove rows where sizeCluster == -1
 idRemove<-which(statsAllClusters$sizeCluster == -1)
@@ -131,8 +126,8 @@ stfdfMC<-stfdf
 stfdfMC$Observed<-rpois(length(stfdf$Observed), lambda = stfdf$Expected)
 # Statistic of each cluster
 statsAllClustersMC<-CalcStatsAllClusters(thegrid, CalcStatClusterGivenCenter, stfdfMC, rr,
-typeCluster, sortDates, idMinDateCluster, idMaxDateCluster, fractpop, modelType,
-modelFormula, modelFamilyGlmGlmer, modelDistZeroinfl, modelLinkZeroinfl, numCPUS)
+typeCluster, sortDates, idMinDateCluster, idMaxDateCluster, fractpop, model0,
+  numCPUS)
 maxStatisticRReplicas[i]<-max(statsAllClustersMC$statistic)
 print(paste("replica",i))
 }

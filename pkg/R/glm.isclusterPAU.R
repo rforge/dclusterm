@@ -17,7 +17,7 @@
 ##' @param minDateCluster start date of the cluster.
 ##' @param maxDateCluster end date of the cluster.
 ##' @param fractpop maximum fraction of the total population inside the cluster.
-##' @param modelType character specification of the type of probability model used to fit the data.
+##' @param model0 Initial model (including covariates).
 ##' This can be "glm" for generalized linear models (glm {stats}),
 ##' "glmer" for generalized linear mixed model (glmer {lme4}), or
 ##' "zeroinfl" for zero-inflated models (zeroinfl {pscl}).
@@ -29,15 +29,38 @@
 ##' @return vector containing the size, the start and end dates, and the
 ##' log-likelihood ratio of the cluster with the maximum log-likelihood ratio.
 ##'
-glmAndZIP.iscluster<-function(stfdf, idxorder, minDateCluster, maxDateCluster, fractpop, modelType,
-modelFormula, modelFamilyGlmGlmer, modelDistZeroinfl, modelLinkZeroinfl){
+glmAndZIP.iscluster<-function(stfdf, idxorder, minDateCluster, maxDateCluster, fractpop, model0){
+#Type,
+#modelFormula, modelFamilyGlmGlmer, modelDistZeroinfl, modelLinkZeroinfl){
 
 # Fit null model
 d0<-stfdf@data
-switch(modelType,
-glm={m0<-glm(          formula(modelFormula), data=d0, family=modelFamilyGlmGlmer)}, 
-glmer={m0<-glmer(      formula(modelFormula), data=d0, family=modelFamilyGlmGlmer)},
-zeroinfl={m0<-zeroinfl(formula(modelFormula), data=d0, dist=modelDistZeroinfl, link=modelLinkZeroinfl)})
+#switch(modelType,
+#glm={m0<-glm(          formula(modelFormula), data=d0, family=modelFamilyGlmGlmer)}, 
+#glmer={m0<-glmer(      formula(modelFormula), data=d0, family=modelFamilyGlmGlmer)},
+#zeroinfl={m0<-zeroinfl(formula(modelFormula), data=d0, dist=modelDistZeroinfl, link=modelLinkZeroinfl)})
+
+#Get model info
+mclass<-class(model0)
+
+#modelFormula<-as.character(formula(model0))
+modelFormula<-paste(formula(model0)[c(2,3)], collapse="~")
+
+if(inherits(model0, "glm") | inherits(model0, "mer"))
+{
+	modelType<-ifelse(mclass[1]=="glm", "glm", "glmer")
+	modelFamilyGlmGlmer<-model0$family
+	modelDistZeroinfl<-NULL
+	modelLinkZeroinfl<-NULL
+}
+else
+{
+	modelType<-mclass
+	modelFamilyGlmGlmer<-NULL
+	modelDistZeroinfl<-model0$dist
+	modelLinkZeroinfl<-model0$link
+}
+
 
 
 # difLaux is always >= 0. In the first iteration (i = 1) ncluster<-1 and difL<-difLaux for model i = 1.
@@ -65,13 +88,13 @@ newformula<-formula(paste( strsplit(modelFormula, "~")[[1]][1], "~ CLUSTER +", s
 switch(modelType,
 glm={
 m1<-glm(     newformula, data=d0, family=modelFamilyGlmGlmer)
-difLaux<-ifelse(coef(m1)[2]>0, (deviance(m0)-deviance(m1))/2, 0) }, 
+difLaux<-ifelse(coef(m1)[2]>0, (deviance(model0)-deviance(m1))/2, 0) }, 
 glmer={
 m1<-glmer(   newformula, data=d0, family=modelFamilyGlmGlmer)
-difLaux<-ifelse(((coef(m1))[[1]][, 2])[1] > 0, (deviance(m0)-deviance(m1))/2, 0) },
+difLaux<-ifelse(((coef(m1))[[1]][, 2])[1] > 0, (deviance(model0)-deviance(m1))/2, 0) },
 zeroinfl={
 m1<-zeroinfl(newformula, data=d0, dist=modelDistZeroinfl, link=modelLinkZeroinfl)
-difLaux<-ifelse(coef(m1)[2]>0, (-2*logLik(m0)+2*logLik(m1))/2, 0) })
+difLaux<-ifelse(coef(m1)[2]>0, (-2*logLik(model0)+2*logLik(m1))/2, 0) })
 
 if(difLaux > difL){
 sizeCluster<-i
@@ -107,7 +130,7 @@ return(c(sizeCluster, minDateCluster, maxDateCluster, difL))
 ##'
 SetVbleCluster<-function(stfdf,idTime,idSpace){
 # vbleCluster, vbleCluster[i] = 1 if position i corresponds to space and time inside the cluster, 0 otherwise
-vbleCluster<-rep(0,length(stfdf[['Observed']]))
+vbleCluster<-rep(0,nrow(stfdf@data))
 idSubsetTime<-stfdf[,idTime,drop=FALSE]@data$ID
 idSubsetSpace<-stfdf[idSpace,drop=FALSE]@data$ID
 vbleCluster[(stfdf$ID %in% idSubsetTime) & (stfdf$ID %in% idSubsetSpace)]<-1
