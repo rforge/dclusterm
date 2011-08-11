@@ -1,0 +1,66 @@
+\documentclass[a4paper,12pt]{article}
+
+
+\title{Brain CAncer in New Mexico}
+
+
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+
+
+<<echo=FALSE, fig=TRUE>>=
+library(DClusterm)
+
+data(brainNM)
+
+stplot(brainst[,,"SMR"])
+
+@
+
+
+
+\section{Cluster detection}
+
+\subsection{Cluster detection with no covariates}
+
+<<>>=
+m0<-glm(Observed~offset(log(Expected))+1, family="poisson", data=brainst@data)
+
+cl0<-DetectClustersModel(brainst, coordinates(brainst@sp), fractpop=.5, alpha=1,
+   typeCluster="ST", R=NULL, numCPUS=NULL, model0=m0)
+   
+cl0
+@
+
+\subsection{Cluster detection after adjusting for covariates}
+
+We will used the inverse of the distance to Los Alamos National Laboratory
+as covariate.
+
+<<>>=
+dst<-spDistsN1(coordinates(brainst@sp), losalamos, TRUE)
+
+nyears<-length(unique(brainst@data$Year))
+brainst@data$IDLANL<-rep(1/dst, nyears)
+
+@
+
+<<>>=
+m1<-glm(Observed~offset(log(Expected))+IDLANL,
+   family="poisson", data=brainst)
+
+cl1<-DetectClustersModel(brainst, coordinates(brainst@sp), fractpop=.5, alpha=1,
+   typeCluster="ST", R=NULL, numCPUS=NULL, model0=m1)
+
+cl1
+@
+
+
+
+\section{Conclussions}
+
+\end{document}

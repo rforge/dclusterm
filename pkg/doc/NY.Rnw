@@ -1,0 +1,65 @@
+\documentclass[a4paper,12pt]{article}
+
+
+\title{Leukemia in upstate New York}
+
+
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+
+
+<<>>=
+library(DClusterm)
+
+data(NY8)
+NY8$Cases2<-round(NY8$Cases)
+NY8$Observed<-NY8$Cases2
+
+NY8$EXP<-NY8$POP8*sum(NY8$Cases2)/sum(NY8$POP8)
+NY8$EXPECTED<-NY8$EXP
+
+NY8$SMR<-NY8$Cases2/NY8$EXP
+
+NY8st<-STFDF(NY8, xts(1,as.Date(1)), NY8@data)
+
+@
+
+
+<<fig=TRUE, echo=FALSE>>=
+hist(NY8$SMR, main="Standardised Mortality Ratio", ylab="SMR")
+@
+
+\section{Cluster detection}
+
+\subsection{Cluster detection with no covariates}
+
+<<>>=
+m0<-glm(Cases2~offset(log(EXP))+1, family="poisson", data=NY8)
+
+cl0<-DetectClustersModel(NY8st, coordinates(NY8), fractpop=.5, alpha=1,
+   typeCluster="S", R=NULL, numCPUS=NULL, model0=m0)
+   
+cl0
+@
+
+\subsection{Cluster detection after adjusting for covariates}
+
+<<>>=
+m1<-glm(Cases2~offset(log(EXP))+PCTOWNHOME+PCTAGE65P+PEXPOSURE, 
+   family="poisson", data=NY8)
+
+cl1<-DetectClustersModel(NY8st, coordinates(NY8), fractpop=.5, alpha=1,
+   typeCluster="S", R=NULL, numCPUS=NULL, model0=m1)
+
+cl1
+@
+
+
+
+\section{Conclussions}
+
+\end{document}
