@@ -16,8 +16,8 @@ CreateGridDClusterm<-function(stfdf, radius, step){
 if(is.null(step)){
 step<-.2*radius
 }
-coordx<-as.data.frame(coordinates(stfdf@sp))[['x']]
-coordy<-as.data.frame(coordinates(stfdf@sp))[['y']]
+coordx<-(coordinates(stfdf@sp))[,1]
+coordy<-(coordinates(stfdf@sp))[,2]
 xgrid<-seq(min(coordx), max(coordx), by=step)
 ygrid<-seq(min(coordy), max(coordy), by=step)
 xlen<-length(xgrid)
@@ -135,8 +135,8 @@ return(as.data.frame(statsAllClusters))
 ##'
 CalcStatClusterGivenCenter<-function(point, stfdf, rr, minDateCluster, maxDateCluster, fractpop, model0){
 
-coordx<-as.data.frame(coordinates(stfdf@sp))[['x']]
-coordy<-as.data.frame(coordinates(stfdf@sp))[['y']]
+coordx<-coordinates(stfdf@sp)[,1]
+coordy<-coordinates(stfdf@sp)[,2]
 xd<-(coordx-point[1])
 yd<-(coordy-point[2])
 dist<-xd*xd+yd*yd

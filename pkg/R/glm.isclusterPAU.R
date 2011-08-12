@@ -83,18 +83,23 @@ d0$CLUSTER<-SetVbleCluster(stfdf,idTime,idSpace)
 
 if((sum(d0$CLUSTER*stfdf[['Expected']])-fractpop*sum(stfdf[['Expected']]))<0){
 
-newformula<-formula(paste( strsplit(modelFormula, "~")[[1]][1], "~ CLUSTER +", strsplit(modelFormula, "~")[[1]][2]))
+#Formula not to refit ALL coefficients
+#newformula<-formula(paste( strsplit(modelFormula, "~")[[1]][1], "~ CLUSTER +", strsplit(modelFormula, "~")[[1]][2]))
+
+#Formula to refit the cluster coefficient only
+newformula<-formula(paste( strsplit(modelFormula, "~")[[1]][1], "~ -1+CLUSTER "))
+
 
 switch(modelType,
 glm={
-m1<-glm(     newformula, data=d0, family=modelFamilyGlmGlmer)
-difLaux<-ifelse(coef(m1)[2]>0, (deviance(model0)-deviance(m1))/2, 0) }, 
+m1<-glm(     newformula, data=d0, family=modelFamilyGlmGlmer, offset=log(fitted(model0)))
+difLaux<-ifelse(coef(m1)[1]>0, (deviance(model0)-deviance(m1))/2, 0) }, 
 glmer={
 m1<-glmer(   newformula, data=d0, family=modelFamilyGlmGlmer)
-difLaux<-ifelse(((coef(m1))[[1]][, 2])[1] > 0, (deviance(model0)-deviance(m1))/2, 0) },
+difLaux<-ifelse(((coef(m1))[[1]][, 1])[1] > 0, (deviance(model0)-deviance(m1))/2, 0) },
 zeroinfl={
 m1<-zeroinfl(newformula, data=d0, dist=modelDistZeroinfl, link=modelLinkZeroinfl)
-difLaux<-ifelse(coef(m1)[2]>0, (-2*logLik(model0)+2*logLik(m1))/2, 0) })
+difLaux<-ifelse(coef(m1)[1]>0, (-2*logLik(model0)+2*logLik(m1))/2, 0) })
 
 if(difLaux > difL){
 sizeCluster<-i

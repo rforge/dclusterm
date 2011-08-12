@@ -82,10 +82,11 @@ sfLibrary(splancs)
 sfLibrary(spacetime)
 sfLibrary(DCluster)
 sfLibrary(pscl)
-sfSource("R/Functions1PAU.R")
-sfSource("R/Functions2PAU.R")
-sfSource("R/glm.isclusterPAU.R")
-sfSource("R/knutils.R")
+sfLibrary(DClusterm)
+#sfSource("R/Functions1PAU.R")
+#sfSource("R/Functions2PAU.R")
+#sfSource("R/glm.isclusterPAU.R")
+#sfSource("R/knutils.R")
 }
 
 # Statistic of each cluster
