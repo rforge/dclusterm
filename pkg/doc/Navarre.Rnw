@@ -1,76 +1,101 @@
-\documentclass[a4paper,12pt]{article}
+\subsection{Brain Cancer in Navarre (Spain)}
+
+*** analyse the incidence of brain cancer in Navarre (Spain) in XXXX.  The
+aggregation level is the health district. Figure \ref{fig:Navarre}  shows the
+SMR. As it can be seen there are many areas where the SMR is zero because there
+are no cases in those areas. *** also tested for positive zero-inflation of
+these data compared to a Poisson distribution.
 
 
-\title{Brain Cancer in Navarre (Spain)}
-
-
-
-\begin{document}
-
-\maketitle
-
-\section{Introduction}
-
-
-<<echo=FALSE, fig=TRUE>>=
+<<echo=FALSE, results=hide>>=
 library(DClusterm)
+library(snowfall)
 library(pscl)
 
 data(Navarre)
-
-spplot(brainnav, "SMR")
-
 @
 
 
+\begin{figure}[!h]
+<<echo=FALSE, fig=TRUE>>=
+print(spplot(brainnav, "SMR"))
+@
+\label{fig:Navarre}
+\caption{SMR of brain cancer in Navarre (Spain) in XXXX.}
+\end{figure}
 
-\section{Cluster detection}
 
-\subsection{Cluster detection with no covariates}
+\subsection{Cluster detection}
+
+\subsubsection{Cluster detection with no covariates}
+
+Before starting our cluster detection methods, we will check the appropriateness
+of a Poisson GLM for this data. Fitting a log-linear model (with no covariates)
+gives the
+following model:
 
 <<>>=
 m0<-glm(OBSERVED~ offset(log(EXPECTED))+1, family="poisson", data=brainnav)
 
+summary(m0)
+@
+
+Futheremore, a quasipoisson model has been fit in order to asses any
+extra-variation in the data:
+
+<<>>=
 m0q<-glm(OBSERVED~ offset(log(EXPECTED))+1, family="quasipoisson", 
    data=brainnav)
+summary(m0q)
+@
+\noindent
+The dispersion parameter in the previous model seems to be higher than 1,
+which may mean that the Poisson distribution is not appropriate.
 
+For this reason, and following *** a zero-inflated Poisson model has been
+fit. Here is the resulting model:
+
+
+<<>>=
 m0zip<-zeroinfl(OBSERVED ~ offset(log(EXPECTED))+1 | 1, data = brainnav,
-  dist="poisson")
+  dist="poisson", x=TRUE)
+summary(m0zip)
+@
 
+Hence, the zero-inflated Poisson model will be used now to detect clusters
+of disease:
+
+
+<<>>=
+brainnav$Expected<-brainnav$EXPECTED
 brainnavst<-STFDF(brainnav, xts(1,as.Date(1)), brainnav@data)
 
-cl0<-DetectClustersModel(brainnavst, coordinates(brainnav), fractpop=.5, 
-   alpha=1,
-   typeCluster="S", R=NULL, numCPUS=NULL, model0=m0zip)
+cl0<-DetectClustersModel(brainnavst, coordinates(brainnav), fractpop=.25, 
+   alpha=.05,
+   typeCluster="S", R=NULL, numCPUS=2, model0=m0zip)
    
 cl0
 @
-
-\subsection{Cluster detection after adjusting for covariates}
-
-We will used the inverse of the distance to Los Alamos National Laboratory
-as covariate.
-
-<<>>=
-dst<-spDistsN1(coordinates(brainst@sp), losalamos, TRUE)
-
-nyears<-length(unique(brainst@data$Year))
-brainst@data$IDLANL<-rep(1/dst, nyears)
-
-@
+\noindent
+As it can be seen, two clusters (with a p-value lower than 0.05) are detected.
+However, they overlap and we will just consider the one with the lowest
+p-value, which is shown in Figure \ref{fig:Navarrecl}
 
 <<>>=
-m1<-glm(Observed~offset(log(Expected))+IDLANL,
-   family="poisson", data=brainst)
-
-cl1<-DetectClustersModel(brainst, coordinates(brainst@sp), fractpop=.5, alpha=1,
-   typeCluster="ST", R=NULL, numCPUS=NULL, model0=m1)
-
-cl1
+names(cl0)[3]<-"size"
+brainnav$x<-coordinates(brainnav)[,1]
+brainnav$y<-coordinates(brainnav)[,2]
+knbinary(brainnav, cl0)
+brainnav$CLUSTER<-knbinary(brainnav, cl0)[,1]
 @
 
-
+\begin{figure}[!h]
+<<fig=TRUE, echo=FALSE>>=
+print(spplot(brainnav, "CLUSTER"))
+@
+\label{fig:Navarrecl}
+\caption{Cluster of brain cancer detected in Navarre (Spain).}
+\end{figure}
 
 \section{Conclussions}
 
-\end{document}

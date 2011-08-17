@@ -1,45 +1,58 @@
-\documentclass[a4paper,12pt]{article}
+\subsection{Brain Cancer in New Mexico}
 
-
-\title{Brain CAncer in New Mexico}
-
-
-
-\begin{document}
-
-\maketitle
-
-\section{Introduction}
-
-
-<<echo=FALSE, fig=TRUE>>=
-library(DClusterm)
-
-data(brainNM)
-
-stplot(brainst[,,"SMR"])
-
-@
-
-
-
-\section{Cluster detection}
-
-\subsection{Cluster detection with no covariates}
+The \texttt{brainNM} data set yearly cases of brain cancer in New Mexico from
+1973 to 1991 (inclusive). The data set has been taken from the SatScan website
+and the area boundaries from the U.S. Census Bureau. In addition, the
+location of Los Alamos National Laboratory has been included (from the 
+Wikipedia). Inverse distance to this site can be used to test for increased
+risk in the areas around the Laboratory as no other covariates are available.
 
 <<>>=
+library(DClusterm)
+#debug(DetectClustersModel)
+#debug(glmAndZIP.iscluster)
+#debug(CalcStatsAllClusters)
+library(snowfall)
+
+data(brainNM)
+@
+
+Expected counts have been obtained using age and sex standardisation over the
+whole period of time. Hence, yearly differences are likely to bee seen
+when plotting the data. The SMR's have been plotted in Figure \ref{fig:NMSMR}.
+
+\begin{figure}[!h]
+<<echo=FALSE, fig=TRUE>>=
+print(stplot(brainst[,,"SMR"]))
+@
+\label{fig:NMSMR}
+\caption{SMR of brain cancer in New Mexico.}
+\end{figure}
+
+
+
+\subsection{Cluster detection}
+
+\subsubsection{Cluster detection with no covariates}
+
+Similarly as in the spatial case, a GLM 
+
+<<results=hide>>=
 m0<-glm(Observed~offset(log(Expected))+1, family="poisson", data=brainst@data)
 
-cl0<-DetectClustersModel(brainst, coordinates(brainst@sp), fractpop=.5, alpha=1,
-   typeCluster="ST", R=NULL, numCPUS=NULL, model0=m0)
-   
+cl0<-DetectClustersModel(brainst, coordinates(brainst@sp), 
+   minDateUser="1988-01-01", maxDateUser="1989-01-01",
+   fractpop=.5, alpha=1, typeCluster="ST", R=NULL, numCPUS=2, model0=m0)
+@
+
+<<>>= 
 cl0
 @
 
-\subsection{Cluster detection after adjusting for covariates}
+\subsubsection{Cluster detection after adjusting for covariates}
 
 We will used the inverse of the distance to Los Alamos National Laboratory
-as covariate.
+as a covariate.
 
 <<>>=
 dst<-spDistsN1(coordinates(brainst@sp), losalamos, TRUE)
@@ -54,13 +67,12 @@ m1<-glm(Observed~offset(log(Expected))+IDLANL,
    family="poisson", data=brainst)
 
 cl1<-DetectClustersModel(brainst, coordinates(brainst@sp), fractpop=.5, alpha=1,
-   typeCluster="ST", R=NULL, numCPUS=NULL, model0=m1)
+   typeCluster="ST", R=NULL, numCPUS=2, model0=m1)
 
 cl1
 @
 
 
 
-\section{Conclussions}
+\subsection{Conclussions}
 
-\end{document}

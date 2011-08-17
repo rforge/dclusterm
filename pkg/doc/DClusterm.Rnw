@@ -77,6 +77,10 @@ a high risk, so that
 
 \input{NY.tex}
 
+\section{Spatio-temporal clusters}
+
+%\input{NM.tex}
+
 \section{Zero-inflated models for cluster detection}
 
 *** extend this method to account for zero-inflation. In this case
@@ -86,6 +90,7 @@ $$
 ZIP
 $$
 
+\input{Navarre.tex}
 
 \section{Mixed-effects models for cluster detection}
 
