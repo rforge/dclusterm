@@ -71,7 +71,8 @@ idTime<- which( (time(stfdf@time) >= minDateCluster) &  (time(stfdf@time) <= max
 
 if(length(idxorder) == 0) {
 print('length(idxorder)=0')
-return(c(sizeCluster, minDateCluster, maxDateCluster, difL))
+return(data.frame(size=sizeCluster, minDateCluster=minDateCluster, 
+   maxDateCluster=maxDateCluster, statistic=difL))
 }
 
 for(i in 1:length(idxorder)){
@@ -87,28 +88,48 @@ if((sum(d0$CLUSTER*stfdf[['Expected']])-fractpop*sum(stfdf[['Expected']]))<0){
 #newformula<-formula(paste( strsplit(modelFormula, "~")[[1]][1], "~ CLUSTER +", strsplit(modelFormula, "~")[[1]][2]))
 
 #Formula to refit the cluster coefficient only
+if(modelType!="zeroinfl")
+{
 newformula<-formula(paste( strsplit(modelFormula, "~")[[1]][1], "~ -1+CLUSTER "))
+}
+else
+{
+offzero<- as.vector(model0$x$zero%*%matrix(model0$coefficients$zero, ncol=1))
+if(!is.null(model0$offset$zero)){oofzero<-offzero+model0$offset$zero}
 
+offcount<- as.vector(model0$x$count%*%matrix(model0$coefficients$count, ncol=1))
+if(!is.null(model0$offset$count)){offcount<-offcount+model0$offset$count}
+
+
+newformula<-newformula<-formula(paste( strsplit(modelFormula, "~")[[1]][1], "~ -1+CLUSTER +offset(offcount)|1+offset(offzero)"))
+
+
+}
 
 switch(modelType,
 glm={
 m1<-glm(     newformula, data=d0, family=modelFamilyGlmGlmer, offset=log(fitted(model0)))
-difLaux<-ifelse(coef(m1)[1]>0, (deviance(model0)-deviance(m1))/2, 0) }, 
+difLaux<-ifelse(coef(m1)[1]>0, (deviance(model0)-deviance(m1))/2, 0) 
+}, 
 glmer={
 m1<-glmer(   newformula, data=d0, family=modelFamilyGlmGlmer)
 difLaux<-ifelse(((coef(m1))[[1]][, 1])[1] > 0, (deviance(model0)-deviance(m1))/2, 0) },
 zeroinfl={
-m1<-zeroinfl(newformula, data=d0, dist=modelDistZeroinfl, link=modelLinkZeroinfl)
+m1<-zeroinfl(newformula, data=d0, dist=modelDistZeroinfl, 
+   link=modelLinkZeroinfl)
 difLaux<-ifelse(coef(m1)[1]>0, (-2*logLik(model0)+2*logLik(m1))/2, 0) })
+
 
 if(difLaux > difL){
 sizeCluster<-i
 difL<-difLaux
 }}else{
-return(c(sizeCluster, minDateCluster, maxDateCluster, difL))
+return(data.frame(size=sizeCluster, 
+   minDateCluster=minDateCluster, maxDateCluster=maxDateCluster, statistic=difL))
 }
 }
-return(c(sizeCluster, minDateCluster, maxDateCluster, difL))
+return(data.frame(size=sizeCluster, 
+   minDateCluster=minDateCluster, maxDateCluster=maxDateCluster, statistic=difL))
 }
 
 

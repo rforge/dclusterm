@@ -84,7 +84,7 @@ minDateCluster=sortDates[i], maxDateCluster=sortDates[j], fractpop, model0)
 statClusterGivenCenter<-sfApply(thegrid, 1, CalcStatClusterGivenCenter, stfdf, rr,
 minDateCluster=sortDates[i], maxDateCluster=sortDates[j], fractpop, model0)
 }
-statsAllClusters<-rbind(statsAllClusters,t(statClusterGivenCenter))
+statsAllClusters<-rbind(statsAllClusters,do.call(rbind, statClusterGivenCenter))
 print(c(i,j))
 }}}
 
@@ -98,10 +98,10 @@ minDateCluster=sortDates[i], maxDateCluster=sortDates[j], fractpop, model0)
 statsAllClusters<-sfApply(thegrid, 1, CalcStatClusterGivenCenter, stfdf, rr,
 minDateCluster=sortDates[i], maxDateCluster=sortDates[j], fractpop, model0)
 }
-statsAllClusters<-t(statsAllClusters)
+statsAllClusters<-do.call(rbind, statsAllClusters)
 print(c(i,j))
 }
-colnames(statsAllClusters)<-c("x", "y", "sizeCluster", "minDateCluster", "maxDateCluster", "statistic")
+names(statsAllClusters)<-c("x", "y", "size", "minDateCluster", "maxDateCluster", "statistic")
 return(as.data.frame(statsAllClusters))
 }
 
@@ -148,7 +148,7 @@ idxorder<-order(dist)
 idxorder<-idxorder[idx[idxorder]]
 
 cl<-glmAndZIP.iscluster(stfdf=stfdf, idxorder=idxorder, minDateCluster, maxDateCluster, fractpop, model0)
-return(c(point, cl))
+return( cbind(data.frame(x=point[1], y=point[2]), cl) )
 }
 
 

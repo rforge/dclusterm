@@ -114,17 +114,22 @@ veccluster<-matrix(NA,dim(statsAllClusters)[1],1)
 
 # 1. p-value without Monte Carlo
 if(is.null(R)){
-for(i in 1:(dim(statsAllClusters)[1])){
+for(i in 1:nrow(statsAllClusters)){
 vecpvalue[i]<- 1-pchisq(2*statsAllClusters$statistic[i], 1)
 veccluster[i]<-vecpvalue[i]<alpha
 }}else{
 
 # 2. p-value with Monte Carlo
 maxStatisticRReplicas<-matrix(NA,R,1)
+stfdfMC<-stfdf
+
 for(i in 1:R){
 # Generate data set under H_0
-stfdfMC<-stfdf
-stfdfMC$Observed<-rpois(length(stfdf$Observed), lambda = stfdf$Expected)
+#stfdfMC$Observed<-rpois(length(stfdf$Observed), lambda = stfdf$Expected)
+
+obslab<-as.character(formula(model0))[2]
+
+stfdfMC[[obslab]]<-rpois(nrow(stfdf@data), lambda = fitted(model0))
 # Statistic of each cluster
 statsAllClustersMC<-CalcStatsAllClusters(thegrid, CalcStatClusterGivenCenter, stfdfMC, rr,
 typeCluster, sortDates, idMinDateCluster, idMaxDateCluster, fractpop, model0,
@@ -147,7 +152,7 @@ sfStop()
 }
 
 statsAllClusters<-cbind(statsAllClusters,veccluster,vecpvalue)
-colnames(statsAllClusters)<-c("x", "y", "sizeCluster", "minDateCluster", "maxDateCluster", "statistic", "cluster", "pvalue")
+names(statsAllClusters)<-c("x", "y", "size", "minDateCluster", "maxDateCluster", "statistic", "cluster", "pvalue")
 
 #print(statsAllClusters[rev(order(statsAllClusters$statistic)), ])
 # Selection of significant clusters
