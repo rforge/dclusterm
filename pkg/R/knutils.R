@@ -1,3 +1,47 @@
+##' Gets areas in a spatio-temporal cluster
+##
+##' This function is similar to get.knclusters but it also allows
+##' for spatio-temporal clusters.
+##
+##' @param stfdf A sp or spacetime object with the information about the data.
+##' @param results Results from a call toe DetectClusterModel
+##' 
+##' @return A list with as many elements as clusters in 'results'
+##'
+get.stclusters<-function(stfdf, results)
+{
+	if(inherits(stfdf, "Spatial"))
+	{
+		d<-as.data.frame(coordinates(stfdf))
+		names(d)<-c("x", "y")
+		return(get.knclusters(d, results))
+	}
+	else{
+		d<-as.data.frame(coordinates(stfdf@sp)	)
+		names(d)<-c("x", "y")
+		knres<-get.knclusters(d, results)
+
+		res<-as.list(rep(NA, nrow(results)))
+
+		tms<-stfdf@time
+
+		nsp<-nrow(d)
+		ntms<-length(tms)
+
+		for(i in 1:length(res))
+		{
+	tidx<-which(as.Date(time(tms))>=as.Date(results$minDateCluster[i]) & as.Date(time(tms))<=as.Date(results$maxDateCluster[i]))
+
+	res[[i]]<-as.vector(sapply(tidx, function(X){(X-1)*nsp+knres[[i]]}))
+
+		}
+	}
+
+	return(res)
+}
+
+
+
 ##' Constructs data frame with clusters in binary format.
 ##'
 ##' This function constructs a data frame with number of columns equal to the
@@ -17,13 +61,13 @@
 ##' The position i of the column is equal to 1 if the polygon i is in the cluster
 ##' or 0 if it is not in the cluster.
 knbinary<-function(datamap, knresults){
-clusters<-get.knclusters(datamap, knresults)
+clusters<-get.stclusters(datamap, knresults)
 res<-lapply(clusters, function(X, n){
 v<-rep(0,n)
 v[X]<-1
-return(v)}, n=dim(datamap)[1])
+return(v)}, n=dim(datamap@data)[1])
 
-res<-data.frame(matrix(unlist(res), nrow=dim(datamap)[1]))
+res<-data.frame(matrix(unlist(res), nrow=dim(datamap@data)[1]))
 names(res)<-paste("CL", 1:length(clusters), sep="")
 return(res)
 }
