@@ -37,12 +37,16 @@ print(stplot(brainst[,,"SMR"]))
 
 Similarly as in the spatial case, a GLM 
 
-<<results=hide>>=
+<<>>=
 m0<-glm(Observed~offset(log(Expected))+1, family="poisson", data=brainst@data)
+summary(m0)
+@
 
+
+<<results=hide>>=
 cl0<-DetectClustersModel(brainst, coordinates(brainst@sp), 
-   minDateUser="1988-01-01", maxDateUser="1989-01-01",
-   fractpop=.5, alpha=1, typeCluster="ST", R=NULL, numCPUS=2, model0=m0)
+   minDateUser="1985-01-01", maxDateUser="1989-01-01",
+   fractpop=.15, alpha=0.05, typeCluster="ST", R=NULL, numCPUS=2, model0=m0)
 @
 
 <<>>= 
@@ -65,14 +69,32 @@ brainst@data$IDLANL<-rep(1/dst, nyears)
 <<>>=
 m1<-glm(Observed~offset(log(Expected))+IDLANL,
    family="poisson", data=brainst)
+summary(m1)
+@
 
-cl1<-DetectClustersModel(brainst, coordinates(brainst@sp), fractpop=.5, alpha=1,
+<<results=hide>>=
+cl1<-DetectClustersModel(brainst, coordinates(brainst@sp), fractpop=.15, 
+   alpha=0.05, minDateUser="1988-01-01", maxDateUser="1989-01-01",
    typeCluster="ST", R=NULL, numCPUS=2, model0=m1)
+@
 
+<<>>=
 cl1
 @
 
+We can easily display the most significant cluster as follows:
 
+<<>>=
+stcl<-get.stclusters(brainst, cl0)
+brainst$CLUSTER<-0
+brainst$CLUSTER[stcl[[1]]]<-1
+@
 
-\subsection{Conclussions}
+\begin{figure}[!h]
+<<fig=TRUE>>=
+stplot(brainst[,,"CLUSTER"], at=c(0, 0.5, 1.5))
+@
+\label{fig:NMcluster}
+\caption{Spatio-temporal cluster of brain cancer detected in New Mexico.}
+\end{figure}
 

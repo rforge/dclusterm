@@ -79,7 +79,7 @@ a high risk, so that
 
 \section{Spatio-temporal clusters}
 
-%\input{NM.tex}
+\input{NM.tex}
 
 \section{Zero-inflated models for cluster detection}
 

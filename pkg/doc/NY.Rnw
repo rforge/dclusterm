@@ -114,5 +114,4 @@ points(cl1[,1:2], pch=19, col="red")
 \caption{Clusters detected after adjusting for covariates.}
 \end{figure}
 
-\subsection{Conclussions}
 

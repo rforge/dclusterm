@@ -97,5 +97,3 @@ print(spplot(brainnav, "CLUSTER"))
 \caption{Cluster of brain cancer detected in Navarre (Spain).}
 \end{figure}
 
-\section{Conclussions}
-
