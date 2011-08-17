@@ -92,7 +92,7 @@ brainst$CLUSTER[stcl[[1]]]<-1
 
 \begin{figure}[!h]
 <<fig=TRUE>>=
-stplot(brainst[,,"CLUSTER"], at=c(0, 0.5, 1.5))
+print(stplot(brainst[,,"CLUSTER"], at=c(0, 0.5, 1.5)))
 @
 \label{fig:NMcluster}
 \caption{Spatio-temporal cluster of brain cancer detected in New Mexico.}
