@@ -101,7 +101,7 @@ offcount<- as.vector(model0$x$count%*%matrix(model0$coefficients$count, ncol=1))
 if(!is.null(model0$offset$count)){offcount<-offcount+model0$offset$count}
 
 
-newformula<-newformula<-formula(paste( strsplit(modelFormula, "~")[[1]][1], "~ -1+CLUSTER +offset(offcount)|1+offset(offzero)"))
+newformula<-formula(paste( strsplit(modelFormula, "~")[[1]][1], "~ -1+CLUSTER +offset(offcount)|1+offset(offzero)"))
 
 
 }
