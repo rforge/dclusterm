@@ -1,7 +1,10 @@
 \documentclass[a4paper,12pt]{article}
 
+\usepackage{natbib}
 
-\title{DClusterm: }
+
+
+\title{DClusterm: Model-based detection of disease clusters}
 
 
 
@@ -12,7 +15,7 @@
 
 \section{Introduction}
 
-**Kulldorff ** proposes a test for detecting disease clusters which
+\citet{Kulldorff:1997} proposes a test for detecting disease clusters which
 will find the most likely cluster. This is called the Spatial Scan
 Statistic and the significance of the test is found via a Monte
 Carlo test. The test statistic is based on a likelihood ratio test
@@ -34,10 +37,10 @@ Monte Carlo test is used to compute the p-value of the most likely cluster.
 
 \section{Generalised Linear Models for cluster detection}
 
-*** show that the test statistic for a given cluster  is equivalent to fitting
-a Generalised Linear Model using a cluster variable as a predictor. This
-cluster variable is a dummy variable which is 1 for the areas in the cluster
-and 0 for the areas outside the cluster.
+\citet{Jung:2009,ZhangLinCSDA:2009} show that the test statistic for a given
+cluster  is equivalent to fitting a Generalised Linear Model using a cluster
+variable as a predictor. This cluster variable is a dummy variable which is 1
+for the areas in the cluster and 0 for the areas outside the cluster.
 
 Firstly, given that we are using GLM's we could include covariates in the 
 model. For example, for a Poisson model with expected counts $E_i$ 
@@ -92,6 +95,12 @@ $$
 
 \input{Navarre.tex}
 
-\section{Mixed-effects models for cluster detection}
+%\section{Mixed-effects models for cluster detection}
+
+\bibliography{DClusterm}
+\bibliographystyle{chicago}
+
+
+
 
 \end{document}

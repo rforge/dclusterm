@@ -2,7 +2,8 @@
 
 The \texttt{NY8} dataset is avaialble in package \texttt{DClusterm} and it
 provides cases of leukemia in different census tracts in upstate New York.
-This data set has been analysed in several papers and books. ***
+This data set has been analysed by several authors 
+\citep{Walletetal:1992,WallerGotway:2004}.
 
 The location of asthma is thought to be likned to the use of TCE (**)
 by several companies in the area. Figure \ref{fig:NYmap} shows the
@@ -36,12 +37,15 @@ NY8st<-STFDF(NY8, xts(1,as.Date(1)), NY8@data)
 @
 
 
+\begin{figure}[h]
 <<fig=TRUE, echo=FALSE>>=
 library(RColorBrewer)
 
 print(spplot(NY8, "SMR", cuts=8, col.regions=brewer.pal(9, "Oranges")))
 @
-
+\caption{SMR of the incidence of Leukemia in upstate New York.}
+\label{fig:NYmap}
+\end{figure}
 \subsection{Cluster detection}
 
 
@@ -73,8 +77,8 @@ The centre of the clusters detected are shown in Figure \ref{fig:NYcl0}.
 plot(NY8)
 points(cl0[,1:2], pch=19, col="red")
 @
-\label{fig:NYcl0}
 \caption{Clusters detected when no covariates are included in the model.}
+\label{fig:NYcl0}
 \end{figure}
 
 \subsubsection{Cluster detection after adjusting for covariates}
@@ -110,8 +114,8 @@ Figure \ref{fig:NYcl1} shows the clusters detected after adjusting for covariate
 plot(NY8)
 points(cl1[,1:2], pch=19, col="red")
 @
-\label{fig:cl1}
 \caption{Clusters detected after adjusting for covariates.}
+\label{fig:NYcl1}
 \end{figure}
 
 
