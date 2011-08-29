@@ -50,7 +50,8 @@ cl0<-DetectClustersModel(brainst, coordinates(brainst@sp),
 @
 
 <<>>= 
-cl0
+nrow(cl0)
+cl0[1:5,]
 @
 
 \subsubsection{Cluster detection after adjusting for covariates}
@@ -79,7 +80,8 @@ cl1<-DetectClustersModel(brainst, coordinates(brainst@sp), fractpop=.15,
 @
 
 <<>>=
-cl1
+nrow(cl1)
+cl1[1:5,]
 @
 
 We can easily display the most significant cluster as follows:

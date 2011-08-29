@@ -86,12 +86,21 @@ a high risk, so that
 
 \section{Zero-inflated models for cluster detection}
 
-*** extend this method to account for zero-inflation. In this case
+\citet{RD:2010} extend this method to account for zero-inflation. In this case
 the observed number of cases come from a mixture distribution:
 
 $$
-ZIP
+Pr(O_i=n_i)=
+\left\{
+\begin{array}{ll}
+\pi_i+(1-\pi_i)Po(0|\theta_iE_i) & n_i=0\\
+(1-\pi_i)Po(n_i|\theta_iE_i) & n_i=1,2,\ldots\\
+\end{array}
+\right.
 $$
+\noindent
+The relative risk $\theta_i$ can be modelled using a log-linear model to depend
+on some relevant risk factors. Also, it is common that all $\pi_i$'s are taken equal to a single value $\pi$.
 
 \input{Navarre.tex}
 

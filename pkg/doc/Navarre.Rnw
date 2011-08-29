@@ -1,10 +1,13 @@
 \subsection{Brain Cancer in Navarre (Spain)}
 
-*** analyse the incidence of brain cancer in Navarre (Spain) in XXXX.  The
-aggregation level is the health district. Figure \ref{fig:Navarre}  shows the
-SMR. As it can be seen there are many areas where the SMR is zero because there
-are no cases in those areas. *** also tested for positive zero-inflation of
-these data compared to a Poisson distribution.
+\citet{Ugarteetal:2006} analyse the incidence of brain cancer in Navarre
+(Spain). The aggregation level is the health district. Figure \ref{fig:Navarre}
+shows the SMR. As it can be seen there are many areas where the SMR is zero
+because there are no cases in those areas. \citet{Ugarteetal:2004} also tested
+for positive zero-inflation of these data compared to a Poisson distribution.
+The method implemented in this package is similar to the one used in
+\citet{RD:2010} for the detection of disease clusters of rare diseases.
+
 
 
 <<echo=FALSE, results=hide>>=
@@ -21,7 +24,7 @@ data(Navarre)
 print(spplot(brainnav, "SMR"))
 @
 \label{fig:Navarre}
-\caption{SMR of brain cancer in Navarre (Spain) in XXXX.}
+\caption{SMR of brain cancer in Navarre (Spain).}
 \end{figure}
 
 
