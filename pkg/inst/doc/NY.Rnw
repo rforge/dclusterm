@@ -5,15 +5,15 @@ provides cases of leukemia in different census tracts in upstate New York.
 This data set has been analysed by several authors 
 \citep{Walletetal:1992,WallerGotway:2004}.
 
-The location of asthma is thought to be likned to the use of TCE (**)
-by several companies in the area. Figure \ref{fig:NYmap} shows the
-Standardised MOrtality Ratios of the census tracts and the lations
-of the industries using TCE.
+The location of leukemia is thought to be linked to the use of Trichloroethene
+(TCE) by several companies in the area. Figure \ref{fig:NYmap} shows the
+Standardised Mortality Ratios of the census tracts and the locations of the
+industries using TCE.
 
 In order to measure exposure, the inverse of the distance to the nearest TCE
 site has been used (PEXPOSURE). In addition, two other socioeconomic covariates
 have been used: the percetage of people aged 65 or more (PCTAGE65P) and the
-percetage of people who own their home (PCTOWNHOME).
+percentage of people who own their home (PCTOWNHOME).
 
 
 <<results=hide>>=

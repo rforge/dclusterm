@@ -3,8 +3,7 @@
 \title{Obtains clusters with the maximum log-likelihood ratio for each center and...}
 \usage{CalcStatsAllClusters(thegrid, CalcStatClusterGivenCenter, stfdf, rr,
     typeCluster, sortDates, idMinDateCluster, idMaxDateCluster,
-    fractpop, modelType, modelFormula, modelFamilyGlmGlmer,
-    modelDistZeroinfl, modelLinkZeroinfl, numCPUS)}
+    fractpop, model0, numCPUS)}
 \description{Obtains clusters with the maximum log-likelihood ratio for each center and
 start and end dates.}
 \details{This function explores all possible clusters changing their center and start
@@ -30,13 +29,9 @@ cluster in the vector sortDates}
 \item{idMaxDateCluster}{index of the closest date to the end date of the
 cluster in the vector sortDates}
 \item{fractpop}{maximum fraction of the total population inside the cluster.}
-\item{modelType}{character specification of the type of probability model used to fit the data.
+\item{model0}{Initial model (including covariates).
 This can be "glm" for generalized linear models (glm {stats}),
 "glmer" for generalized linear mixed model (glmer {lme4}), or
 "zeroinfl" for zero-inflated models (zeroinfl {pscl}).}
-\item{modelFormula}{character specification of the symbolic description of the model.}
-\item{modelFamilyGlmGlmer}{family function to be used in the model if modelType is "glm" or "glmer".}
-\item{modelDistZeroinfl}{character specification of count model family if modelType is "zeroinfl".}
-\item{modelLinkZeroinfl}{character specification of link function in the binary zero-inflation model if modelType is "zeroinfl".}
 \item{numCPUS}{Number of cpus used when using snowfall to run the method.
 If snowfall is not used numCPUS is NULL.}}

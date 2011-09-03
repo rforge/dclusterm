@@ -43,7 +43,7 @@ m0<-glm(OBSERVED~ offset(log(EXPECTED))+1, family="poisson", data=brainnav)
 summary(m0)
 @
 
-Futheremore, a quasipoisson model has been fit in order to asses any
+Furthermore, a quasipoisson model has been fit in order to asses any
 extra-variation in the data:
 
 <<>>=
@@ -55,8 +55,8 @@ summary(m0q)
 The dispersion parameter in the previous model seems to be higher than 1,
 which may mean that the Poisson distribution is not appropriate.
 
-For this reason, and following *** a zero-inflated Poisson model has been
-fit. Here is the resulting model:
+For this reason, and following \citet{Ugarteetal:2004}, a zero-inflated Poisson
+model has been fit. Here is the resulting model:
 
 
 <<>>=

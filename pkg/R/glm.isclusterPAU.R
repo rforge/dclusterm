@@ -21,10 +21,6 @@
 ##' This can be "glm" for generalized linear models (glm {stats}),
 ##' "glmer" for generalized linear mixed model (glmer {lme4}), or
 ##' "zeroinfl" for zero-inflated models (zeroinfl {pscl}).
-##' @param modelFormula character specification of the symbolic description of the model.
-##' @param modelFamilyGlmGlmer family function to be used in the model if modelType is "glm" or "glmer".
-##' @param modelDistZeroinfl character specification of count model family if modelType is "zeroinfl".
-##' @param modelLinkZeroinfl character specification of link function in the binary zero-inflation model if modelType is "zeroinfl".
 ##'
 ##' @return vector containing the size, the start and end dates, and the
 ##' log-likelihood ratio of the cluster with the maximum log-likelihood ratio.

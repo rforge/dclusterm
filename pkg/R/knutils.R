@@ -4,7 +4,7 @@
 ##' for spatio-temporal clusters.
 ##
 ##' @param stfdf A sp or spacetime object with the information about the data.
-##' @param results Results from a call toe DetectClusterModel
+##' @param results Results from a call to DetectClusterModel
 ##' 
 ##' @return A list with as many elements as clusters in 'results'
 ##'
@@ -60,6 +60,7 @@ get.stclusters<-function(stfdf, results)
 ##' @return data frame where the columns represent the clusters in binary format.
 ##' The position i of the column is equal to 1 if the polygon i is in the cluster
 ##' or 0 if it is not in the cluster.
+##'
 knbinary<-function(datamap, knresults){
 clusters<-get.stclusters(datamap, knresults)
 res<-lapply(clusters, function(X, n){
@@ -90,6 +91,7 @@ return(res)
 ##' @param indClustersPlot rows of knresults that denote the clusters to be plotted.
 ##'
 ##' @return factor with levels that represent the clusters.
+##'
 mergeknclusters<-function(datamap, knresults, indClustersPlot){
 n<-nrow(knresults)
 knbin<-as.matrix(knbinary(datamap, knresults))	
@@ -115,6 +117,7 @@ return(res)
 ##' @param map SpatialPolygonsDataFrame with the polygons of the map.
 ##'
 ##' @return plots of the detected clusters for each start date.
+##'
 PlotClustersNoOverlap<-function(statsAllClustersNoOverlap, colors, map){
 
 # Name of the clusters. Cluster's order by their significance

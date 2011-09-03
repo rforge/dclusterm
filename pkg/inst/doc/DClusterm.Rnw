@@ -30,7 +30,7 @@ $$
 
 Here, $z$ represents a cluster (i.e., a set of contiguous areas), $\theta_z$
 the relative risk in the cluster and $\theta_{\overline{z}}$ the relative risk
-outside the cluster. Many different clusters are  are tested in turn. The most
+outside the cluster. Many different clusters are tested in turn. The most
 likely cluster is the one with the highest value of the test statistic. Then a
 Monte Carlo test is used to compute the p-value of the most likely cluster.
 
@@ -38,7 +38,7 @@ Monte Carlo test is used to compute the p-value of the most likely cluster.
 \section{Generalised Linear Models for cluster detection}
 
 \citet{Jung:2009,ZhangLinCSDA:2009} show that the test statistic for a given
-cluster  is equivalent to fitting a Generalised Linear Model using a cluster
+cluster is equivalent to fitting a Generalised Linear Model using a cluster
 variable as a predictor. This cluster variable is a dummy variable which is 1
 for the areas in the cluster and 0 for the areas outside the cluster.
 
@@ -69,7 +69,7 @@ $\gamma$ is a measure of the difference of the risk in the cluster. We
 are only interested in cluster whose coefficient is higher than 0 (i.e.,
 increased risk).
 
-Testing different clustes will produce many different cluster covariates.
+Testing different clusters will produce many different cluster covariates.
 We can use model selection techniques to select the most important cluster in 
 the area.  In particular, the log-likelihood can be used to 
 compare the model with the cluster variable to the null model (i.e., the

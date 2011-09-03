@@ -1,6 +1,6 @@
 \subsection{Brain Cancer in New Mexico}
 
-The \texttt{brainNM} data set yearly cases of brain cancer in New Mexico from
+The \texttt{brainNM} data set contains yearly cases of brain cancer in New Mexico from
 1973 to 1991 (inclusive). The data set has been taken from the SatScan website
 and the area boundaries from the U.S. Census Bureau. In addition, the
 location of Los Alamos National Laboratory has been included (from the 
@@ -56,7 +56,7 @@ cl0[1:5,]
 
 \subsubsection{Cluster detection after adjusting for covariates}
 
-We will used the inverse of the distance to Los Alamos National Laboratory
+We will use the inverse of the distance to Los Alamos National Laboratory
 as a covariate.
 
 <<>>=
