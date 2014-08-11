@@ -10,8 +10,13 @@
 ##'
 ##' @param stfdf spatio-temporal class object containing the data. See
 ##' STFDF-class {spacetime} for details. It contains an object of class
-##' Spatial with the coordinates, a POSIXct object with the time, and a
-##' data.frame with vectors Observed, Expected and potential covariates in each location and time.
+##' Spatial with the coordinates, a time object holding time information,
+##' an endTime vector of class POSIXct holding end points of time intervals,
+##' and a data.frame with vectors Observed, Expected and potential covariates
+##' in each location and time. Note that the function DetectClustersModel
+##' does not use the endTime vector. We can define endTime, for example,
+##' as the vector of class POSIXct which contains the same dates as the ones
+##' contained in the time object. 
 ##' @param thegrid two-columns matrix containing the points of the grid to be
 ##' used. If it is null, a rectangular grid is built.
 ##' @param radius maximum radius of the clusters.
