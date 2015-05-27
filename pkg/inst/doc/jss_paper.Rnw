@@ -1,4 +1,4 @@
-%Sweave("jss_paper.Rnw", encoding = "UTF-8", keep.source = FALSE)
+%Sweave("jss_paper.Rnw", encoding = "UTF-8", keep.source = FALSE); system("pdflatex jss_paper.tex"); system("bibtex jss_paper"); system("pdflatex jss_paper.tex"); system("pdflatex jss_paper.tex")
 %system("pdflatex jss_paper.tex")
 %system("bibtex jss_paper")
 
@@ -129,135 +129,113 @@ a high risk, so that
 
 %\input{NY.tex}
 
-
-\subsection{Leukemia in upstate New York}
-
-The \texttt{NY8} dataset is avaialble in package \texttt{DClusterm} and it
-provides cases of leukemia in different census tracts in upstate New York.
-This data set has been analysed by several authors 
-\citep{Walletetal:1992,WallerGotway:2004}.
-
-The location of leukemia is thought to be linked to the use of Trichloroethene
-(TCE) by several companies in the area. Figure \ref{fig:NYmap} shows the
-Standardised Mortality Ratios of the census tracts and the locations of the
-industries using TCE.
-
-In order to measure exposure, the inverse of the distance to the nearest TCE
-site has been used (PEXPOSURE). In addition, two other socioeconomic covariates
-have been used: the percetage of people aged 65 or more (PCTAGE65P) and the
-percentage of people who own their home (PCTOWNHOME).
-
-
-<<results=hide>>=
-library(DClusterm)
-library(xts)
-library(snowfall)
-
-data(NY8)
-NY8$Cases2<-round(NY8$Cases)
-NY8$Observed<-NY8$Cases2
-
-NY8$EXP<-NY8$POP8*sum(NY8$Cases2)/sum(NY8$POP8)
-NY8$Expected<-NY8$EXP
-
-NY8$SMR<-NY8$Cases2/NY8$EXP
-
-NY8$x<-coordinates(NY8)[,1]
-NY8$y<-coordinates(NY8)[,2]
-
-NY8st<-STFDF(NY8, xts(1,as.Date(1)), NY8@data)
-
-@
-
-
-\begin{figure}[h]
-<<fig=TRUE, echo=FALSE>>=
-library(RColorBrewer)
-
-print(spplot(NY8, "SMR", cuts=8, col.regions=brewer.pal(9, "Oranges")))
-@
-\caption{SMR of the incidence of Leukemia in upstate New York.}
-\label{fig:NYmap}
-\end{figure}
-\subsection{Cluster detection}
-
-
-\subsubsection{Cluster detection with no covariates}
-
-First of all, a model with no covariates will be fitted and used
-as a starting point.
-
-<<results=hide>>=
-m0<-glm(Cases2~offset(log(EXP))+1, family="poisson", data=NY8)
-
-idxcl<-c(120, 12, 89, 139, 146)
-cl0<-DetectClustersModel(NY8st, thegrid=as.data.frame(NY8)[idxcl,c("x", "y")], 
-   fractpop=.15, alpha=0.05, radius=Inf, step=NULL,
-   typeCluster="S", R=NULL, numCPUS=2, model0=m0)
-@
-
-
-Below is a summary of the clusters detected with this method. The dates
-can be ignored as this is a purely spatial cluster.
-<<>>=   
-cl0
-@
-
-The centre of the clusters detected are shown in Figure \ref{fig:NYcl0}.
-
-\begin{figure}[h!]
-<<echo=FALSE, fig=TRUE>>=
-plot(NY8)
-points(cl0[,1:2], pch=19, col="red")
-@
-\caption{Clusters detected when no covariates are included in the model.}
-\label{fig:NYcl0}
-\end{figure}
-
-\subsubsection{Cluster detection after adjusting for covariates}
-
-Similarly, clusters can be detected after adjusting for significant
-risk factors. First we will fit a GLM with the 3 covariates mentioned
-earlier. As it can be seen, all three are significant:
-
-<<>>=
-m1<-glm(Cases2~offset(log(EXP))+PCTOWNHOME+PCTAGE65P+PEXPOSURE, 
-   family="poisson", data=NY8)
-summary(m1)
-@
-
-The cluster detection method is run as before, but now we use the
-previous model instead:
-
-<<results=hide>>=
-cl1<-DetectClustersModel(NY8st, thegrid=as.data.frame(NY8)[idxcl,c("x", "y")], 
-   fractpop=.15, alpha=.05,
-   typeCluster="S", R=NULL, numCPUS=2, model0=m1)
-@
-
-<<>>=
-cl1
-@
-
-
-Figure \ref{fig:NYcl1} shows the clusters detected after adjusting for covariates.
-
-\begin{figure}[!h]
-<<echo=FALSE, fig=TRUE>>=
-plot(NY8)
-points(cl1[,1:2], pch=19, col="red")
-@
-\caption{Clusters detected after adjusting for covariates.}
-\label{fig:NYcl1}
-\end{figure}
-
-
-
-
-
 \section{Spatio-temporal clusters}
 
 %\input{NM.tex}
+
+
+\subsection{Brain Cancer in New Mexico}
+
+The \texttt{brainNM} data set contains yearly cases of brain cancer in New Mexico from
+1973 to 1991 (inclusive). The data set has been taken from the SatScan website
+and the area boundaries from the U.S. Census Bureau. In addition, the
+location of Los Alamos National Laboratory has been included (from the 
+Wikipedia). Inverse distance to this site can be used to test for increased
+risk in the areas around the Laboratory as no other covariates are available.
+
+<<>>=
+library(DClusterm)
+#debug(DetectClustersModel)
+#debug(glmAndZIP.iscluster)
+#debug(CalcStatsAllClusters)
+library(snowfall)
+
+data(brainNM)
+@
+
+Expected counts have been obtained using age and sex standardisation over the
+whole period of time. Hence, yearly differences are likely to bee seen
+when plotting the data. The SMR's have been plotted in Figure \ref{fig:NMSMR}.
+
+\begin{figure}[!h]
+<<echo=FALSE, fig=TRUE>>=
+print(stplot(brainst[,,"SMR"]))
+@
+\label{fig:NMSMR}
+\caption{SMR of brain cancer in New Mexico.}
+\end{figure}
+
+
+
+\subsection{Cluster detection}
+
+\subsubsection{Cluster detection with no covariates}
+
+Similarly as in the spatial case, a GLM 
+
+<<>>=
+m0<-glm(Observed~offset(log(Expected))+1, family="poisson", data=brainst@data)
+summary(m0)
+@
+
+
+<<results=hide>>=
+cl0<-DetectClustersModel(brainst, coordinates(brainst@sp), 
+   minDateUser="1985-01-01", maxDateUser="1989-01-01",
+   fractpop=.15, alpha=0.05, typeCluster="ST", R=NULL, numCPUS=2, model0=m0)
+@
+
+<<>>= 
+nrow(cl0)
+cl0[1:5,]
+@
+
+\subsubsection{Cluster detection after adjusting for covariates}
+
+We will use the inverse of the distance to Los Alamos National Laboratory
+as a covariate.
+
+<<>>=
+dst<-spDistsN1(coordinates(brainst@sp), losalamos, TRUE)
+
+nyears<-length(unique(brainst@data$Year))
+brainst@data$IDLANL<-rep(1/dst, nyears)
+
+@
+
+<<>>=
+m1<-glm(Observed~offset(log(Expected))+IDLANL,
+   family="poisson", data=brainst)
+summary(m1)
+@
+
+<<results=hide>>=
+cl1<-DetectClustersModel(brainst, coordinates(brainst@sp), fractpop=.15, 
+   alpha=0.05, minDateUser="1988-01-01", maxDateUser="1989-01-01",
+   typeCluster="ST", R=NULL, numCPUS=2, model0=m1)
+@
+
+<<>>=
+nrow(cl1)
+cl1[1:5,]
+@
+
+We can easily display the most significant cluster as follows:
+
+<<>>=
+stcl<-get.stclusters(brainst, cl0)
+brainst$CLUSTER<-0
+brainst$CLUSTER[stcl[[1]]]<-1
+@
+
+\begin{figure}[!h]
+<<fig=TRUE>>=
+print(stplot(brainst[,,"CLUSTER"], at=c(0, 0.5, 1.5)))
+@
+\label{fig:NMcluster}
+\caption{Spatio-temporal cluster of brain cancer detected in New Mexico.}
+\end{figure}
+
 
 \section{Zero-inflated models for cluster detection}
 
@@ -277,7 +255,7 @@ $$
 The relative risk $\theta_i$ can be modelled using a log-linear model to depend
 on some relevant risk factors. Also, it is common that all $\pi_i$'s are taken equal to a single value $\pi$.
 
-\input{Navarre.tex}
+%\input{Navarre.tex}
 
 %\section{Mixed-effects models for cluster detection}
 
