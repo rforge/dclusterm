@@ -1,0 +1,120 @@
+%\VignetteIndexEntry{DClusterm: Model-based detection of disease clusters}
+%\VignetteDepends{}
+%\VignetteKeywords{spatial}
+%\VignettePackage{DClusterm}
+
+\documentclass[a4paper,12pt]{article}
+
+\usepackage{natbib}
+
+
+
+\title{DClusterm: Model-based detection of disease clusters}
+
+
+
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+
+\citet{Kulldorff:1997} proposes a test for detecting disease clusters which
+will find the most likely cluster. This is called the Spatial Scan
+Statistic and the significance of the test is found via a Monte
+Carlo test. The test statistic is based on a likelihood ratio test
+for the following test:
+
+$$
+\begin{array}{cc}
+H_0: & \theta_z=\theta_{\overline{z}}\\
+H_1: & \theta_z>\theta_{\overline{z}}\\
+\end{array}
+$$
+
+Here, $z$ represents a cluster (i.e., a set of contiguous areas), $\theta_z$
+the relative risk in the cluster and $\theta_{\overline{z}}$ the relative risk
+outside the cluster. Many different clusters are tested in turn. The most
+likely cluster is the one with the highest value of the test statistic. Then a
+Monte Carlo test is used to compute the p-value of the most likely cluster.
+
+
+\section{Generalised Linear Models for cluster detection}
+
+\citet{Jung:2009,ZhangLinCSDA:2009} show that the test statistic for a given
+cluster is equivalent to fitting a Generalised Linear Model using a cluster
+variable as a predictor. This cluster variable is a dummy variable which is 1
+for the areas in the cluster and 0 for the areas outside the cluster.
+
+Firstly, given that we are using GLM's we could include covariates in the 
+model. For example, for a Poisson model with expected counts $E_i$ 
+we could have:
+
+$$
+O_i\sim Po(E_i \theta_i)
+$$
+
+$$
+\log(\theta_i)=\log(E_i)+\alpha+\beta x_i 
+$$
+\noindent
+Fitting this model will provide estimates $\hat\alpha$ and $\hat\beta$.
+This will account for the (spatial) effects of the covariates. In order
+to include the cluster variable the effects of the covariates will be keep
+fixed. Hence, the clusters covariates will be used in a model with fixed
+coefficients for the covariates:
+
+$$
+\log(\theta_i)=\log(E_i)+\hat\alpha+\hat\beta x_i +\gamma CLUSTER_i
+$$
+\noindent
+This means that the offset now is $\log(E_i)+\hat\alpha+\hat\beta x_i$.
+$\gamma$ is a measure of the difference of the risk in the cluster. We
+are only interested in cluster whose coefficient is higher than 0 (i.e.,
+increased risk).
+
+Testing different clusters will produce many different cluster covariates.
+We can use model selection techniques to select the most important cluster in 
+the area.  In particular, the log-likelihood can be used to 
+compare the model with the cluster variable to the null model (i.e., the
+one with the covariates only). Note that we are interested in clusters with 
+a high risk, so that 
+
+%NY8 Example
+
+\input{NY.tex}
+
+\section{Spatio-temporal clusters}
+
+\input{NM.tex}
+
+\section{Zero-inflated models for cluster detection}
+
+\citet{RD:2010} extend this method to account for zero-inflation. In this case
+the observed number of cases come from a mixture distribution:
+
+$$
+Pr(O_i=n_i)=
+\left\{
+\begin{array}{ll}
+\pi_i+(1-\pi_i)Po(0|\theta_iE_i) & n_i=0\\
+(1-\pi_i)Po(n_i|\theta_iE_i) & n_i=1,2,\ldots\\
+\end{array}
+\right.
+$$
+\noindent
+The relative risk $\theta_i$ can be modelled using a log-linear model to depend
+on some relevant risk factors. Also, it is common that all $\pi_i$'s are taken equal to a single value $\pi$.
+
+\input{Navarre.tex}
+
+%\section{Mixed-effects models for cluster detection}
+
+\bibliography{DClusterm}
+\bibliographystyle{chicago}
+
+
+
+
+\end{document}
