@@ -77,7 +77,11 @@ of disease:
 
 <<>>=
 brainnav$Expected<-brainnav$EXPECTED
-brainnavst<-STFDF(brainnav, xts(1,as.Date(1)), brainnav@data)
+
+brainnavst<-STFDF(as(brainnav, "SpatialPolygons"),
+xts(1,as.Date("1990-01-01")), brainnav@data,
+endTime=as.POSIXct(strptime(c("1990-01-01"), "%Y-%m-%d"), tz = "GMT"))
+
 
 cl0<-DetectClustersModel(brainnavst, coordinates(brainnav), fractpop=.25, 
    alpha=.05,
