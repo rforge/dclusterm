@@ -96,15 +96,16 @@ p-value, which is shown in Figure \ref{fig:Navarrecl}
 
 <<>>=
 names(cl0)[3]<-"size"
-brainnav$x<-coordinates(brainnav)[,1]
-brainnav$y<-coordinates(brainnav)[,2]
+#brainnav$x<-coordinates(brainnav)[,1]
+#brainnav$y<-coordinates(brainnav)[,2]
 knbinary(brainnav, cl0)
-brainnav$CLUSTER<-knbinary(brainnav, cl0)[,1]
+brainnav$CLUSTER<-as.factor(knbinary(brainnav, cl0)[,1])
+levels(brainnav$CLUSTER) <- c("", "CLUSTER")
 @
 
 \begin{figure}[!h]
 <<fig=TRUE, echo=FALSE>>=
-print(spplot(brainnav, "CLUSTER"))
+print(spplot(brainnav, "CLUSTER", col.regions = c("white", "grey")) )
 @
 \label{fig:Navarrecl}
 \caption{Cluster of brain cancer detected in Navarre (Spain).}

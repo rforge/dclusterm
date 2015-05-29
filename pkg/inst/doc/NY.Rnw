@@ -25,6 +25,7 @@ percentage of people who own their home (PCTOWNHOME).
 <<results=hide>>=
 library(DClusterm)
 library(snowfall)
+library(xts)
 
 data(NY8)
 NY8$Cases2<-round(NY8$Cases)
