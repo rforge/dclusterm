@@ -38,7 +38,8 @@ NY8$SMR<-NY8$Cases2/NY8$EXP
 NY8$x<-coordinates(NY8)[,1]
 NY8$y<-coordinates(NY8)[,2]
 
-NY8st<-STFDF(NY8, xts(1,as.Date(1)), NY8@data)
+NY8st<-STFDF(as(NY8, "SpatialPolygons"), xts(1,as.Date("1972-01-01")),
+NY8@data, endTime=as.POSIXct(strptime(c("1972-01-01"), "%Y-%m-%d"), tz = "GMT"))
 
 @
 
