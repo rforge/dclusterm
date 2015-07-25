@@ -1,3 +1,29 @@
+##' Computes the probability that a model parameter is <=k from inla marginals
+##'
+##' This function will be used to calculate the P(coeficient variable cluster <=0)
+##'
+##' @param func is the inla marginals of the model parameter
+##' @param k is the cutoff
+##' 
+##' @return probability model coefficient <=k
+##'
+computeprob<-function(func, k){
+	idx<-which(func[,1]<=k)
+	if(length(idx)>0)
+	{
+	weights<-func[idx+1,1]-func[idx,1]
+
+	prob<-sum(func[idx,2]*weights)
+	}
+	else
+	{
+		prob<-0
+	}
+	return(prob)
+}
+
+
+
 ##' Gets areas in a spatio-temporal cluster
 ##
 ##' This function is similar to get.knclusters but it also allows

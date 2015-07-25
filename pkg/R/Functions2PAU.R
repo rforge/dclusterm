@@ -32,15 +32,14 @@ return(thegrid)
 
 
 
-
-##' Obtains clusters with the maximum log-likelihood ratio for each center and
-##' start and end dates.
+##' Obtains the clusters with the maximum log-likelihood ratio or minimum DIC
+##' for each center and start and end dates.
 ##' 
 ##' This function explores all possible clusters changing their center and start
 ##' and end dates. For each center and time periods, it obtains the cluster with
-##' the maximum log-likelihood ratio so that the maximum fraction of the total
-##' population inside the cluster is less than fractpop, and the maximum
-##' distance to the center is less than radius.
+##' the maximum log-likelihood ratio or minimum DIC so that the maximum fraction
+##' of the total population inside the cluster is less than fractpop, 
+##' and the maximum distance to the center is less than radius.
 ##'
 ##' @param thegrid grid with the coordinates of the centers of the clusters
 ##' explored.
@@ -59,14 +58,16 @@ return(thegrid)
 ##' @param fractpop maximum fraction of the total population inside the cluster.
 ##' @param model0 Initial model (including covariates).
 ##' This can be "glm" for generalized linear models (glm {stats}),
-##' "glmer" for generalized linear mixed model (glmer {lme4}), or
-##' "zeroinfl" for zero-inflated models (zeroinfl {pscl}).
+##' "glmer" for generalized linear mixed model (glmer {lme4}),
+##' "zeroinfl" for zero-inflated models (zeroinfl {pscl}), or
+##' "inla" for generalized linear, generalized linear mixed or zero-inflated models.
 ##' @param numCPUS Number of cpus used when using snowfall to run the method.
 ##' If snowfall is not used numCPUS is NULL.
 ##'
 ##' @return data frame with information of the clusters with the maximum
-##' log-likelihood ratio for each center and start and end dates. It contains the coordinates of the center,
-##' the size, the start and end dates, and the log-likelihood ratio of each of the clusters.
+##' log-likelihood ratio or minimum DIC for each center and start and end dates.
+##' It contains the coordinates of the center, the size, the start and end dates,
+##' the log-likelihood ratio or DIC, the p-value and the risk of each of the clusters.
 ##'
 CalcStatsAllClusters<-function(thegrid, CalcStatClusterGivenCenter, stfdf, rr,
 typeCluster, sortDates, idMinDateCluster, idMaxDateCluster, fractpop, model0,
@@ -101,7 +102,8 @@ minDateCluster=sortDates[i], maxDateCluster=sortDates[j], fractpop, model0)
 statsAllClusters<-do.call(rbind, statsAllClusters)
 print(c(i,j))
 }
-names(statsAllClusters)<-c("x", "y", "size", "minDateCluster", "maxDateCluster", "statistic")
+names(statsAllClusters)<-c("x", "y", "size", "minDateCluster", "maxDateCluster",
+"statistic", "pvalue", "risk")
 return(as.data.frame(statsAllClusters))
 }
 
@@ -109,15 +111,15 @@ return(as.data.frame(statsAllClusters))
 
 
 
-##' Calls the function to obtain the cluster with the maximum log-likelihood
-##' ratio of all the clusters with the same center and start and end dates.
+##' Calls the function to obtain the cluster with the maximum log-likelihood ratio
+##' or minimum DIC of all the clusters with the same center and start and end dates.
 ##' 
 ##' This function orders the regions according to the distance to a given center
 ##' and selects the regions with distance to the center less than sqrt(rr).
 ##' Then it calls glmAndZIP.iscluster() to obtain the cluster with the maximum
-##' log-likelihood ratio of all the clusters with the same center and start and
-##' end dates, and where the maximum fraction of the total population inside the
-##' cluster is less than fractpop.
+##' log-likelihood ratio or minimum DIC of all the clusters with the same center
+##' and start and end dates, and where the maximum fraction of the total
+##' population inside the cluster is less than fractpop.
 ##'
 ##' @param point vector with the coordinates of the center of the cluster.
 ##' @param stfdf spatio-temporal class object containing the data.
@@ -127,13 +129,16 @@ return(as.data.frame(statsAllClusters))
 ##' @param fractpop maximum fraction of the total population inside the cluster.
 ##' @param model0 Initial model (including covariates).
 ##' This can be "glm" for generalized linear models (glm {stats}),
-##' "glmer" for generalized linear mixed model (glmer {lme4}), or
-##' "zeroinfl" for zero-inflated models (zeroinfl {pscl}).
+##' "glmer" for generalized linear mixed model (glmer {lme4}),
+##' "zeroinfl" for zero-inflated models (zeroinfl {pscl}), or
+##' "inla" for generalized linear, generalized linear mixed or zero-inflated models.
 ##'
-##' @return vector containing the coordinates of the center, the size, the
-##' start and end dates, and the log-likelihood ratio of the cluster with the maximum log-likelihood ratio.
+##' @return vector containing the coordinates of the center, the size,
+##' the start and end dates, the log-likelihood ratio or DIC, the p-value and 
+##' the risk of the cluster with the maximum log-likelihood ratio or minimum DIC.
 ##'
 CalcStatClusterGivenCenter<-function(point, stfdf, rr, minDateCluster, maxDateCluster, fractpop, model0){
+
 
 coordx<-coordinates(stfdf@sp)[,1]
 coordy<-coordinates(stfdf@sp)[,2]

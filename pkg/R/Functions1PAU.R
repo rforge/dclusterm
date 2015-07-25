@@ -5,8 +5,9 @@
 ##' the cluster is less than fractpop, and the maximum distance to the center is
 ##' less than radius.
 ##' The search can be done for spatial or spatio-temporal clusters.
-##' The significance of the clusters is obtained with a Monte Carlo procedure or
-##' based on the chi-square distribution.
+##' The significance of the clusters is obtained with a Monte Carlo procedure
+##' or based on the chi-square distribution (glm, glmer or zeroinfl models)
+##' or DIC (inla models).
 ##'
 ##' @param stfdf spatio-temporal class object containing the data. See
 ##' STFDF-class {spacetime} for details. It contains an object of class
@@ -28,24 +29,25 @@
 ##' @param minDateUser start date of the clusters.
 ##' @param maxDateUser end date of the clusters.
 ##' @param R If the cluster's significance is calculated based on the chi-square
-##' distribution, R is NULL. If the cluster's significance is calculated using a
+##' distribution or DIC, R is NULL. If the cluster's significance is calculated using a
 ##' Monte Carlo procedure, R represents the number replicates under the null hypothesis.
 ##' @param numCPUS Number of cpus used when using snowfall to run the method.
 ##' If snowfall is not used numCPUS is NULL.
 ##' @param model0 Initial model (including covariates).
 ##' This can be "glm" for generalized linear models (glm {stats}),
-##' "glmer" for generalized linear mixed model (glmer {lme4}), or
-##' "zeroinfl" for zero-inflated models (zeroinfl {pscl}).
+##' "glmer" for generalized linear mixed model (glmer {lme4}),
+##' "zeroinfl" for zero-inflated models (zeroinfl {pscl}), or
+##' "inla" for generalized linear, generalized linear mixed or zero-inflated models.
 ##'
 ##' @return data frame with information of the detected clusters ordered by its
-##' log-likelihood ratio value. Each row represents the information of one of
-##' the clusters. It contains the coordinates of the center, the size, the start
-##' and end dates, the log-likelihood ratio, a boolean indicating if it is a
-##' cluster (TRUE in all cases), and the p-value of the cluster.
+##' log-likelihood ratio value or DIC. Each row represents the information of
+##' one of the clusters. It contains the coordinates of the center, the size,
+##' the start and end dates, the log-likelihood ratio or DIC, the p-value,
+##' the risk of the cluster, and a boolean indicating if it is a
+##' cluster (TRUE in all cases).
 ##'
 DetectClustersModel<-function(stfdf, thegrid=NULL, radius=Inf, step=NULL, fractpop, alpha,
 typeCluster, minDateUser=min(time(stfdf@time)), maxDateUser=max(time(stfdf@time)), R=NULL, numCPUS=NULL, model0){
-
 # Create column with ID. Unique identifier
 stfdf[['ID']]<-1:nrow(stfdf@data)
 
@@ -87,6 +89,7 @@ sfLibrary(splancs)
 sfLibrary(spacetime)
 sfLibrary(DCluster)
 sfLibrary(pscl)
+sfLibrary(INLA)
 sfLibrary(DClusterm)
 #sfSource("R/Functions1PAU.R")
 #sfSource("R/Functions2PAU.R")
@@ -94,10 +97,14 @@ sfLibrary(DClusterm)
 #sfSource("R/knutils.R")
 }
 
+
+
 # Statistic of each cluster
 statsAllClusters<-CalcStatsAllClusters(thegrid, CalcStatClusterGivenCenter, stfdf, rr,
 typeCluster, sortDates, idMinDateCluster, idMaxDateCluster, fractpop, model0, 
   numCPUS)
+
+
 
 # Remove rows where sizeCluster == -1
 idRemove<-which(statsAllClusters$sizeCluster == -1)
@@ -111,9 +118,19 @@ print("No clusters found")
 return("No clusters found")
 }
 
+
+
+
+if(class(model0)[1]=="inla"){
+vecpvalue<-statsAllClusters$pvalue
+veccluster<-vecpvalue<alpha
+}
+else{
+
 # p-value of each cluster
 vecpvalue<-matrix(NA,dim(statsAllClusters)[1],1)
 veccluster<-matrix(NA,dim(statsAllClusters)[1],1)
+
 
 ##############################################################################################
 
@@ -151,16 +168,26 @@ veccluster[i]<-vecpvalue[i]<alpha
 
 ##############################################################################################
 
+}
 # End snowfall
 if(!is.null(numCPUS)){
 sfStop()
 }
 
-statsAllClusters<-cbind(statsAllClusters,veccluster,vecpvalue)
-names(statsAllClusters)<-c("x", "y", "size", "minDateCluster", "maxDateCluster", "statistic", "cluster", "pvalue")
 
-#print(statsAllClusters[rev(order(statsAllClusters$statistic)), ])
+
+statsAllClusters$pvalue<-vecpvalue
+statsAllClusters$cluster<-veccluster
+#statsAllClusters<-cbind(statsAllClusters,veccluster,vecpvalue)
+names(statsAllClusters)<-c("x", "y", "size", "minDateCluster", "maxDateCluster",
+"statistic", "pvalue", "risk", "cluster")
+
+
 # Selection of significant clusters
+indpvalueNA<-which(is.na(statsAllClusters$pvalue))
+if(length(indpvalueNA)>0){
+statsAllClusters<-statsAllClusters[-indpvalueNA, ]
+}
 statsAllClusters<-statsAllClusters[statsAllClusters$pvalue < alpha, ]
 
 # If there are no clusters return "No clusters found"
@@ -169,9 +196,13 @@ print(paste("No significant clusters found with alpha =", alpha))
 return("No clusters found")
 }
 
-# Ordered results by statistic value
-statsAllClusters<-statsAllClusters[rev(order(statsAllClusters$statistic)), ]
 
+# Ordered results by statistic value
+if(class(model0)[1]=="inla"){
+statsAllClusters<-statsAllClusters[order(statsAllClusters$statistic), ]
+}else{
+statsAllClusters<-statsAllClusters[rev(order(statsAllClusters$statistic)), ]
+}
 # Return
 statsAllClusters$minDateCluster<-as.POSIXct(statsAllClusters$minDateCluster, origin="1970-01-01", tz="GMT")
 statsAllClusters$maxDateCluster<-as.POSIXct(statsAllClusters$maxDateCluster, origin="1970-01-01", tz="GMT")
