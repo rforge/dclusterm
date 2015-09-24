@@ -8,6 +8,8 @@
 \usepackage{amssymb}
 %% need no \usepackage{Sweave.sty}
 
+\usepackage{showlabels}
+
 
 
 
@@ -18,7 +20,8 @@
 
 %% almost as usual
 \author{Virgilio G\'omez-Rubio\\Universidad de\\ Castilla-La Mancha
-\And Paula Moraga-Serrano\\London School of Hygiene \& Tropical Medicine
+\And Paula Moraga-Serrano\\London School of Hygiene\\ \& Tropical Medicine
+\And John Molitor\\Oregon State University
 %Achim Zeileis\\Universit\"at Innsbruck \And 
 %        Second Author\\Plus Affiliation}
 }
@@ -27,12 +30,30 @@
 \title{\pkg{DClusterm}: Model-based detection of disease clusters}
 
 %% for pretty printing and a nice hypersummary also set:
-\Plainauthor{Virgilio G\'omez-Rubio, Paula Moraga-Serrano}
+\Plainauthor{Virgilio G\'omez-Rubio et al.}%, Paula Moraga-Serrano}
 \Plaintitle{DClusterm: Model-based detection of disease clusters}
 %\Shorttitle{} %% a short title (if necessary)
 
 %% an abstract and keywords
 \Abstract{
+The detection of regions with unusual high risk plays an important role in
+disease mapping and the analysis of Public Health data. In particular, the
+detection of groups of areas (i.e., clusters) where the risk is significantly 
+high is often conducted by Public Health authorities.
+
+Many methods have been proposed for the detection of disease clusters, most of
+them based on moving windows, such as, Kulldorff's Spatial Scan Statistics
+(SSS).  Here we describe a model-based approach for the detection of disease
+clusters implemented in the \pkg{DClusterm} package. Our model-based
+approach is based on representing a large number of possible clusters by
+dummy variables and then fitting many genralized linear models to the data wherethese covariates are included one at a time. Cluster detection is done by 
+performing a variable or model selection among all fitted models using
+different criteria.
+
+Because of our model-based approach, cluster detection can be performed using
+different types of likelihoods anf latent effects. We cover the detection of
+spatial and spatio-temporal clusters, as well as how to account for covariates,
+deal with zero-inflated datasets and overdispersion in the data.
 
 }
 
@@ -50,7 +71,12 @@ University of Castilla-La Mancha\\
 Paula Moraga-Serrano\\
 London School of Hygiene \& Tropical Medicine\\
 Keppel Street\\
-WC1E 7HT London, United Kingdom
+WC1E 7HT London, United Kingdom\\
+\\
+John Molitor\\
+College of Public Health and Human Sciences\\
+Oregon State University\\
+Corvallis, Oregon 97331, United States
 }
 
 
@@ -63,6 +89,10 @@ WC1E 7HT London, United Kingdom
 \maketitle
 
 \section{Introduction}
+
+
+** SOME INTRO TEXT HERE **
+
 
 \citet{Kulldorff:1997} proposes a test for detecting disease clusters which
 will find the most likely cluster. This is called the Spatial Scan
@@ -84,7 +114,12 @@ likely cluster is the one with the highest value of the test statistic. Then a
 Monte Carlo test is used to compute the p-value of the most likely cluster.
 
 
+
+
+
 \section{Generalised Linear Models for cluster detection}
+\label{sec:GLM}
+
 
 \citet{Jung:2009,ZhangLinCSDA:2009} show that the test statistic for a given
 cluster is equivalent to fitting a Generalised Linear Model using a cluster
@@ -124,6 +159,11 @@ the area.  In particular, the log-likelihood can be used to
 compare the model with the cluster variable to the null model (i.e., the
 one with the covariates only). Note that we are interested in clusters with 
 a high risk, so that 
+
+
+\citet{BilanciaDemarinis:2014,GomezRubioetal:2015}
+
+
 
 %NY8 Example
 
@@ -254,8 +294,23 @@ points(cl1[,1:2], pch=19, col="red")
 
 
 \section{Spatio-temporal clusters}
+\label{sec:spacetime}
 
 %\input{NM.tex}
+
+
+\citet{Jung:2009} discusses how to extend model-based approaches for the
+detection of spatial disease clusters to space and time. 
+\citet{GomezRubioetal:2015} propose the following model:
+
+\begin{equation} 
+\log(\mu_{i,t}) =  \log(E_{i,t}) + \gamma_j c^{(j)}_{i,t}
+\label{eq:stcluster}
+\end{equation}
+\noindent
+\noindent
+where $\mu_{i,t}$ is the mean of area $i$ at time $t$ and $c^{(j)}_{i,t}$
+a cluster dummy variable for cluster $j$.
 
 
 \subsection{Brain Cancer in New Mexico}
@@ -362,6 +417,7 @@ print(stplot(brainst[,,"CLUSTER"], at=c(0, 0.5, 1.5)))
 
 
 \section{Zero-inflated models for cluster detection}
+\label{sec:zeroinfl}
 
 \citet{RD:2010} extend this method to account for zero-inflation. In this case
 the observed number of cases come from a mixture distribution:
@@ -490,7 +546,19 @@ print(spplot(brainnav, "CLUSTER", col.regions = c("white", "grey")) )
 \end{figure}
 
 
-%\section{Mixed-effects models for cluster detection}
+\section{Mixed-effects models for cluster detection}
+\label{sec:mixed}
+
+
+\section{Bivariate models for cluster detection}
+\label{sec:bivar}
+
+
+\section{Discussion}
+\label{sec:disc}
+
+
+
 
 \bibliography{DClusterm}
 %\bibliographystyle{chicago}
