@@ -354,7 +354,7 @@ locations (area centroids or actual locations of individual data).
 
 <<results=hide>>=
 idxcl <- c(120, 12, 89, 139, 146)
-cl0 <- DetectClustersModel(NY8st, thegrid = as.data.frame(NY8)[idxcl, c("x", "y")], 
+ny.cl0 <- DetectClustersModel(NY8st, thegrid = as.data.frame(NY8)[idxcl, c("x", "y")], 
    fractpop = .15, alpha = 0.05, radius = Inf, step = NULL,
    typeCluster = "S", R = NULL, numCPUS = 4, model0 = ny.m0)
 @
@@ -372,7 +372,7 @@ cluster are order by increasing value of \code{pvalue}, so that most
 significant clusters are reported first.
 
 <<>>=   
-cl0
+ny.cl0
 @
 
 The centre of the clusters detected are shown in Figure~\ref{fig:NYcl}.
@@ -383,7 +383,7 @@ high risk based on the raw data (observed and expected counts) alone.
 %\centering
 <<eval = FALSE, echo=FALSE, fig=TRUE>>=
 plot(NY8)
-points(cl0[,1:2], pch=19, col="red")
+points(ny.cl0[, 1:2], pch = 19, col = "red")
 @
 %\caption{Clusters detected when no covariates are included in the model.}
 %\label{fig:NYcl0}
@@ -407,14 +407,14 @@ detection is performed as in the previous example, but now we use the model
 that adjusts for covariates instead:
 
 <<results=hide>>=
-cl1<-DetectClustersModel(NY8st, 
+ny.cl1<-DetectClustersModel(NY8st, 
   thegrid = as.data.frame(NY8)[idxcl, c("x", "y")], 
   fractpop = .15, alpha = .05,
   typeCluster = "S", R = NULL, numCPUS = 4, model0 = ny.m1)
 @
 
 <<>>=
-cl1
+ny.cl1
 @
 
 Figure~\ref{fig:NYcl} shows the clusters detected after adjusting for
@@ -433,11 +433,11 @@ par(mfrow = c(1,2))
 
 #No covariates
 plot(NY8)
-points(cl0[,1:2], pch=19, col="red")
+points(ny.cl0[,1:2], pch=19, col="red")
 
 #With covariates
 plot(NY8)
-points(cl1[,1:2], pch=19, col="red")
+points(ny.cl1[,1:2], pch=19, col="red")
 @
 \caption{Clusters detected with no covariate adjustment (left) and after adjusting for 
   covariates (right).}
@@ -542,15 +542,15 @@ clusters. **ANYTHING ELSE ABOUT HOW S-T CLUSTERS ARE DEFINED?**
 ** FIXME: Use complete time periord of data for cluster detection
 
 <<results=hide>>=
-cl0<-DetectClustersModel(brainst, NM.coords,
+nm.cl0<-DetectClustersModel(brainst, NM.coords,
   minDateUser = "1985-01-01", maxDateUser = "1989-01-01",
   fractpop = .15, alpha = 0.05, typeCluster = "ST", R = NULL, 
   numCPUS = 4, model0 = nm.m0)
 @
 
 <<>>= 
-nrow(cl0)
-cl0[1:5,]
+nrow(nm.cl0)
+nm.cl0[1:5,]
 @
 
 \subsubsection{Cluster detection after adjusting for covariates}
@@ -590,18 +590,18 @@ cases.
 ** FIXME: Use complete time periord of data for cluster detection
 
 <<results=hide>>=
-cl1 <- DetectClustersModel(brainst, NM.coords, fractpop = 0.15, 
+nm.cl1 <- DetectClustersModel(brainst, NM.coords, fractpop = 0.15, 
    alpha = 0.05, minDateUser = "1985-01-01", maxDateUser = "1989-01-01",
    typeCluster = "ST", R = NULL, numCPUS = 4, model0 = nm.m1)
 @
 
-The number of clusters detected in this case is \Sexpr{nrow(cl1)}, the same
+The number of clusters detected in this case is \Sexpr{nrow(nm.cl1)}, the same
 as in the example with no covariates (**CHECK**). By inspecting the five most
 significant clusters we can observe that they are very similar to the ones detected
 before:
 
 <<>>=
-cl1[1:5,]
+nm.cl1[1:5,]
 @
 
 In order to exploit the output from \code{DetectClustersModel()}, function \code{get.stclusters()}
@@ -610,7 +610,7 @@ The next example shows how to add a new variable to \code{brainst} with the spac
 in the most significant cluster, which is displayed in Figure~\ref{fig:NMcluster}.
 
 <<>>=
-stcl <- get.stclusters(brainst, cl0)
+stcl <- get.stclusters(brainst, nm.cl0)
 brainst$CLUSTER <- 0
 brainst$CLUSTER[ stcl[[1]] ] <- 1
 @
@@ -744,14 +744,14 @@ a \code{zeroinfl} model. This provides a very flexible way of handling different
 types of models in \proglang{R} for cluster detection.
 
 <<results = hide>>=
-cl0 <- DetectClustersModel(brainnavst, coordinates(brainnav), fractpop = 0.25, 
+nav.cl0 <- DetectClustersModel(brainnavst, coordinates(brainnav), fractpop = 0.25, 
    alpha = 0.05, typeCluster = "S", R = NULL, numCPUS = 4, model0 = nav.m0zip)
 @
 
 The output will show the following clusters:
 
 <<>>=   
-cl0
+nav.cl0
 @
 \noindent
 As it can be seen, two clusters (with a p-value lower than 0.05) are detected.
@@ -770,7 +770,7 @@ the first one, the most significant, is added as a new column to the original
 \code{SpatialPolygonsDataFrame} to be displayed in Figure~\ref{fig:Navarrecl}.
 
 <<>>=
-nav.clusters <- knbinary(brainnav, cl0)
+nav.clusters <- knbinary(brainnav, nav.cl0)
 brainnav$CLUSTER <- as.factor(nav.clusters[, 1]) 
 levels(brainnav$CLUSTER) <- c("", "CLUSTER")
 @
@@ -787,6 +787,84 @@ print(spplot(brainnav, "CLUSTER", col.regions = c("white", "grey")) )
 
 \section{Mixed-effects models for cluster detection}
 \label{sec:mixed}
+
+Mixed-effects can be incorporated into our models to account for unmeasured
+risk factors. Cluster detection will be performed as usual, but we should keep
+in mind that by including random effects and dummy cluster covariates there may
+be a clash between the two. By using dummy variables we are intentionally
+looking for unexplained spatial variation in the data. Hence, random effects
+should aim at modelling a different structure.
+
+Random effects are particularly useful to model over-dispersion in count data.
+For the Poisson case, this will mean that the realtive risk can be modelled as:
+
+\begin{eqnarray}
+\log(\theta_i) & =  &\log(E_i) + \alpha + \beta x_i + \gamma_j c^{(j)}_i + u_i\\
+u_i & \sim &  N(0, \sigma^2_u)
+\end{eqnarray}
+\noindent
+where $u_i$ represents a random effect Normally distributed with zero mean and
+variance $\sigma^2_u$. Note that random effects can be defined to be spatially
+correalted, as suggested by \citep{BilanciaDemarinis:2014}. However, this can
+produce a clash between the dummy cluster variables and the random effects.
+
+\subsection{Leukemia in upstate New York}
+
+
+
+We go back to the example on the leukemia incidence in upstate New York to show
+how models can include random effects and, at the same time, detect disease
+clusters. In this particular example, random effects will be important in order
+to reflect any over-dispersion present in the data. For this reason, our first
+step here is to test the data for over-dispersion using Dean's $P_B$ and $P'_B$
+score tests \citep[see,][for details]{}.  These two tests have been
+implemented in functions \code{DeanB()} and \code{DeanB2()} in the
+\pkg{DCluster} package.  They both take a \code{glm} object and perform the
+score tests:
+
+<<>>=
+DeanB(ny.m0)
+DeanB2(ny.m0)
+@
+
+From the results, it is clear that when no covariates are included data are clearly over-dispersed.
+Hence, a Poisson distribution will not be appropriate to model the observed counts in each
+tract.
+
+The same tests applied to the model with covariates produce a similar result:
+
+<<>>=
+DeanB(ny.m1)
+DeanB2(ny.m1)
+@
+
+Although p-values have increased, they are both small and we may still consider
+that data are over-dispersed. Hence, we will aim at detecting clusters using a
+Poison regression with independent random effects to account for track-level
+heterogeneity.
+
+\subsection{Cluster detection with no covariates}
+
+
+<<>>=
+ny.mm0 <- glmer(Observed ~ offset(log(Expected)) + (1 | AREANAME), 
+  data = as(NY8, "data.frame"), family = "poisson")
+summary(ny.mm0)
+@
+
+
+FIXME: Fix how handles glmAndZIP.iscluster() 
+
+<<eval = FALSE>>=
+ny.clmm1 <- DetectClustersModel(NY8st,
+  thegrid = as.data.frame(NY8)[idxcl, c("x", "y")],
+  fractpop = .15, alpha = .05,
+  typeCluster = "S", R = NULL, numCPUS = 1, model0 = ny.mm0)
+@
+
+\subsection{Cluster detection with covariates}
+
+
 
 
 \section{Bivariate models for cluster detection}

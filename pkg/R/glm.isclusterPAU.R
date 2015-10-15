@@ -35,10 +35,10 @@ d0<-stfdf@data
 
 mclass<-class(model0)[1]
 
-if(inherits(model0, "glm") | inherits(model0, "mer")){
+if(inherits(model0, "glm") | inherits(model0, "mer") | inherits(model0, "glmerMod")){
     modelFormula<-paste(formula(model0)[c(2,3)], collapse="~")
     modelType<-ifelse(mclass=="glm", "glm", "glmer")
-	modelFamilyGlmGlmer<-model0$family
+	modelFamilyGlmGlmer <- family(model0)
 	modelDistZeroinfl<-NULL
 	modelLinkZeroinfl<-NULL
 }
