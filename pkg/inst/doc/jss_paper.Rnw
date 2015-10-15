@@ -27,7 +27,7 @@
 
 %\title{Extending the \pkg{R-INLA} Package for Spatial Statistics}
 %\title{Some Spatial Statistical Extensions to \pkg{R-INLA}}
-\title{\pkg{DClusterm}: Model-based detection of disease clusters}
+\title{\pkg{DClusterm}: Model-based Detection of Disease Clusters}
 
 %% for pretty printing and a nice hypersummary also set:
 \Plainauthor{Virgilio G\'omez-Rubio et al.}%, Paula Moraga-Serrano}
@@ -161,7 +161,7 @@ are provided in Section \ref{sec:disc}.
 
 
 
-\section{Generalised Linear Models for cluster detection}
+\section{Generalised linear models for cluster detection}
 \label{sec:GLM}
 
 
@@ -190,11 +190,11 @@ fixed. Hence, the clusters covariates will be used in a model with fixed
 coefficients for the covariates:
 
 $$
-\log(\theta_i) = \log(E_i) + \hat\alpha + \hat\beta x_i + \gamma CLUSTER_i
+\log(\theta_i) = \log(E_i) + \hat\alpha + \hat\beta x_i + \gamma_j CLUSTER_j
 $$
 \noindent
 This means that the offset now is $\log(E_i)+\hat\alpha+\hat\beta x_i$.
-$\gamma$ is a measure of the difference of the risk in the cluster. We
+$\gamma_j$ is a measure of the difference of the risk in the cluster. We
 are only interested in clusters whose coefficient is higher than 0 (i.e.,
 increased risk), hence those with a significant negative coefficient will
 be ignored.
@@ -286,9 +286,24 @@ NY8st <- STFDF(as(NY8, "SpatialPolygons"), xts(1, as.Date("1972-01-01")), NY8@da
 <<fig=TRUE, echo=FALSE>>=
 library(RColorBrewer)
 
-print(spplot(NY8, "SMR", cuts = 8, col.regions = brewer.pal(9, "Oranges")))
+#Save plots
+p1 <- spplot(NY8, "SMR", cuts = 8, col.regions = brewer.pal(9, "Oranges"),
+   main = "Standardised Mortality Ratio")
+p2 <- spplot(NY8, "PCTOWNHOME", cuts = 8, col.regions = brewer.pal(9, "Blues"),
+   main = "PCTOWNHOME")
+p3 <- spplot(NY8, "PCTAGE65P", cuts = 8, col.regions = brewer.pal(9, "Greens"),
+   main = "PCTAGE65P")
+p4 <- spplot(NY8, "PEXPOSURE", cuts = 8, col.regions = rev(brewer.pal(9, "Reds")),
+   main = "PEXPOSURE")
+
+#Display plots
+print(p1, position = c(0, 0.5, 0.5, 1), more = TRUE)
+print(p2, position = c(0.5, 0.5, 1, 1), more = TRUE)
+print(p3, position = c(0, 0, 0.5, 0.5), more = TRUE)
+print(p4, position = c(0.5, 0, 1, 0.5))
+
 @
-\caption{**INCLUDE TCE LOCATIONS AND THRE OTHER COVARIATES** SMR of the incidence of Leukemia in upstate New York.}
+\caption{**INCLUDE TCE LOCATIONS** SMR and covariates of the incidence of Leukemia in upstate New York dataset.}
 \label{fig:NYmap}
 \end{figure}
 \subsection{Cluster detection}
@@ -302,7 +317,7 @@ exaple, using the AIC or the log--likelihood) to assess whether they provide a
 better fit. 
 
 <<results=hide>>=
-m0 <- glm(Observed ~ offset(log(Expected)) + 1, family = "poisson", data = NY8)
+ny.m0 <- glm(Observed ~ offset(log(Expected)) + 1, family = "poisson", data = NY8)
 @
 
 Cluster detection will use the previous model and new cluster dummy variables
@@ -341,7 +356,7 @@ locations (area centroids or actual locations of individual data).
 idxcl <- c(120, 12, 89, 139, 146)
 cl0 <- DetectClustersModel(NY8st, thegrid = as.data.frame(NY8)[idxcl, c("x", "y")], 
    fractpop = .15, alpha = 0.05, radius = Inf, step = NULL,
-   typeCluster = "S", R = NULL, numCPUS = 4, model0 = m0)
+   typeCluster = "S", R = NULL, numCPUS = 4, model0 = ny.m0)
 @
 
 
@@ -360,19 +375,19 @@ significant clusters are reported first.
 cl0
 @
 
-The centre of the clusters detected are shown in Figure~\ref{fig:NYcl0}.
+The centre of the clusters detected are shown in Figure~\ref{fig:NYcl}.
 Because of the lack of adjustment for covariates these clusters show regions of
 high risk based on the raw data (observed and expected counts) alone.
 
-\begin{figure}[h!]
-\centering
-<<echo=FALSE, fig=TRUE>>=
+%\begin{figure}[h!]
+%\centering
+<<eval = FALSE, echo=FALSE, fig=TRUE>>=
 plot(NY8)
 points(cl0[,1:2], pch=19, col="red")
 @
-\caption{Clusters detected when no covariates are included in the model.}
-\label{fig:NYcl0}
-\end{figure}
+%\caption{Clusters detected when no covariates are included in the model.}
+%\label{fig:NYcl0}
+%\end{figure}
 
 \subsubsection{Cluster detection after adjusting for covariates}
 
@@ -381,9 +396,9 @@ factors. First of all, we will fit a Poisson regression with the 3 covariates
 mentioned earlier. As it can be seen, all three are significant:
 
 <<>>=
-m1 <- glm(Observed ~ offset(log(Expected)) + PCTOWNHOME + PCTAGE65P + PEXPOSURE,
+ny.m1 <- glm(Observed ~ offset(log(Expected)) + PCTOWNHOME + PCTAGE65P + PEXPOSURE,
   family = "poisson", data = NY8)
-summary(m1)
+summary(ny.m1)
 @
 
 As the three covariates are significant, the expected number of cases will be
@@ -395,14 +410,14 @@ that adjusts for covariates instead:
 cl1<-DetectClustersModel(NY8st, 
   thegrid = as.data.frame(NY8)[idxcl, c("x", "y")], 
   fractpop = .15, alpha = .05,
-  typeCluster = "S", R = NULL, numCPUS = 4, model0 = m1)
+  typeCluster = "S", R = NULL, numCPUS = 4, model0 = ny.m1)
 @
 
 <<>>=
 cl1
 @
 
-Figure~\ref{fig:NYcl1} shows the clusters detected after adjusting for
+Figure~\ref{fig:NYcl} shows the clusters detected after adjusting for
 covariates.  Compared to the example with no covariate adjustment, one custer
 has dissappeared. Hence, that cluster has been explained by the effect of the
 covariates. Another cluster is a bit smaller in size, which means that
@@ -413,12 +428,20 @@ the covariates.
 
 \begin{figure}[!h]
 \centering
-<<echo=FALSE, fig=TRUE>>=
+<<echo=FALSE, fig=TRUE, width = 10, height = 5>>=
+par(mfrow = c(1,2))
+
+#No covariates
+plot(NY8)
+points(cl0[,1:2], pch=19, col="red")
+
+#With covariates
 plot(NY8)
 points(cl1[,1:2], pch=19, col="red")
 @
-\caption{Clusters detected after adjusting for covariates.}
-\label{fig:NYcl1}
+\caption{Clusters detected with no covariate adjustment (left) and after adjusting for 
+  covariates (right).}
+\label{fig:NYcl}
 \end{figure}
 
 
@@ -433,12 +456,12 @@ detection of spatial disease clusters to space and time.
 \citet{GomezRubioetal:2015} propose the following model:
 
 \begin{equation} 
-\log(\mu_{i,t}) =  \log(E_{i,t}) + \gamma_j c^{(j)}_{i,t}
+\log(\mu_{i,t}) =  \log(E_{i,t}) + \gamma_j c^{(j)}
 \label{eq:stcluster}
 \end{equation}
 \noindent
 \noindent
-where $\mu_{i,t}$ is the mean of area $i$ at time $t$ and $c^{(j)}_{i,t}$
+where $\mu_{i,t}$ is the mean of area $i$ at time $t$ and $c^{(j)}$
 a cluster dummy variable for cluster $j$. 
 
 Note how now data are indexed according to space and time. Dummy cluster
@@ -449,13 +472,13 @@ aggregated using all possible temporal windows up to a predefined temporal
 range.
 
 
-\subsection{Brain Cancer in New Mexico}
+\subsection{Brain cancer in New Mexico}
 
 The \code{brainNM} dataset (included in \pkg{DClusterm}) contains yearly cases
 of brain cancer in New Mexico from 1973 to 1991 (inclusive) in a
 \pkg{spacetime} object. The data set has been taken from the SatScan website
 and the area boundaries from the U.S.  Census Bureau. In addition, the location
-of Los Alamos National Laboratory has been included (from the Wikipedia).
+of Los Alamos National Laboratory (LANL) has been included (from the Wikipedia).
 Inverse distance to this site can be used to test for increased risk in the
 areas around the Laboratory as no other covariates are available. 
 
@@ -493,12 +516,21 @@ print(stplot(brainst[, , "SMR"], cuts = 8,
 \subsubsection{Cluster detection with no covariates}
 
 Similarly as in the purely spatial case, a Poisson regression with no 
-covariates will be fitted:
+covariates will be fitted first:
 
 <<>>=
-m0 <- glm(Observed ~ offset(log(Expected)) + 1, family = "poisson", 
+nm.m0 <- glm(Observed ~ offset(log(Expected)) + 1, family = "poisson", 
   data = brainst)
-summary(m0)
+summary(nm.m0)
+@
+
+Before proceding with disease cluster detection, we have extracted the
+centroids of the counties in New Mexico by using function \code{coordinates()}
+on the \code{sp} slot in the \code{STIDF} object that stores the data.
+
+
+<<results=hide>>=
+NM.coords <- coordinates(brainst@sp)
 @
 
 Cluster detection with function \code{DetectClustersModel()} takes
@@ -507,11 +539,13 @@ the minimum and maximum times that are considered when looking for
 clusters. \code{typeCluster = "ST"} is used to look for spatio-temporal
 clusters. **ANYTHING ELSE ABOUT HOW S-T CLUSTERS ARE DEFINED?**
 
+** FIXME: Use complete time periord of data for cluster detection
+
 <<results=hide>>=
-cl0<-DetectClustersModel(brainst, coordinates(brainst@sp), 
+cl0<-DetectClustersModel(brainst, NM.coords,
   minDateUser = "1985-01-01", maxDateUser = "1989-01-01",
   fractpop = .15, alpha = 0.05, typeCluster = "ST", R = NULL, 
-  numCPUS = 4, model0 = m0)
+  numCPUS = 4, model0 = nm.m0)
 @
 
 <<>>= 
@@ -521,57 +555,89 @@ cl0[1:5,]
 
 \subsubsection{Cluster detection after adjusting for covariates}
 
-We will use the inverse of the distance to Los Alamos National Laboratory
-as a covariate.
+In this case, we will use the inverse of the distance to LANL as a covariate as
+no other information about the areas is available. Distances have been computed
+using function \code{spDistsN1} Given that coordinates are expressed in
+longitude and latitude  great circle distances are used.
 
 <<>>=
-dst<-spDistsN1(coordinates(brainst@sp), losalamos, TRUE)
-
-nyears<-length(unique(brainst@data$Year))
-brainst@data$IDLANL<-rep(1/dst, nyears)
-
+dst <- spDistsN1(pts = NM.coords, pt = losalamos, longlat = TRUE)
 @
+
+Distances need to be put together in a way that values are available for all time periods.
+In this case, given that distances do not change over time, a vector is creaeted by repeating
+the vector of distances as many times as time slots (years) we have in the dataset.
 
 <<>>=
-m1<-glm(Observed~offset(log(Expected))+IDLANL,
-   family="poisson", data=brainst)
-summary(m1)
+nyears <- length(unique(brainst$Year))
+brainst$IDLANL <- rep(1/dst, nyears)
 @
+
+With all this data we are now able to fit a baseline model.
+
+<<>>=
+nm.m1 <- glm(Observed ~ offset(log(Expected)) + IDLANL,
+   family = "poisson", data = brainst)
+summary(nm.m1)
+@
+
+Note how now the included covariate is not significant. For illustrative
+purposes, we will still keep the covariate in our model for the cluster
+detection. However, non-significant covariates will have a tiny impact on the
+clusters detected as they will not produce a change in the expected number of
+cases.
+
+** FIXME: Use complete time periord of data for cluster detection
 
 <<results=hide>>=
-cl1<-DetectClustersModel(brainst, coordinates(brainst@sp), fractpop=.15, 
-   alpha=0.05, minDateUser="1988-01-01", maxDateUser="1989-01-01",
-   typeCluster="ST", R=NULL, numCPUS=4, model0=m1)
+cl1 <- DetectClustersModel(brainst, NM.coords, fractpop = 0.15, 
+   alpha = 0.05, minDateUser = "1985-01-01", maxDateUser = "1989-01-01",
+   typeCluster = "ST", R = NULL, numCPUS = 4, model0 = nm.m1)
 @
 
+The number of clusters detected in this case is \Sexpr{nrow(cl1)}, the same
+as in the example with no covariates (**CHECK**). By inspecting the five most
+significant clusters we can observe that they are very similar to the ones detected
+before:
+
 <<>>=
-nrow(cl1)
 cl1[1:5,]
 @
 
-We can easily display the most significant cluster as follows:
+In order to exploit the output from \code{DetectClustersModel()}, function \code{get.stclusters()}
+will take the data and this output to return a list with the indices of the areas in the cluster.
+The next example shows how to add a new variable to \code{brainst} with the space-time regions
+in the most significant cluster, which is displayed in Figure~\ref{fig:NMcluster}.
 
 <<>>=
-stcl<-get.stclusters(brainst, cl0)
-brainst$CLUSTER<-0
-brainst$CLUSTER[stcl[[1]]]<-1
+stcl <- get.stclusters(brainst, cl0)
+brainst$CLUSTER <- 0
+brainst$CLUSTER[ stcl[[1]] ] <- 1
 @
 
 \begin{figure}[!h]
-<<fig=TRUE>>=
+\centering
+<<echo = FALSE, fig=TRUE>>=
 print(stplot(brainst[, , "CLUSTER"], at = c(0, 0.5, 1.5), 
   col.regions = c("white", "gray")))
 @
-\label{fig:NMcluster}
 \caption{Spatio-temporal cluster of brain cancer detected in New Mexico.}
+\label{fig:NMcluster}
 \end{figure}
 
 
 \section{Zero-inflated models for cluster detection}
 \label{sec:zeroinfl}
 
-\citet{RD:2010} extend this method to account for zero-inflation. In this case
-the observed number of cases come from a mixture distribution:
+The analysis of rare diseases often involves datasets where there are many
+areas with zero counts, leading to zero-inflated data. In this situation the
+Poisson or Binomial likelihoods may not be suitable to fit a model and other
+distributions for the data should be used.  \citet{RD:2010} discuss this issue
+and they have extended model-based cluster detection methods to account for
+zero-inflation. 
+
+Four count data, a zero-inflated Poisson could be used. In this case,  observed
+number of cases come from a mixture distribution:
 
 $$
 Pr(O_i=n_i)=
@@ -583,22 +649,23 @@ Pr(O_i=n_i)=
 \right.
 $$
 \noindent
-The relative risk $\theta_i$ can be modelled using a log-linear model to depend
-on some relevant risk factors. Also, it is common that all $\pi_i$'s are taken equal to a single value $\pi$.
+Relative risk $\theta_i$ can be modelled using a log-linear model to depend on
+some relevant risk factors. Also, it is common that all $\pi_i$'s are taken
+equal to a single value $\pi$.
 
 %\input{Navarre.tex}
 
 
-\subsection{Brain Cancer in Navarre (Spain)}
+\subsection{Brain cancer in Navarre (Spain)}
 
 \citet{Ugarteetal:2006} analyse the incidence of brain cancer in Navarre
 (Spain). The aggregation level is the health district. Figure~\ref{fig:Navarre}
-shows the SMR. As it can be seen there are many areas where the SMR is zero
-because there are no cases in those areas. \citet{Ugarteetal:2004} also tested
-for positive zero-inflation of these data compared to a Poisson distribution.
-The method implemented in this package is similar to the one used in
-\citet{RD:2010} for the detection of disease clusters of rare diseases.
-
+shows the Standardised Mortality Ratios. As it can be seen there are many areas
+where the SMR is zero because there are no cases in those areas.
+\citet{Ugarteetal:2004} also assessed a significant zero-inflation of these
+data compared to a Poisson distribution. For cluster detection, the method
+implemented in \code{DClusterm} is similar to the one used in \citet{RD:2010}
+for the detection of disease clusters of rare diseases.
 
 
 <<echo=FALSE, results=hide>>=
@@ -615,86 +682,106 @@ data(Navarre)
 print(spplot(brainnav, "SMR", cuts = 8, 
   col.regions = brewer.pal(9, "Oranges")))
 @
-\label{fig:Navarre}
 \caption{SMR of brain cancer in Navarre (Spain).}
+\label{fig:Navarre}
 \end{figure}
 
 
 \subsection{Cluster detection}
 
-\subsubsection{Cluster detection with no covariates}
+%\subsubsection{Cluster detection with no covariates}
 
-Before starting our cluster detection methods, we will check the appropriateness
-of a Poisson GLM for this data. Fitting a log-linear model (with no covariates)
-gives the
-following model:
+Before starting our cluster detection methods, we will check the
+appropriateness of a Poisson distribution for this data. Fitting a log-linear
+model (with no covariates) gives the following model:
 
 <<>>=
-m0<-glm(OBSERVED~ offset(log(EXPECTED))+1, family="poisson", data=brainnav)
+nav.m0 <- glm(OBSERVED ~ offset(log(EXPECTED)) + 1, family = "poisson", data = brainnav)
 
-summary(m0)
+summary(nav.m0)
 @
 
 Furthermore, a quasipoisson model has been fit in order to asses any
 extra-variation in the data:
 
 <<>>=
-m0q<-glm(OBSERVED~ offset(log(EXPECTED))+1, family="quasipoisson", 
-   data=brainnav)
-summary(m0q)
+nav.m0q <- glm(OBSERVED ~ offset(log(EXPECTED)) + 1, family = "quasipoisson", 
+   data = brainnav)
+summary(nav.m0q)
 @
 \noindent
 The dispersion parameter in the previous model seems to be higher than 1,
 which may mean that the Poisson distribution is not appropriate.
 
 For this reason, and following \citet{Ugarteetal:2004}, a zero-inflated Poisson
-model has been fit. Here is the resulting model:
+model has been fit using function \code{zeroinfl()} from package \pkg{pscl}.
+Here is the resulting model:
 
 
 <<>>=
-m0zip<-zeroinfl(OBSERVED ~ offset(log(EXPECTED))+1 | 1, data = brainnav,
-  dist="poisson", x=TRUE)
-summary(m0zip)
+nav.m0zip <- zeroinfl(OBSERVED ~ offset(log(EXPECTED)) + 1 | 1, data = brainnav,
+  dist = "poisson", x = TRUE)
+summary(nav.m0zip)
 @
 
 Hence, the zero-inflated Poisson model will be used now to detect clusters
-of disease:
-
+of disease. As in the example on the New York leukemia dataset, a \pkg{spacetime}
+object will store all the information. The column for the expected counts must
+be names \code{Expected}, and this is our first step now. Note also that,
+because only one time period is considered, data will have a single value and
+it is the 1st of January of 1990.
 
 <<>>=
-brainnav$Expected<-brainnav$EXPECTED
+brainnav$Expected <- brainnav$EXPECTED
 
-brainnavst<-STFDF(as(brainnav, "SpatialPolygons"),
-xts(1,as.Date("1990-01-01")), brainnav@data,
-endTime=as.POSIXct(strptime(c("1990-01-01"), "%Y-%m-%d"), tz = "GMT"))
+brainnavst <- STFDF(as(brainnav, "SpatialPolygons"),
+  xts(1,as.Date("1990-01-01")), as(brainnav, "data.frame"),
+  endTime = as.POSIXct(strptime(c("1990-01-01"), "%Y-%m-%d"), tz = "GMT"))
+@
 
+Function \code{DetectClustersModel()} will perform the cluster detection using
+a \code{zeroinfl} model. This provides a very flexible way of handling different
+types of models in \proglang{R} for cluster detection.
 
-cl0<-DetectClustersModel(brainnavst, coordinates(brainnav), fractpop=.25, 
-   alpha=.05,
-   typeCluster="S", R=NULL, numCPUS=4, model0=m0zip)
-   
+<<results = hide>>=
+cl0 <- DetectClustersModel(brainnavst, coordinates(brainnav), fractpop = 0.25, 
+   alpha = 0.05, typeCluster = "S", R = NULL, numCPUS = 4, model0 = nav.m0zip)
+@
+
+The output will show the following clusters:
+
+<<>>=   
 cl0
 @
 \noindent
 As it can be seen, two clusters (with a p-value lower than 0.05) are detected.
 However, they overlap and we will just consider the one with the lowest
-p-value, which is shown in Figure~\ref{fig:Navarrecl}
+p-value, which is shown in Figure~\ref{fig:Navarrecl}.
+
+An index for the areas in each of the detected cluster can be obtained with
+function \code{knbinary()}. This function will return a \code{data.frame} with
+all the dummy cluster variables, i.e., the \code{data.frame} will have as many
+columns as clusters and a number of rows equal to the number of areas. Entries
+will be 1 if an areas is in a given cluster and 0 otherwise. This indices can
+be used for a number of analyses, such as checking whether two clusters overlap
+or computing the number of times an area is included in a cluster. In the
+follwing example we obtain the representation of all the clusters detected and
+the first one, the most significant, is added as a new column to the original
+\code{SpatialPolygonsDataFrame} to be displayed in Figure~\ref{fig:Navarrecl}.
 
 <<>>=
-names(cl0)[3]<-"size"
-#brainnav$x<-coordinates(brainnav)[,1]
-#brainnav$y<-coordinates(brainnav)[,2]
-knbinary(brainnav, cl0)
-brainnav$CLUSTER<-as.factor(knbinary(brainnav, cl0)[,1])
+nav.clusters <- knbinary(brainnav, cl0)
+brainnav$CLUSTER <- as.factor(nav.clusters[, 1]) 
 levels(brainnav$CLUSTER) <- c("", "CLUSTER")
 @
 
 \begin{figure}[!h]
+\centering
 <<fig=TRUE, echo=FALSE>>=
 print(spplot(brainnav, "CLUSTER", col.regions = c("white", "grey")) )
 @
-\label{fig:Navarrecl}
 \caption{Cluster of brain cancer detected in Navarre (Spain).}
+\label{fig:Navarrecl}
 \end{figure}
 
 
