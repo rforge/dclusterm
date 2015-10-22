@@ -160,6 +160,12 @@ been included in Section \ref{sec:bivar}. Finally, a discussion and some final r
 are provided in Section \ref{sec:disc}.
 
 
+\begin{verbatim}
+##' The significance of the clusters is obtained with a Monte Carlo procedure
+##' or based on the chi-square distribution (glm, glmer or zeroinfl models)
+##' or DIC (inla models).
+\end{verbatim}
+
 
 \section{Generalised linear models for cluster detection}
 \label{sec:GLM}
@@ -856,7 +862,7 @@ summary(ny.mm0)
 FIXME: Fix how handles glmAndZIP.iscluster() 
 
 <<eval = FALSE>>=
-ny.clmm1 <- DetectClustersModel(NY8st,
+ny.clmm0 <- DetectClustersModel(NY8st,
   thegrid = as.data.frame(NY8)[idxcl, c("x", "y")],
   fractpop = .15, alpha = .05,
   typeCluster = "S", R = NULL, numCPUS = 1, model0 = ny.mm0)
@@ -867,14 +873,63 @@ ny.clmm1 <- DetectClustersModel(NY8st,
 
 
 
+
+<<>>=
+ny.mm1 <- glmer(Observed ~ offset(log(Expected)) + PCTOWNHOME + 
+  PCTAGE65P + PEXPOSURE + (1 | AREANAME),
+  data = as(NY8, "data.frame"), family = "poisson")
+summary(ny.mm1)
+@
+
+
+FIXME: Fix how handles glmAndZIP.iscluster()
+
+<<eval = FALSE>>=
+ny.clmm1 <- DetectClustersModel(NY8st,
+  thegrid = as.data.frame(NY8)[idxcl, c("x", "y")],
+  fractpop = .15, alpha = .05,
+  typeCluster = "S", R = NULL, numCPUS = 1, model0 = ny.mm1)
+@
+
+
+
+
+
 \section{Bivariate models for cluster detection}
 \label{sec:bivar}
+
+
+FIXME: We may remove this section...
 
 
 \section{Discussion}
 \label{sec:disc}
 
+In this paper we have introduced \pkg{DClusterm}, a new package for the
+\proglang{R} statistical computing software for the detection of disease
+clusters using a model-based approach. Clusters are represented by dummy
+variables that are introduced into a generalised linear model and  different
+likelihoods can be used to account for different types of data.  Because of
+this model-based approach, fixed effects (to consider relevant risk factors)
+and random effects (to account for other non-spatial unmeasured risk factors)
+can be put in the linear predictor as well.
 
+In our examples we have considered well known datasets to show how the
+functions in \pkg{DClusterm} tackle the problem of cluster detection.  The
+results are similar to those found in relevant papers where the same datasets
+have been analysed using a similar methodology.  In particular, we have
+considered the case of the detection of clusters in space and space-time,
+zero-inflated data and over-dispersed data. 
+
+
+
+
+\section{Acknowledgements}
+
+This package was initially developed by Paula Moraga as a Google Summer of Code
+Project.  Virgilio Gómez-Rubio acknowledges support from grant PPIC-2014-001-P
+funded by JCCM-FEDER, and grant MTM2013-42323 funded by MINECO.
+**ADD OTHER GRANTS?**
 
 
 \bibliography{DClusterm}
