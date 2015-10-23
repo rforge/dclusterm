@@ -50,7 +50,7 @@ DetectClustersModel <- function(stfdf, thegrid = NULL, radius = Inf,
   R = NULL, model0) {
 
   # Create column with ID. Unique identifier
-  stfdf[['ID']] < -1:nrow(stfdf@data)
+  stfdf[['ID']] <- 1:nrow(stfdf@data)
 
   sortDates <- sort(unique(time(stfdf@time)))
 
@@ -266,8 +266,7 @@ SelectStatsAllClustersNoOverlap <- function(stfdf, statsAllClusters) {
 
     idSpaceOneCluster <- order(dist)[1:statsAllClusters$sizeCluster[i]]
     idTimeOneCluster <- 
-      which(time(stfdf@time) >= statsAllClusters$minDateCluster[i] & 
-      time(stfdf@time) <= statsAllClusters$maxDateCluster[i])
+      which(time(stfdf@time) >= statsAllClusters$minDateCluster[i] & time(stfdf@time) <= statsAllClusters$maxDateCluster[i])
 
     if(sum(idSpaceOneCluster %in% idSpaceAllClustersNoOverlap) ==0 || 
       sum(idTimeOneCluster %in% idTimeAllClustersNoOverlap) == 0) {

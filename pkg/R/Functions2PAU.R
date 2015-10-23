@@ -173,23 +173,26 @@ CalcStatsAllClusters <- function(thegrid, CalcStatClusterGivenCenter, stfdf,
 ##' the start and end dates, the log-likelihood ratio or DIC, the p-value and 
 ##' the risk of the cluster with the maximum log-likelihood ratio or minimum DIC.
 ##'
-CalcStatClusterGivenCenter<-function(point, stfdf, rr, minDateCluster, maxDateCluster, fractpop, model0){
+CalcStatClusterGivenCenter <- function(point, stfdf, rr, minDateCluster,
+  maxDateCluster, fractpop, model0) {
 
 
-coordx<-coordinates(stfdf@sp)[,1]
-coordy<-coordinates(stfdf@sp)[,2]
-xd<-(coordx-point[1])
-yd<-(coordy-point[2])
-dist<-xd*xd+yd*yd
-#
-idx<-(dist <= rr)
-idxorder<-order(dist)
+  coordx <- coordinates(stfdf@sp)[, 1]
+  coordy <- coordinates(stfdf@sp)[, 2]
 
-# Only the regions with distance less than radius can be part of the cluster
-idxorder<-idxorder[idx[idxorder]]
+  xd <- (coordx - point[1])
+  yd <- (coordy - point[2])
+  dist <- xd * xd+ yd * yd
 
-cl<-glmAndZIP.iscluster(stfdf=stfdf, idxorder=idxorder, minDateCluster, maxDateCluster, fractpop, model0)
-return( cbind(data.frame(x=point[1], y=point[2]), cl) )
+ #
+  idx <- (dist <= rr)
+  idxorder <- order(dist)
+
+  # Only the regions with distance less than radius can be part of the cluster
+  idxorder <- idxorder[idx[idxorder]]
+
+  cl <- glmAndZIP.iscluster(stfdf = stfdf, idxorder = idxorder, 
+    minDateCluster, maxDateCluster, fractpop, model0)
+  return( cbind(data.frame(x = point[1], y = point[2]), cl) )
 }
-
 

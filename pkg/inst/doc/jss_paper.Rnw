@@ -367,9 +367,10 @@ locations (area centroids or actual locations of individual data).
 
 <<results=hide>>=
 idxcl <- c(120, 12, 89, 139, 146)
-ny.cl0 <- DetectClustersModel(NY8st, thegrid = as.data.frame(NY8)[idxcl, c("x", "y")], 
-   fractpop = .15, alpha = 0.05, radius = Inf, step = NULL,
-   typeCluster = "S", R = NULL, model0 = ny.m0)
+ny.cl0 <- DetectClustersModel(NY8st,
+ thegrid = as.data.frame(NY8)[idxcl, c("x", "y")], 
+ fractpop = .15, alpha = 0.05, radius = Inf, step = NULL,
+ typeCluster = "S", R = NULL, model0 = ny.m0)
 @
 
 
