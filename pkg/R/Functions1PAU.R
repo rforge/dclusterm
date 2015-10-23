@@ -31,8 +31,6 @@
 ##' @param R If the cluster's significance is calculated based on the chi-square
 ##' distribution or DIC, R is NULL. If the cluster's significance is calculated using a
 ##' Monte Carlo procedure, R represents the number replicates under the null hypothesis.
-##' @param numCPUS Number of cpus used when using snowfall to run the method.
-##' If snowfall is not used numCPUS is NULL.
 ##' @param model0 Initial model (including covariates).
 ##' This can be "glm" for generalized linear models (glm {stats}),
 ##' "glmer" for generalized linear mixed model (glmer {lme4}),
@@ -46,167 +44,192 @@
 ##' the risk of the cluster, and a boolean indicating if it is a
 ##' cluster (TRUE in all cases).
 ##'
-DetectClustersModel<-function(stfdf, thegrid=NULL, radius=Inf, step=NULL, fractpop, alpha,
-typeCluster, minDateUser=min(time(stfdf@time)), maxDateUser=max(time(stfdf@time)), R=NULL, numCPUS=NULL, model0){
-# Create column with ID. Unique identifier
-stfdf[['ID']]<-1:nrow(stfdf@data)
+DetectClustersModel <- function(stfdf, thegrid = NULL, radius = Inf,
+  step = NULL, fractpop, alpha, typeCluster,
+  minDateUser = min(time(stfdf@time)), maxDateUser = max(time(stfdf@time)),
+  R = NULL, model0) {
 
-sortDates<-sort(unique(time(stfdf@time)))
+  # Create column with ID. Unique identifier
+  stfdf[['ID']] < -1:nrow(stfdf@data)
 
-# Check minDateUser and maxDateUser make sense
-minDateData<-min(time(stfdf@time))
-maxDateData<-max(time(stfdf@time))
-if(minDateUser > maxDateUser){
-print('Error: cluster minimum date is greater than cluster maximum date')
-return(0)
-}
-if(minDateUser > maxDateData){
-print('Error: cluster minimum date is greater than data set maximum date')
-return(0)
-}
-if(maxDateUser < minDateData){
-print('Error: cluster maximum date is smaller than data set minimum date')
-return(0)
-}
-# Closest dates to minDateUser and maxDateUser
-idMinDateCluster<-min(which(sortDates >= minDateUser))
-idMaxDateCluster<-max(which(sortDates <= maxDateUser))
+  sortDates <- sort(unique(time(stfdf@time)))
 
+  # Check minDateUser and maxDateUser make sense
+  minDateData <- min(time(stfdf@time))
+  maxDateData <- max(time(stfdf@time))
 
-# If grid is null, create a new grid
-if(is.null(thegrid)){
-CreateGridDClusterm(stfdf, radius, step)
-}
+  if(minDateUser > maxDateUser) {
+    stop('Cluster minimum date is greater than cluster maximum date')
+  }
 
-# Radius
-rr<-radius*radius
+  if(minDateUser > maxDateData) {
+    stop('Cluster minimum date is greater than data set maximum date')
+  }
 
-# Init snowfall
-if(!is.null(numCPUS)){
-sfInit( parallel=TRUE, cpus=numCPUS )
-sfLibrary(spdep)
-sfLibrary(splancs)
-sfLibrary(spacetime)
-sfLibrary(DCluster)
-sfLibrary(pscl)
-sfLibrary(INLA)
-sfLibrary(DClusterm)
-#sfSource("R/Functions1PAU.R")
-#sfSource("R/Functions2PAU.R")
-#sfSource("R/glm.isclusterPAU.R")
-#sfSource("R/knutils.R")
-}
+  if(maxDateUser < minDateData) {
+    stop('Cluster maximum date is smaller than data set minimum date')
+  }
+
+  # Closest dates to minDateUser and maxDateUser
+  idMinDateCluster <- min(which(sortDates >= minDateUser))
+  idMaxDateCluster <- max(which(sortDates <= maxDateUser))
 
 
+  # If grid is null, create a new grid
+  if(is.null(thegrid)) {
+    CreateGridDClusterm(stfdf, radius, step)
+  }
 
-# Statistic of each cluster
-statsAllClusters<-CalcStatsAllClusters(thegrid, CalcStatClusterGivenCenter, stfdf, rr,
-typeCluster, sortDates, idMinDateCluster, idMaxDateCluster, fractpop, model0, 
-  numCPUS)
+  # Radius
+  rr <- radius * radius
 
+  ## Init snowfall
+  #if(!is.null(numCPUS)){
+  #sfInit( parallel=TRUE, cpus=numCPUS )
+  #sfLibrary(spdep)
+  #sfLibrary(splancs)
+  #sfLibrary(spacetime)
+  #sfLibrary(DCluster)
+  #sfLibrary(pscl)
+  #sfLibrary(INLA)
+  #sfLibrary(DClusterm)
+  ##sfSource("R/Functions1PAU.R")
+  ##sfSource("R/Functions2PAU.R")
+  ##sfSource("R/glm.isclusterPAU.R")
+  ##sfSource("R/knutils.R")
+  #}
 
-
-# Remove rows where sizeCluster == -1
-idRemove<-which(statsAllClusters$sizeCluster == -1)
-if(length(idRemove)>0){
-statsAllClusters<-statsAllClusters[-idRemove, ]
-}
-
-# If there are no clusters return "No clusters found"
-if(dim(statsAllClusters)[1] == 0){
-print("No clusters found")
-return("No clusters found")
-}
-
-
-
-
-if(class(model0)[1]=="inla"){
-vecpvalue<-statsAllClusters$pvalue
-veccluster<-vecpvalue<alpha
-}
-else{
-
-# p-value of each cluster
-vecpvalue<-matrix(NA,dim(statsAllClusters)[1],1)
-veccluster<-matrix(NA,dim(statsAllClusters)[1],1)
+  #Init parallel
+  numCPUS <- getOption("mc.cores")
+  if(!is.null(numCPUS)) {
+    cl <- makeCluster(numCPUS)
+    setDefaultCluster(cl)
+  }
 
 
-##############################################################################################
-
-# 1. p-value without Monte Carlo
-if(is.null(R)){
-for(i in 1:nrow(statsAllClusters)){
-vecpvalue[i]<- 1-pchisq(2*statsAllClusters$statistic[i], 1)
-veccluster[i]<-vecpvalue[i]<alpha
-}}else{
-
-# 2. p-value with Monte Carlo
-maxStatisticRReplicas<-matrix(NA,R,1)
-stfdfMC<-stfdf
-
-for(i in 1:R){
-# Generate data set under H_0
-#stfdfMC$Observed<-rpois(length(stfdf$Observed), lambda = stfdf$Expected)
-
-obslab<-as.character(formula(model0))[2]
-
-stfdfMC[[obslab]]<-rpois(nrow(stfdf@data), lambda = fitted(model0))
-# Statistic of each cluster
-statsAllClustersMC<-CalcStatsAllClusters(thegrid, CalcStatClusterGivenCenter, stfdfMC, rr,
-typeCluster, sortDates, idMinDateCluster, idMaxDateCluster, fractpop, model0,
-  numCPUS)
-maxStatisticRReplicas[i]<-max(statsAllClustersMC$statistic)
-print(paste("replica",i))
-}
-
-# p-value according to rank
-for(i in 1:(dim(statsAllClusters)[1])){
-vecpvalue[i]<-(sum(maxStatisticRReplicas > statsAllClusters$statistic[i]) + 1)/(R + 1)
-veccluster[i]<-vecpvalue[i]<alpha
-}}
-
-##############################################################################################
-
-}
-# End snowfall
-if(!is.null(numCPUS)){
-sfStop()
-}
+  # Statistic of each cluster
+  statsAllClusters <- CalcStatsAllClusters(thegrid, CalcStatClusterGivenCenter,
+    stfdf, rr,  typeCluster, sortDates, idMinDateCluster, idMaxDateCluster,
+    fractpop, model0, numCPUS)
 
 
+  # Remove rows where sizeCluster == -1
+  idRemove <- which(statsAllClusters$sizeCluster == -1)
+  if(length(idRemove) > 0) {
+    statsAllClusters <- statsAllClusters[-idRemove, ]
+  }
 
-statsAllClusters$pvalue<-vecpvalue
-statsAllClusters$cluster<-veccluster
-#statsAllClusters<-cbind(statsAllClusters,veccluster,vecpvalue)
-names(statsAllClusters)<-c("x", "y", "size", "minDateCluster", "maxDateCluster",
-"statistic", "pvalue", "risk", "cluster")
+  # If there are no clusters return "No clusters found"
+  #FIXME: Retiurn something different
+  if(dim(statsAllClusters)[1] == 0) {
+    print("No clusters found")
+    return("No clusters found")
+  }
+
+  if(class(model0)[1] == "inla") {
+    vecpvalue <- statsAllClusters$pvalue
+    veccluster <- vecpvalue < alpha
+  }
+  else {
+
+    # p-value of each cluster
+    vecpvalue <- matrix(NA, dim(statsAllClusters)[1], 1)
+    veccluster <- matrix(NA, dim(statsAllClusters)[1], 1)
+
+    ##############################################################################################
+
+  # 1. p-value without Monte Carlo
+  if(is.null(R)) {
+    for(i in 1:nrow(statsAllClusters)) {
+      vecpvalue[i] <- 1 - pchisq(2 * statsAllClusters$statistic[i], 1)
+      veccluster[i] <- vecpvalue[i] < alpha
+    }
+  } else {
+
+    # 2. p-value with Monte Carlo
+    maxStatisticRReplicas <- matrix(NA, R, 1)
+    stfdfMC <- stfdf
+
+    for(i in 1:R) {
+      # Generate data set under H_0
+      #stfdfMC$Observed <- 
+        rpois(length(stfdf$Observed), lambda = stfdf$Expected)
+
+      obslab <- as.character(formula(model0))[2]
+
+      stfdfMC[[obslab]] <- rpois(nrow(stfdf@data), lambda = fitted(model0))
+
+      # Statistic of each cluster
+      statsAllClustersMC <- CalcStatsAllClusters(thegrid, 
+        CalcStatClusterGivenCenter, stfdfMC, rr, typeCluster, sortDates, 
+        idMinDateCluster, idMaxDateCluster, fractpop, model0, numCPUS)
+
+      maxStatisticRReplicas[i] <- max(statsAllClustersMC$statistic)
+
+      print(paste("replica",i))
+    }
+
+    # p-value according to rank
+    for(i in 1:(dim(statsAllClusters)[1])) {
+      vecpvalue[i] <- 
+        (sum(maxStatisticRReplicas > statsAllClusters$statistic[i]) + 1)/(R + 1)
+      veccluster[i]<-vecpvalue[i]<alpha
+    }
+  }
+
+  ##############################################################################################
+
+  }
+
+  ## End snowfall
+  #if(!is.null(numCPUS)){
+  #sfStop()
+  #}
+
+  #Stop parallel cluster
+  if(!is.null(numCPUS)){
+    stopCluster(cl)
+  }
 
 
-# Selection of significant clusters
-indpvalueNA<-which(is.na(statsAllClusters$pvalue))
-if(length(indpvalueNA)>0){
-statsAllClusters<-statsAllClusters[-indpvalueNA, ]
-}
-statsAllClusters<-statsAllClusters[statsAllClusters$pvalue < alpha, ]
+  statsAllClusters$pvalue <- vecpvalue
+  statsAllClusters$cluster <- veccluster
 
-# If there are no clusters return "No clusters found"
-if(dim(statsAllClusters)[1] == 0){
-print(paste("No significant clusters found with alpha =", alpha))
-return("No clusters found")
-}
+  #statsAllClusters <- cbind(statsAllClusters, veccluster, vecpvalue)
+  names(statsAllClusters) <- c("x", "y", "size", "minDateCluster",
+    "maxDateCluster", "statistic", "pvalue", "risk", "cluster")
 
 
-# Ordered results by statistic value
-if(class(model0)[1]=="inla"){
-statsAllClusters<-statsAllClusters[order(statsAllClusters$statistic), ]
-}else{
-statsAllClusters<-statsAllClusters[rev(order(statsAllClusters$statistic)), ]
-}
-# Return
-statsAllClusters$minDateCluster<-as.POSIXct(statsAllClusters$minDateCluster, origin="1970-01-01", tz="GMT")
-statsAllClusters$maxDateCluster<-as.POSIXct(statsAllClusters$maxDateCluster, origin="1970-01-01", tz="GMT")
-return(statsAllClusters)
+  # Selection of significant clusters
+  indpvalueNA <- which(is.na(statsAllClusters$pvalue))
+  if(length(indpvalueNA) > 0) {
+    statsAllClusters <- statsAllClusters[-indpvalueNA, ]
+  }
+  statsAllClusters <- statsAllClusters[statsAllClusters$pvalue < alpha, ]
+
+  # If there are no clusters return "No clusters found"
+  #FIXME: Return a different value, i.e., empty data.frame
+  if(dim(statsAllClusters)[1] == 0) {
+    print(paste("No significant clusters found with alpha =", alpha))
+    return("No clusters found")
+  }
+
+
+  # Ordered results by statistic value
+  if(class(model0)[1] == "inla") {
+    statsAllClusters <- statsAllClusters[order(statsAllClusters$statistic), ]
+  } else {
+    statsAllClusters <-
+      statsAllClusters[rev(order(statsAllClusters$statistic)), ]
+  }
+
+  # Return
+  statsAllClusters$minDateCluster <- as.POSIXct(statsAllClusters$minDateCluster,
+    origin = "1970-01-01", tz = "GMT")
+  statsAllClusters$maxDateCluster <- as.POSIXct(statsAllClusters$maxDateCluster,
+    origin = "1970-01-01", tz = "GMT")
+
+  return(statsAllClusters)
 }
 
 
@@ -226,32 +249,40 @@ return(statsAllClusters)
 ##' @return data frame with the same information than statsAllClusters but only
 ##' for clusters that do not overlap.
 ##'
-SelectStatsAllClustersNoOverlap<-function(stfdf, statsAllClusters){
-# statsAllClusters is ordered by statistic value
-coordx<-as.data.frame(coordinates(stfdf@sp))[['x']]
-coordy<-as.data.frame(coordinates(stfdf@sp))[['y']]
-idSpaceAllClustersNoOverlap<-NULL
-idTimeAllClustersNoOverlap<-NULL
-statsAllClustersNoOverlap<-NULL
+SelectStatsAllClustersNoOverlap <- function(stfdf, statsAllClusters) {
+  # statsAllClusters is ordered by statistic value
+  coordx <- as.data.frame(coordinates(stfdf@sp))[['x']]
+  coordy <- as.data.frame(coordinates(stfdf@sp))[['y']]
 
-for(i in 1:(dim(statsAllClusters)[1])){
-xd<-(coordx-statsAllClusters$x[i])
-yd<-(coordy-statsAllClusters$y[i])
-dist<-xd*xd+yd*yd
-idSpaceOneCluster<-order(dist)[1:statsAllClusters$sizeCluster[i]]
-idTimeOneCluster<-which(time(stfdf@time) >= statsAllClusters$minDateCluster[i] & time(stfdf@time) <= statsAllClusters$maxDateCluster[i])
-if(sum(idSpaceOneCluster %in% idSpaceAllClustersNoOverlap) ==0 || sum(idTimeOneCluster %in% idTimeAllClustersNoOverlap) == 0){
-statsAllClustersNoOverlap<-rbind(statsAllClustersNoOverlap, statsAllClusters[i, ])
-idSpaceAllClustersNoOverlap<-c(idSpaceAllClustersNoOverlap, idSpaceOneCluster)
-idTimeAllClustersNoOverlap<-c(idTimeAllClustersNoOverlap, idTimeOneCluster)
-}}
-return(statsAllClustersNoOverlap)
+  idSpaceAllClustersNoOverlap <- NULL
+  idTimeAllClustersNoOverlap <- NULL
+  statsAllClustersNoOverlap <- NULL
+
+  for(i in 1:(dim(statsAllClusters)[1])) {
+    xd <- (coordx-statsAllClusters$x[i])
+    yd <- (coordy-statsAllClusters$y[i])
+
+    dist <- xd * xd + yd * yd
+
+    idSpaceOneCluster <- order(dist)[1:statsAllClusters$sizeCluster[i]]
+    idTimeOneCluster <- 
+      which(time(stfdf@time) >= statsAllClusters$minDateCluster[i] & 
+      time(stfdf@time) <= statsAllClusters$maxDateCluster[i])
+
+    if(sum(idSpaceOneCluster %in% idSpaceAllClustersNoOverlap) ==0 || 
+      sum(idTimeOneCluster %in% idTimeAllClustersNoOverlap) == 0) {
+
+      statsAllClustersNoOverlap <-
+        rbind(statsAllClustersNoOverlap, statsAllClusters[i, ])
+
+      idSpaceAllClustersNoOverlap <-
+        c(idSpaceAllClustersNoOverlap, idSpaceOneCluster)
+
+      idTimeAllClustersNoOverlap <-
+        c(idTimeAllClustersNoOverlap, idTimeOneCluster)
+    }
+  }
+
+  return(statsAllClustersNoOverlap)
 }
-
-
-
-
-
-
-
 

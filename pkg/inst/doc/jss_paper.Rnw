@@ -11,7 +11,6 @@
 \usepackage{showlabels}
 
 
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% declarations for jss.cls %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -254,7 +253,7 @@ action is to load some required packages and the dataset itself.
 
 <<results = hide>>=
 library(DClusterm)
-library(snowfall)
+#library(snowfall)
 library(xts)
 
 data(NY8)
@@ -348,10 +347,18 @@ that is why its first argument is a space-time object. The type of
 clusters that are investigated is defined by argument \code{typeCluster}.
 In the example we have used \code{typeCluster = "S"}.
 
-Other options include the number of CPUs to be used to test for clusters in
-parallel (argument \code{numCPUS}) and the number of replicates for Monte Carlo
-tests (argument \code{R}) if cluster assessment is done by simulation. By
-default, Monte Carlo tests are not used.
+Other options include the number of replicates for Monte Carlo tests (argument
+\code{R}) if cluster assessment is done by simulation. By default, Monte Carlo
+tests are not used. \pkg{DClusterm} allows for parallel computing using several
+cores as implemented in package \pkg{parallel}.  The number of cores to use is
+defined in option \code{mc.cores}, as in the following example (where 4 cores
+are used):
+
+<<echo = TRUE>>=
+options(mc.cores = 4)
+@
+
+
 
 In the following example, to reduce the computational burden, we have only
 looked for clusters around 5 areas (whose rows in \code{NY8} are defined in
@@ -362,7 +369,7 @@ locations (area centroids or actual locations of individual data).
 idxcl <- c(120, 12, 89, 139, 146)
 ny.cl0 <- DetectClustersModel(NY8st, thegrid = as.data.frame(NY8)[idxcl, c("x", "y")], 
    fractpop = .15, alpha = 0.05, radius = Inf, step = NULL,
-   typeCluster = "S", R = NULL, numCPUS = 4, model0 = ny.m0)
+   typeCluster = "S", R = NULL, model0 = ny.m0)
 @
 
 
@@ -416,7 +423,7 @@ that adjusts for covariates instead:
 ny.cl1<-DetectClustersModel(NY8st, 
   thegrid = as.data.frame(NY8)[idxcl, c("x", "y")], 
   fractpop = .15, alpha = .05,
-  typeCluster = "S", R = NULL, numCPUS = 4, model0 = ny.m1)
+  typeCluster = "S", R = NULL, model0 = ny.m1)
 @
 
 <<>>=
@@ -493,7 +500,7 @@ library(DClusterm)
 #debug(DetectClustersModel)
 #debug(glmAndZIP.iscluster)
 #debug(CalcStatsAllClusters)
-library(snowfall)
+#library(snowfall)
 @
 
 <<>>=
@@ -551,7 +558,7 @@ clusters. **ANYTHING ELSE ABOUT HOW S-T CLUSTERS ARE DEFINED?**
 nm.cl0<-DetectClustersModel(brainst, NM.coords,
   minDateUser = "1985-01-01", maxDateUser = "1989-01-01",
   fractpop = .15, alpha = 0.05, typeCluster = "ST", R = NULL, 
-  numCPUS = 4, model0 = nm.m0)
+  model0 = nm.m0)
 @
 
 <<>>= 
@@ -598,7 +605,7 @@ cases.
 <<results=hide>>=
 nm.cl1 <- DetectClustersModel(brainst, NM.coords, fractpop = 0.15, 
    alpha = 0.05, minDateUser = "1985-01-01", maxDateUser = "1989-01-01",
-   typeCluster = "ST", R = NULL, numCPUS = 4, model0 = nm.m1)
+   typeCluster = "ST", R = NULL, model0 = nm.m1)
 @
 
 The number of clusters detected in this case is \Sexpr{nrow(nm.cl1)}, the same
@@ -676,8 +683,8 @@ for the detection of disease clusters of rare diseases.
 
 <<echo=FALSE, results=hide>>=
 library(DClusterm)
-library(snowfall)
-library(pscl)
+#library(snowfall)
+#library(pscl)
 
 data(Navarre)
 @
@@ -749,9 +756,14 @@ Function \code{DetectClustersModel()} will perform the cluster detection using
 a \code{zeroinfl} model. This provides a very flexible way of handling different
 types of models in \proglang{R} for cluster detection.
 
+
+FIXME: Use several cores in this example. We get an error (zeroinfl() not found)
+with several cores... 
+
 <<results = hide>>=
+options(mc.cores = NULL)
 nav.cl0 <- DetectClustersModel(brainnavst, coordinates(brainnav), fractpop = 0.25, 
-   alpha = 0.05, typeCluster = "S", R = NULL, numCPUS = 4, model0 = nav.m0zip)
+   alpha = 0.05, typeCluster = "S", R = NULL, model0 = nav.m0zip)
 @
 
 The output will show the following clusters:
@@ -865,7 +877,7 @@ FIXME: Fix how handles glmAndZIP.iscluster()
 ny.clmm0 <- DetectClustersModel(NY8st,
   thegrid = as.data.frame(NY8)[idxcl, c("x", "y")],
   fractpop = .15, alpha = .05,
-  typeCluster = "S", R = NULL, numCPUS = 1, model0 = ny.mm0)
+  typeCluster = "S", R = NULL, model0 = ny.mm0)
 @
 
 \subsection{Cluster detection with covariates}
@@ -888,7 +900,7 @@ FIXME: Fix how handles glmAndZIP.iscluster()
 ny.clmm1 <- DetectClustersModel(NY8st,
   thegrid = as.data.frame(NY8)[idxcl, c("x", "y")],
   fractpop = .15, alpha = .05,
-  typeCluster = "S", R = NULL, numCPUS = 1, model0 = ny.mm1)
+  typeCluster = "S", R = NULL, model0 = ny.mm1)
 @
 
 

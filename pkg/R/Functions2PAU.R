@@ -11,22 +11,28 @@
 ##'
 ##' @return two columns matrix where each row represents a point of the grid.
 ##'
-CreateGridDClusterm<-function(stfdf, radius, step){
-# Return: thegrid
-if(is.null(step)){
-step<-.2*radius
-}
-coordx<-(coordinates(stfdf@sp))[,1]
-coordy<-(coordinates(stfdf@sp))[,2]
-xgrid<-seq(min(coordx), max(coordx), by=step)
-ygrid<-seq(min(coordy), max(coordy), by=step)
-xlen<-length(xgrid)
-ylen<-length(ygrid)
-npoints<-xlen*ylen
-thegrid<-matrix(rep(NA, 2*npoints) , ncol=2)
-thegrid[,1]<-rep(xgrid, times=ylen)
-thegrid[,2]<-rep(ygrid, each=xlen)
-return(thegrid)
+CreateGridDClusterm <- function(stfdf, radius, step) {
+  # Return: thegrid
+  if(is.null(step)) {
+    step <- .2 * radius
+  }
+
+  coordx <- (coordinates(stfdf@sp))[,1]
+  coordy <- (coordinates(stfdf@sp))[,2]
+
+  xgrid <- seq(min(coordx), max(coordx), by = step)
+  ygrid <- seq(min(coordy), max(coordy), by = step)
+
+  xlen <- length(xgrid)
+  ylen <- length(ygrid)
+
+  npoints <- xlen * ylen
+
+  thegrid < -matrix(rep(NA, 2 * npoints) , ncol = 2)
+  thegrid[, 1] <- rep(xgrid, times = ylen)
+  thegrid[, 2] <- rep(ygrid, each = xlen)
+
+  return(thegrid)
 }
 
 
@@ -69,42 +75,72 @@ return(thegrid)
 ##' It contains the coordinates of the center, the size, the start and end dates,
 ##' the log-likelihood ratio or DIC, the p-value and the risk of each of the clusters.
 ##'
-CalcStatsAllClusters<-function(thegrid, CalcStatClusterGivenCenter, stfdf, rr,
-typeCluster, sortDates, idMinDateCluster, idMaxDateCluster, fractpop, model0,
-numCPUS){
-# Temporal dimension here, spatial dimension inside glmAndZIP.iscluster
+CalcStatsAllClusters <- function(thegrid, CalcStatClusterGivenCenter, stfdf,
+  rr, typeCluster, sortDates, idMinDateCluster, idMaxDateCluster, fractpop,
+  model0, numCPUS){
 
-if(typeCluster == "ST"){
-statsAllClusters<-NULL
-for (i in idMinDateCluster:idMaxDateCluster){
-for (j in i: idMaxDateCluster){
-if(is.null(numCPUS)){
-statClusterGivenCenter<-apply(thegrid, 1, CalcStatClusterGivenCenter, stfdf, rr,
-minDateCluster=sortDates[i], maxDateCluster=sortDates[j], fractpop, model0)
-}else{
-statClusterGivenCenter<-sfApply(thegrid, 1, CalcStatClusterGivenCenter, stfdf, rr,
-minDateCluster=sortDates[i], maxDateCluster=sortDates[j], fractpop, model0)
-}
-statsAllClusters<-rbind(statsAllClusters,do.call(rbind, statClusterGivenCenter))
-print(c(i,j))
-}}}
+  # Temporal dimension here, spatial dimension inside glmAndZIP.iscluster
+  if(typeCluster == "ST"){
+    statsAllClusters <- NULL
+    for (i in idMinDateCluster:idMaxDateCluster) {
+      for (j in i:idMaxDateCluster) {
+        if(is.null(numCPUS)) {
+          statClusterGivenCenter <- apply(thegrid, 1, 
+            CalcStatClusterGivenCenter, stfdf, rr, 
+            minDateCluster = sortDates[i],
+            maxDateCluster = sortDates[j], fractpop, model0)
+        } else {
 
-if(typeCluster == "S"){
-i<-idMinDateCluster
-j<-idMaxDateCluster
-if(is.null(numCPUS)){
-statsAllClusters<-apply(thegrid, 1, CalcStatClusterGivenCenter, stfdf, rr,
-minDateCluster=sortDates[i], maxDateCluster=sortDates[j], fractpop, model0)
-}else{
-statsAllClusters<-sfApply(thegrid, 1, CalcStatClusterGivenCenter, stfdf, rr,
-minDateCluster=sortDates[i], maxDateCluster=sortDates[j], fractpop, model0)
-}
-statsAllClusters<-do.call(rbind, statsAllClusters)
-print(c(i,j))
-}
-names(statsAllClusters)<-c("x", "y", "size", "minDateCluster", "maxDateCluster",
-"statistic", "pvalue", "risk")
-return(as.data.frame(statsAllClusters))
+    #SNOWFALL
+    #FIXME: REmove this commented code
+    #        statClusterGivenCenter <- sfApply(thegrid, 1, 
+    #          CalcStatClusterGivenCenter, stfdf, rr,
+    #          minDateCluster = sortDates[i], maxDateCluster = sortDates[j], 
+    #          fractpop, model0)
+
+            #PARALLEL
+            statClusterGivenCenter <- parApply(cl = NULL, thegrid, 1, 
+            CalcStatClusterGivenCenter, stfdf, rr,
+            minDateCluster = sortDates[i], maxDateCluster = sortDates[j], 
+            fractpop, model0)
+        }
+
+        statsAllClusters <- 
+          rbind(statsAllClusters, do.call(rbind, statClusterGivenCenter))
+
+        print(c(i, j))
+      }
+    }
+  }
+
+  if(typeCluster == "S") {
+    i <- idMinDateCluster
+    j <- idMaxDateCluster
+    if(is.null(numCPUS)) {
+      statsAllClusters <- apply(thegrid, 1, CalcStatClusterGivenCenter, stfdf, 
+        rr, minDateCluster = sortDates[i], maxDateCluster = sortDates[j],
+        fractpop, model0)
+    } else {
+#SNOWFALL
+#FIXME: Remove this commented code
+#    statsAllClusters <- sfApply(thegrid, 1, CalcStatClusterGivenCenter, stfdf, 
+#      rr, minDateCluster = sortDates[i], maxDateCluster = sortDates[j], 
+#      fractpop, model0)
+
+        #PARALLEL
+        statsAllClusters <- parApply(cl = NULL, thegrid, 1, 
+          CalcStatClusterGivenCenter, stfdf, 
+          rr, minDateCluster = sortDates[i], maxDateCluster = sortDates[j], 
+          fractpop, model0)
+    }
+
+    statsAllClusters <- do.call(rbind, statsAllClusters)
+    print(c(i, j))
+  }
+
+  names(statsAllClusters) <- c("x", "y", "size", "minDateCluster", 
+    "maxDateCluster", "statistic", "pvalue", "risk")
+  return(as.data.frame(statsAllClusters))
 }
 
 
