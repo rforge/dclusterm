@@ -264,7 +264,7 @@ SelectStatsAllClustersNoOverlap <- function(stfdf, statsAllClusters) {
 
     dist <- xd * xd + yd * yd
 
-    idSpaceOneCluster <- order(dist)[1:statsAllClusters$sizeCluster[i]]
+    idSpaceOneCluster <- order(dist)[1:statsAllClusters$size[i]]
     idTimeOneCluster <- 
       which(time(stfdf@time) >= statsAllClusters$minDateCluster[i] & time(stfdf@time) <= statsAllClusters$maxDateCluster[i])
 

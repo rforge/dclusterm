@@ -2,7 +2,7 @@ Package: DClusterm
 Type: Package
 Title: Model-based clustering
 Version: 0.01
-Date: 2011-7-1
+Date: 2015-11-23
 Author: Virgilio Gomez-Rubio, Paula Esther Moraga Serrano, Barry
     Rowlingson
 Maintainer: Virgilio Gomez-Rubio <virgilio.gomez@uclm.es>
