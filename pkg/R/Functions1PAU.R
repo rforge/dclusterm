@@ -251,8 +251,8 @@ DetectClustersModel <- function(stfdf, thegrid = NULL, radius = Inf,
 ##'
 SelectStatsAllClustersNoOverlap <- function(stfdf, statsAllClusters) {
   # statsAllClusters is ordered by statistic value
-  coordx <- as.data.frame(coordinates(stfdf@sp))[['x']]
-  coordy <- as.data.frame(coordinates(stfdf@sp))[['y']]
+  coordx <- coordinates(stfdf@sp)[, 1]
+  coordy <- coordinates(stfdf@sp)[, 2]
 
   idSpaceAllClustersNoOverlap <- NULL
   idTimeAllClustersNoOverlap <- NULL
@@ -266,7 +266,7 @@ SelectStatsAllClustersNoOverlap <- function(stfdf, statsAllClusters) {
 
     idSpaceOneCluster <- order(dist)[1:statsAllClusters$size[i]]
     idTimeOneCluster <- 
-      which(time(stfdf@time) >= statsAllClusters$minDateCluster[i] & time(stfdf@time) <= statsAllClusters$maxDateCluster[i])
+      which(as.Date(time(stfdf@time)) >= as.Date(statsAllClusters$minDateCluster[i]) & as.Date(time(stfdf@time)) <= as.Date(statsAllClusters$maxDateCluster[i]))
 
     if(sum(idSpaceOneCluster %in% idSpaceAllClustersNoOverlap) ==0 || 
       sum(idTimeOneCluster %in% idTimeAllClustersNoOverlap) == 0) {
