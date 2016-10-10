@@ -592,7 +592,7 @@ the time period have been constrained to 1985--1989.  Furtheremore,
 
 
 <<results=hide>>=
-nm.cl0<-DetectClustersModel(brainst, NM.coords,
+nm.cl0 <- DetectClustersModel(brainst, NM.coords,
   minDateUser = "1985-01-01", maxDateUser = "1989-01-01",
   fractpop = .15, alpha = 0.05, typeCluster = "ST", R = NULL, 
   model0 = nm.m0)
