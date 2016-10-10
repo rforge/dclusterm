@@ -68,7 +68,7 @@ m0<-glm(Cases2~offset(log(EXP))+1, family="poisson", data=NY8)
 idxcl<-c(120, 12, 89, 139, 146)
 cl0<-DetectClustersModel(NY8st, thegrid=as.data.frame(NY8)[idxcl,c("x", "y")], 
    fractpop=.15, alpha=0.05, radius=Inf, step=NULL,
-   typeCluster="S", R=NULL, numCPUS=2, model0=m0)
+   typeCluster="S", R=NULL, model0=m0)
 @
 
 
@@ -107,7 +107,7 @@ previous model instead:
 <<results=hide>>=
 cl1<-DetectClustersModel(NY8st, thegrid=as.data.frame(NY8)[idxcl,c("x", "y")], 
    fractpop=.15, alpha=.05,
-   typeCluster="S", R=NULL, numCPUS=2, model0=m1)
+   typeCluster="S", R=NULL, model0=m1)
 @
 
 <<>>=
