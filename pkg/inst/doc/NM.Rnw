@@ -52,7 +52,7 @@ summary(m0)
 <<results=hide>>=
 cl0<-DetectClustersModel(brainst, coordinates(brainst@sp), 
    minDateUser="1985-01-01", maxDateUser="1989-01-01",
-   fractpop=.15, alpha=0.05, typeCluster="ST", R=NULL, numCPUS=2, model0=m0)
+   fractpop=.15, alpha=0.05, typeCluster="ST", R=NULL, model0=m0)
 @
 
 <<>>= 
@@ -82,7 +82,7 @@ summary(m1)
 <<results=hide>>=
 cl1<-DetectClustersModel(brainst, coordinates(brainst@sp), fractpop=.15, 
    alpha=0.05, minDateUser="1988-01-01", maxDateUser="1989-01-01",
-   typeCluster="ST", R=NULL, numCPUS=2, model0=m1)
+   typeCluster="ST", R=NULL, model0=m1)
 @
 
 <<>>=

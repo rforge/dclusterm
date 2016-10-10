@@ -85,7 +85,7 @@ endTime=as.POSIXct(strptime(c("1990-01-01"), "%Y-%m-%d"), tz = "GMT"))
 
 cl0<-DetectClustersModel(brainnavst, coordinates(brainnav), fractpop=.25, 
    alpha=.05,
-   typeCluster="S", R=NULL, numCPUS=2, model0=m0zip)
+   typeCluster="S", R=NULL, model0=m0zip)
    
 cl0
 @
