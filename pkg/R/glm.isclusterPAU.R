@@ -89,10 +89,38 @@ glmAndZIP.iscluster <- function(stfdf, idxorder, minDateCluster,
 
 
       # Formula to refit the cluster coefficient only
-      if(modelType == "glm" | modelType == "glmer") {
+      if(modelType == "glm") {
         newformula <- formula(paste( strsplit(modelFormula, "~")[[1]][1], 
          "~ -1+CLUSTER "))
       }
+      #INI Add 11/10/16
+      if(modelType == "glmer"){
+        #newformula O ~ -1+CLUSTER + random effects
+        #need to keep random effects from model0 formula
+        formularight <- strsplit(modelFormula, "~")[[1]][2]
+        terms <- strsplit(formularight, "[+]")[[1]]
+        indexrandomeffects <- grep("[|]",terms)
+        reModelFormula <- paste(terms[indexrandomeffects], collapse="+")
+        newformula <- formula(paste( strsplit(modelFormula, "~")[[1]][1], "~ -1+CLUSTER +", reModelFormula))
+        
+        
+        #Fit model0withoutre. When I fit m1 I need to put offset log(fitted(model0withoutre))
+        #Check if the initial model has a parameter offset. If not may be in the formula
+        if("(offset)" %in% names(model0@frame)){
+          offsetmodel0 <- model0@frame[,"(offset)"]
+        }else{
+          offsetmodel0 <- NULL  
+        }
+        formulawithoutreright <- paste(terms[-indexrandomeffects],collapse="+")
+        if(formularight == ""){
+          formulawithoutreright <- 1  
+        }
+        formulawithoutre <- formula(paste(strsplit(modelFormula, "~")[[1]][1], "~ ", formulawithoutreright))
+        modelwithoutre <- glm(formulawithoutre, data = d0, family = modelFamilyGlmGlmer, offset = offsetmodel0)
+        
+     }
+      #END Add 11/10/16
+      
       if(modelType == "zeroinfl") {
         offzero <- as.vector(model0$x$zero %*% 
          matrix(model0$coefficients$zero, ncol=1))
@@ -137,7 +165,9 @@ glmAndZIP.iscluster <- function(stfdf, idxorder, minDateCluster,
           (deviance(model0) - deviance(m1))/2, 0)
        }, 
        glmer = {
-         m1 <- glmer(newformula, data = d0, family = modelFamilyGlmGlmer)
+         m1 <- glmer(newformula, data = d0, family = modelFamilyGlmGlmer,
+                     offset=log(fitted(modelwithoutre)))
+         # Add offset 11/10/2016
          riskAux <- ((coef(m1))[[1]][, 1])[1]
          estadisticoAux <- ifelse(riskAux > 0, 
           (deviance(model0) - deviance(m1))/2, 0)
