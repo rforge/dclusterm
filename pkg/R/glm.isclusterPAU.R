@@ -93,33 +93,30 @@ glmAndZIP.iscluster <- function(stfdf, idxorder, minDateCluster,
         newformula <- formula(paste( strsplit(modelFormula, "~")[[1]][1], 
          "~ -1+CLUSTER "))
       }
-      #INI Add 11/10/16
       if(modelType == "glmer"){
-        #newformula O ~ -1+CLUSTER + random effects
+        #newformula O ~ -1 + CLUSTER + random effects
         #need to keep random effects from model0 formula
-        formularight <- strsplit(modelFormula, "~")[[1]][2]
-        terms <- strsplit(formularight, "[+]")[[1]]
-        indexrandomeffects <- grep("[|]",terms)
-        reModelFormula <- paste(terms[indexrandomeffects], collapse="+")
-        newformula <- formula(paste( strsplit(modelFormula, "~")[[1]][1], "~ -1+CLUSTER +", reModelFormula))
+        formularight<-strsplit(modelFormula, "~")[[1]][2]
+        terms<-strsplit(formularight, "[+]")[[1]]
+        indexrandomeffects<-grep("[|]",terms)
+        reModelFormula<- paste(terms[indexrandomeffects],collapse="+")
+        newformula <- formula(paste( strsplit(modelFormula, "~")[[1]][1], "~ -1+CLUSTER +",reModelFormula))
         
         
-        #Fit model0withoutre. When I fit m1 I need to put offset log(fitted(model0withoutre))
-        #Check if the initial model has a parameter offset. If not may be in the formula
-        if("(offset)" %in% names(model0@frame)){
-          offsetmodel0 <- model0@frame[,"(offset)"]
-        }else{
-          offsetmodel0 <- NULL  
+        #When I fit m1 I need to put offset equal to fitted fixedeffects model0 + offset model0
+        #(fitted values without random effects)
+        fixedeffectsmodel0<- model.matrix(model0) %*% model0@beta
+        #if offset is in parameter offset (eg. offset=Expected)
+        if("(offset)"%in%names(model0@frame)){
+          offsetmodel0<-log(model0@frame[,"(offset)"])
         }
-        formulawithoutreright <- paste(terms[-indexrandomeffects],collapse="+")
-        if(formularight == ""){
-          formulawithoutreright <- 1  
+        #if offset is in the formula (eg. ~ offset(log(Expected)))
+        if("offset"%in%substr(names(model0@frame),1,6)){
+          offsetmodel0<-model0@frame[which(substr(names(model0@frame),1,6)=="offset")]
         }
-        formulawithoutre <- formula(paste(strsplit(modelFormula, "~")[[1]][1], "~ ", formulawithoutreright))
-        modelwithoutre <- glm(formulawithoutre, data = d0, family = modelFamilyGlmGlmer, offset = offsetmodel0)
-        
-     }
-      #END Add 11/10/16
+        #This will be the offset in m1
+        fittedwithoutre <- fixedeffectsmodel0+unlist(offsetmodel0)
+      }
       
       if(modelType == "zeroinfl") {
         offzero <- as.vector(model0$x$zero %*% 
@@ -166,8 +163,7 @@ glmAndZIP.iscluster <- function(stfdf, idxorder, minDateCluster,
        }, 
        glmer = {
          m1 <- glmer(newformula, data = d0, family = modelFamilyGlmGlmer,
-                     offset=log(fitted(modelwithoutre)))
-         # Add offset 11/10/2016
+                     offset=fittedwithoutre)
          riskAux <- ((coef(m1))[[1]][, 1])[1]
          estadisticoAux <- ifelse(riskAux > 0, 
           (deviance(model0) - deviance(m1))/2, 0)
