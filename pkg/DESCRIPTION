@@ -8,7 +8,7 @@ Author: Virgilio Gomez-Rubio, Paula Esther Moraga Serrano, Barry
 Maintainer: Virgilio Gomez-Rubio <virgilio.gomez@uclm.es>
 Depends: R (>= 2.9.0), parallel, sp, splancs, spacetime, DCluster, pscl, RColorBrewer, lme4
 Suggests: INLA
-Description: Model-based spatial clustering
+Description: Model-based methods for the detection of disease clusters.
 License: GPL-3
 LazyLoad: yes
 LazyData: yes
