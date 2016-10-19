@@ -15,6 +15,7 @@ options(prompt = "R> ", continue = "+  ", width = 70, useFancyQuotes = FALSE)
 
 \usepackage{showlabels}
 
+%\VignetteIndexEntry{Model-based detection of disease clusters}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% declarations for jss.cls %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -22,7 +23,7 @@ options(prompt = "R> ", continue = "+  ", width = 70, useFancyQuotes = FALSE)
 
 %% almost as usual
 \author{Virgilio G\'omez-Rubio\\Universidad de Castilla-La Mancha
-\And Paula Moraga-Serrano\\London School of Hygiene\\ \& Tropical Medicine
+\And Paula Moraga-Serrano\\Queensland University of Technology
 \AND John Molitor\\Oregon State University
 \And Barry Rowlingson\\Lancaster University
 }
@@ -73,11 +74,11 @@ E-mail: \email{virgilio.gomez@uclm.es}\\
 URL: \url{http://www.uclm.es/profesorado/vgomez}\\
  \\
 Paula Moraga-Serrano\\
-London School of Hygiene \& Tropical Medicine\\
-Keppel Street\\
-WC1E 7HT London, United Kingdom\\
-E-mail: \email{paula.moraga-serrano@lshtm.ac.uk}\\
-URL: \url{http://www.lshtm.ac.uk/aboutus/people/moraga-serrano.paula}\\
+School of Mathematical Sciences\\
+Queensland University of Technology\\
+GPO Box 2434, Brisbane, QLD 4001, Australia\\
+E-mail: \email{paula.moragaserrano@qut.edu.au}\\
+URL:\url{http://staff.qut.edu.au/staff/moragase/}\\
 \\
 John Molitor\\
 College of Public Health and Human Sciences\\
@@ -922,21 +923,26 @@ ny.mm0 <- glmer(Observed ~ offset(log(Expected)) + (1 | AREANAME),
 summary(ny.mm0)
 @
 
-
-FIXME: Fix how handles glmAndZIP.iscluster() 
-
-<<eval = FALSE>>=
+<<eval = TRUE>>=
 ny.clmm0 <- DetectClustersModel(NY8st,
   thegrid = as.data.frame(NY8)[idxcl, c("x", "y")],
-  fractpop = .15, alpha = .05,
+  fractpop = .15, alpha = 0.05,
   typeCluster = "S", R = NULL, model0 = ny.mm0)
 @
 
+<<>>=
+ny.clmm0
+@
+
+After accounting for overdispersion, the number of clusters detected is
+\Sexpr{nrow(ny.clmm0)}. These are shown in Figure~\ref{}. The largest cluster
+detected before has now dissappeared and only the two smallest clusters remain.
+This may be due to the fact that XXXXXXXX.  The two remaining clusters have the
+same size and a very similar risk than in the previous case.
+
+
+
 \subsection{Cluster detection with covariates}
-
-
-
-
 
 <<>>=
 ny.mm1 <- glmer(Observed ~ offset(log(Expected)) + PCTOWNHOME + 
@@ -946,14 +952,46 @@ summary(ny.mm1)
 @
 
 
-FIXME: Fix how handles glmAndZIP.iscluster()
-
-<<eval = FALSE>>=
+<<eval = TRUE>>=
 ny.clmm1 <- DetectClustersModel(NY8st,
   thegrid = as.data.frame(NY8)[idxcl, c("x", "y")],
-  fractpop = .15, alpha = .05,
+  fractpop = .15, alpha = 0.05,
   typeCluster = "S", R = NULL, model0 = ny.mm1)
 @
+
+<<>>=
+ny.clmm1
+@
+
+When overdispersion and covariates are included in the model, only one of the
+clusters reamins. In particular, the one centered at XXXXX with a size of 1 and
+a slightly reduced estimate of the cluster coefficient.  This should not come
+as a surprise given that we have already seen how including covariates explains
+some of the extra-variation and that by including random effects the
+significance of the clusters is also reduced. A summary of the clusters
+detected can be found in Figure~\ref{fig:NYclmm}.
+
+
+
+\begin{figure}[!h]
+\centering
+<<echo=FALSE, fig=TRUE, width = 10, height = 5>>=
+par(mfrow = c(1,2))
+
+#No covariates
+plot(NY8)
+points(ny.clmm0[,1:2], pch=19, col="red")
+
+#With covariates
+plot(NY8)
+points(ny.clmm1[,1:2], pch=19, col="red")
+@
+\caption{Clusters detected with no covariate adjustment (left) and after adjusting for
+  covariates (right) using a mixed-effects model to account for overdispersion
+of the data.}
+\label{fig:NYclmm}
+\end{figure}
+
 
 
 

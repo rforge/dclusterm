@@ -1,8 +1,8 @@
 Package: DClusterm
 Type: Package
-Title: Model-based clustering
-Version: 0.01
-Date: 2015-11-23
+Title: Model-based detection of disease clusters
+Version: 0.1
+Date: 2016-10-19
 Author: Virgilio Gomez-Rubio, Paula Esther Moraga Serrano, Barry
     Rowlingson
 Maintainer: Virgilio Gomez-Rubio <virgilio.gomez@uclm.es>

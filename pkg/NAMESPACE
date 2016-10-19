@@ -9,5 +9,9 @@ import(
   sp,
   splancs,
   spacetime,
-  DCluster
+  DCluster,
+  RColorBrewer,
+  lme4,
+  parallel,
+  pscl
 )
