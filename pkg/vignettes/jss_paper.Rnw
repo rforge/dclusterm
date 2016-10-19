@@ -805,11 +805,7 @@ a \code{zeroinfl} model now. This provides a very flexible way of handling
 different types of models in \proglang{R} for cluster detection.
 
 
-FIXME: Use several cores in this example. We get an error (zeroinfl() not found)
-with several cores... 
-
 <<results = hide>>=
-options(mc.cores = NULL)
 nav.cl0 <- DetectClustersModel(brainnavst, coordinates(brainnav), fractpop = 0.25, 
    alpha = 0.05, typeCluster = "S", R = NULL, model0 = nav.m0zip)
 @
@@ -964,12 +960,11 @@ ny.clmm1
 @
 
 When overdispersion and covariates are included in the model, only one of the
-clusters reamins. In particular, the one centered at XXXXX with a size of 1 and
-a slightly reduced estimate of the cluster coefficient.  This should not come
-as a surprise given that we have already seen how including covariates explains
-some of the extra-variation and that by including random effects the
-significance of the clusters is also reduced. A summary of the clusters
-detected can be found in Figure~\ref{fig:NYclmm}.
+clusters remains with size 1 and a slightly reduced estimate of the cluster
+coefficient.  This should not come as a surprise given that we have already
+seen how including covariates explains some of the extra-variation and that by
+including random effects the significance of the clusters is also reduced. A
+summary of the clusters detected can be found in Figure~\ref{fig:NYclmm}.
 
 
 
@@ -1029,7 +1024,6 @@ zero-inflated data and over-dispersed data.
 This package was initially developed by Paula Moraga as a Google Summer of Code
 Project.  Virgilio G\'omez-Rubio acknowledges support from grant PPIC-2014-001-P
 funded by JCCM-FEDER, and grant MTM2013-42323 funded by MINECO.
-**ADD OTHER GRANTS?**
 
 
 \bibliography{DClusterm}
