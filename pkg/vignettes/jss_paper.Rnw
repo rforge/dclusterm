@@ -23,7 +23,7 @@ options(prompt = "R> ", continue = "+  ", width = 70, useFancyQuotes = FALSE)
 
 %% almost as usual
 \author{Virgilio G\'omez-Rubio\\Universidad de Castilla-La Mancha
-\And Paula Moraga-Serrano\\Queensland University of Technology
+\And Paula Moraga\\Queensland University of Technology
 \AND John Molitor\\Oregon State University
 \And Barry Rowlingson\\Lancaster University
 }
@@ -33,24 +33,24 @@ options(prompt = "R> ", continue = "+  ", width = 70, useFancyQuotes = FALSE)
 \title{\pkg{DClusterm}: Model-based Detection of Disease Clusters}
 
 %% for pretty printing and a nice hypersummary also set:
-\Plainauthor{Virgilio G\'omez-Rubio et al.}%, Paula Moraga-Serrano}
+\Plainauthor{Virgilio G\'omez-Rubio et al.}%, Paula Moraga}
 \Plaintitle{DClusterm: Model-based detection of disease clusters}
 %\Shorttitle{} %% a short title (if necessary)
 
 %% an abstract and keywords
 \Abstract{
 The detection of regions with unusual high risk plays an important role in
-disease mapping and the analysis of Public Health data. In particular, the
+disease mapping and the analysis of public health data. In particular, the
 detection of groups of areas (i.e., clusters) where the risk is significantly 
 high is often conducted by Public Health authorities.
 
 Many methods have been proposed for the detection of disease clusters, most of
-them based on moving windows, such as, Kulldorff's Spatial Scan Statistics
+them based on moving windows, such as Kulldorff's Spatial Scan Statistics
 (SSS).  Here we describe a model-based approach for the detection of disease
 clusters implemented in the \pkg{DClusterm} package. Our model-based
-approach is based on representing a large number of possible clusters by
-dummy variables and then fitting many generalized linear models to the data where
-these covariates are included one at a time. Cluster detection is done by 
+approach is based on representing a large number of possible clusters by dummy
+variables and then fitting many generalized linear models to the data where
+these covariates are included one at a time. Cluster detection is done by
 performing a variable or model selection among all fitted models using
 different criteria.
 
@@ -74,7 +74,7 @@ University of Castilla-La Mancha\\
 E-mail: \email{virgilio.gomez@uclm.es}\\
 URL: \url{http://www.uclm.es/profesorado/vgomez}\\
  \\
-Paula Moraga-Serrano\\
+Paula Moraga\\
 School of Mathematical Sciences\\
 Queensland University of Technology\\
 GPO Box 2434, Brisbane, QLD 4001, Australia\\
@@ -144,9 +144,9 @@ the relative risk in the cluster and $\theta_{\overline{z}}$ the relative risk
 outside the cluster. Many different possible clusters are tested in turn and
 the most likely cluster (i.e., the one with the highest value of the test
 statistic) is selected. Significance of this cluster is assessed with a Monte 
-Carlo test that also provides a the p-value.
+Carlo test that also provides the p-value.
 
-In this paper we will describe how some methods that provide a a link between
+In this paper we will describe how some methods that provide a link between
 GLMs and SSS have been implemented in the \pkg{DClusterm} package for the
 \proglang{R} software, so that the detection of disease clusters is approached
 from a regression point of view. As described later, this will involve fitting
@@ -170,6 +170,8 @@ Finally, a discussion and some final remarks are provided in Section
 
 
 \begin{verbatim}
+FIXME:
+
 ##' Significance of the clusters is obtained with a Monte Carlo procedure
 ##' or based on the chi-square distribution (glm, glmer or zeroinfl models)
 ##' or DIC (inla models).
@@ -196,28 +198,28 @@ $$ O_i \sim Po(E_i \theta_i)
 $$
 
 $$
-\log(\theta_i) = \log(E_i) + \alpha + \beta x_i 
+\log(\mu_i) = \log(E_i) + \alpha + \beta x_i 
 $$
 \noindent
 $\log(E_i)$ is an offset to account for the population structure (age, gender,
-etc.).  $theta_i$ is the relative risk and it measures any deviation (increase
+etc.).  $\theta_i$ is the relative risk and it measures any deviation (increase
 or decrease) in the incidence of the disease from the expected number of cases.
 Finally, $x_i$ represents a covariate with possible risk factors associated to
 the disease.
 
 Fitting this model will provide estimates $\hat\alpha$ and $\hat\beta$.
 This will account for the (spatial) effects of the covariates. In order
-to include the cluster variable the effects of the covariates will be keep
+to include the cluster variable the effects of the covariates will be kept
 fixed. Hence, the clusters covariates will be used in a model with fixed
 coefficients for the covariates:
 
 $$
-\log(\theta_i) = \log(E_i) + \hat\alpha + \hat\beta x_i + \gamma_j c_i^{(j)}
+\log(\mu_i) = \log(E_i) + \hat\alpha + \hat\beta x_i + \gamma_j c_i^{(j)}
 $$
 \noindent
 This means that the offset now is $\log(E_i)+\hat\alpha+\hat\beta x_i$.
 $c_i^{(j)}$ is a dummy cluster variable associated to a cluster $j$,
-with $j$ an index over the list of all possible clusters being tests,  and
+with $j$ an index over the list of all possible clusters being tested,  and
 defined as
 
 $$
@@ -253,7 +255,7 @@ understand how cluster detection works with these methods.
 
 
 \citet{BilanciaDemarinis:2014,GomezRubioetal:2015} describe a similar approach
-to the detection of disease cluster using Bayesian hierarchical models. The
+to the detection of disease clusters using Bayesian hierarchical models. The
 Integrated Nested Laplace Approximation (INLA) is used in both cases for model
 fitting as it provides computational benefits over other computationally
 expensive methods, such as Markov Chain Monte Carlo.
@@ -264,6 +266,7 @@ expensive methods, such as Markov Chain Monte Carlo.
 %\input{NY.tex}
 
 \subsection{Leukemia in upstate New York}
+\label{subsec:ex:NY}
 
 The \texttt{NY8} dataset is available in package \texttt{DClusterm} and it
 provides cases of leukemia in different census tracts in upstate New York.
@@ -306,7 +309,7 @@ NY8$Expected  <- NY8$POP8 * sum(NY8$Observed) / sum(NY8$POP8)
 NY8$SMR <- NY8$Observed/NY8$Expected
 @
 
-The centres of the areas will be stored in columns names \code{x} and \code{y}.
+The centres of the areas will be stored in columns named \code{x} and \code{y}.
 This will be used later when ordering the areas by increasing distance to the
 putative cluster centre. If the location of the main populated cities are
 available these could be used but here we will use function
@@ -338,7 +341,8 @@ library(RColorBrewer)
 
 #Save plots
 p1 <- spplot(NY8, "SMR", cuts = 8, col.regions = brewer.pal(9, "Oranges"),
-   main = "Standardised Mortality Ratio")
+   main = "Standardised Mortality Ratio", 
+  sp.layout = list(list("sp.points", TCE, col = "red")))
 p2 <- spplot(NY8, "PCTOWNHOME", cuts = 8, col.regions = brewer.pal(9, "Blues"),
    main = "PCTOWNHOME")
 p3 <- spplot(NY8, "PCTAGE65P", cuts = 8, col.regions = brewer.pal(9, "Greens"),
@@ -353,7 +357,11 @@ print(p3, position = c(0, 0, 0.5, 0.5), more = TRUE)
 print(p4, position = c(0.5, 0, 1, 0.5))
 
 @
-\caption{**INCLUDE TCE LOCATIONS** SMR and covariates of the incidence of Leukemia in upstate New York dataset.}
+\caption{Standardised Mortality Ratios and covariates of the incidence of
+Leukemia in upstate New York dataset. PEXPOSURE is the inverse of the distance
+to the nearest TCE site, PCTAGE65P is the percentage people aged 65 or more,
+and PCTOWNHOME is the percentage of people who own their home. The red
+crosses in the top-left map mark the locations of the TCE sites.}
 \label{fig:NYmap}
 \end{figure}
 \subsection{Cluster detection}
@@ -377,11 +385,11 @@ Argument \code{thegrid} will take a 2-column \code{data.frame} (with names
 \code{x} and {y}) with the centres of possible clusters. If the grid of cluster
 centres is not defined, then a rectangular grid is used with a distance between
 adjacent points defined by argument \code{step}.  Dummy cluster variables are
-created around these points are created by adding areas to the cluster until a
-certain percentage of the population has been reached (defined by argument
-\code{fractpop}) or until a certain distance about the centre (defined by
-argument \code{radius}). When testing for significant cluster variables, 
-argument \code{alpha} defines the significance level.
+created around these points by adding areas to the cluster until a certain
+percentage of the population (defined by argument \code{fractpop}) or until a
+certain distance about the centre (defined by argument \code{radius}) has been
+reached. When testing for significant cluster variables, argument \code{alpha}
+defines the significance level.
 
 \code{DetectClustersModel()} can detect spatial and spatio-temporal clusters,
 that is why its first argument is a space-time object. The type of 
@@ -415,7 +423,7 @@ ny.cl0 <- DetectClustersModel(NY8st,
 
 
 Below is a summary of the clusters detected. Dates can be ignored as this is a
-purely spatial cluster. In the case of spatio-temporal clusters, dates
+purely spatial cluster analysis. In the case of spatio-temporal clusters, dates
 shown define the temporal range of the cluster.  Values \code{x} and \code{y}
 defined the cluster centre, \code{size} is the number of areas (or individuals)
 in the cluster, \code{statistic} represents the point estimate of the
@@ -429,15 +437,38 @@ significant clusters are reported first.
 ny.cl0
 @
 
-The centre of the clusters detected are shown in Figure~\ref{fig:NYcl}.
-Because of the lack of adjustment for covariates these clusters show regions of
-high risk based on the raw data (observed and expected counts) alone.
+Function \code{get.knclusters()} can be used to extract the indices of the
+areas in the different clusters detected. In the next lines, we show how to
+write a new function called \code{get.allknclusters()} to obtain all the
+clusters detected together in a single variable:
+
+<<>>=
+get.allknclusters <- function (spdf, knresults) {
+  clusters <- rep("", nrow(spdf))
+
+  knclusters <- get.knclusters(spdf, knresults)
+  if(length(knclusters) >0 ) {
+    clusters[unique(unlist(knclusters))] <- "CLUSTER"
+    clusters <- as.factor(clusters)
+  }
+
+  return(clusters)
+}
+  
+NY8$CLUSTER0 <- get.allknclusters(NY8, ny.cl0)
+@
+
+The areas and centres of the clusters detected are shown in
+Figure~\ref{fig:NYcl}.  Because of the lack of adjustment for covariates these
+clusters show regions of high risk based on the raw data (observed and expected
+counts) alone.
 
 %\begin{figure}[h!]
 %\centering
 <<eval = FALSE, echo=FALSE, fig=TRUE>>=
-plot(NY8)
-points(ny.cl0[, 1:2], pch = 19, col = "red")
+cl0.centres <- SpatialPoints(ny.cl0[, 1:2])
+spplot(NY8, "CLUSTER0", col.regions = c("white", "gray"), col = "#4D4D4D",
+  sp.layout = list(list("sp.points", cl0.centres, pch = 19, col = "black")))
 @
 %\caption{Clusters detected when no covariates are included in the model.}
 %\label{fig:NYcl0}
@@ -471,11 +502,20 @@ ny.cl1<-DetectClustersModel(NY8st,
 ny.cl1
 @
 
+Similarly as in the previous example, we can use function
+\code{get.allkncluster()} to get the indices of the aras in the clusters and
+add a new variable to the \code{SpatialPolygonsDataFrame}:
+
+<<>>=
+NY8$CLUSTER1 <- get.allknclusters(NY8, ny.cl1)
+@
+
+
 Figure~\ref{fig:NYcl} shows the clusters detected after adjusting for
 covariates.  Compared to the example with no covariate adjustment, one cluster
 has dissappeared. Hence, that cluster has been explained by the effect of the
 covariates. Another cluster is a bit smaller in size, which means that
-covariate only explain a small part of it. The most significant cluster remains
+covariates only explain a small part of it. The most significant cluster remains
 the same. In all cases, cluster significance has been reduced by the effect of
 the covariates.
 
@@ -483,18 +523,24 @@ the covariates.
 \begin{figure}[!h]
 \centering
 <<echo=FALSE, fig=TRUE, width = 10, height = 5>>=
-par(mfrow = c(1,2))
+library(gridExtra)
+library(latticeExtra)
 
-#No covariates
-plot(NY8)
-points(ny.cl0[,1:2], pch=19, col="red")
+ny.map0 <- spplot(NY8, c("CLUSTER0"), col.regions = c("white", "gray"),
+    col = "#4D4D4D", colorkey = FALSE) +
+  layer(lpoints(ny.cl0$x, ny.cl0$y, pch = 19))
 
-#With covariates
-plot(NY8)
-points(ny.cl1[,1:2], pch=19, col="red")
+ny.map1 <- spplot(NY8, c("CLUSTER1"), col.regions = c("white", "gray"),
+     col = "#4D4D4D", colorkey = FALSE) +
+  layer(lpoints(ny.cl1$x, ny.cl1$y, pch = 19))
+
+grid.arrange(ny.map0, ny.map1, ncol = 2)
+
+
 @
 \caption{Clusters detected with no covariate adjustment (left) and after adjusting for 
-  covariates (right).}
+  covariates (right). Areas in clusters are shaded in gray and cluster centres
+are represented by blue dots.}
 \label{fig:NYcl}
 \end{figure}
 
@@ -529,7 +575,7 @@ using all possible temporal windows up to a predefined temporal range.
 
 The \code{brainNM} dataset (included in \pkg{DClusterm}) contains yearly cases
 of brain cancer in New Mexico from 1973 to 1991 (inclusive) in a
-\pkg{spacetime} object. The data set has been taken from the SatScan website
+\pkg{spacetime} object. The data set has been taken from the SaTScan website
 and the area boundaries from the U.S.  Census Bureau. In addition, the location
 of Los Alamos National Laboratory (LANL) has been included (from Wikipedia).
 Inverse distance to this site can be used to test for increased risk in the
@@ -568,7 +614,7 @@ print(stplot(brainst[, , "SMR"], cuts = 8,
 
 \subsubsection{Cluster detection with no covariates}
 
-Similarly as in the purely spatial case, a Poisson regression with no 
+Similarly as in the purely spatial case, a Poisson model with no 
 covariates will be fitted first:
 
 <<>>=
@@ -600,7 +646,9 @@ nm.cl0 <- DetectClustersModel(brainst, NM.coords,
   model0 = nm.m0)
 @
 \noindent
-\Sexpr{nrow(nm.cl0)} possible clusters have been found this time. The first 5
+\Sexpr{nrow(nm.cl0)} possible clusters have been found this time. However,
+note that most of them overlap and may be different configurations of the
+same cluster. The first 5
 are summarised below:
 
 <<>>= 
@@ -611,7 +659,7 @@ nm.cl0[1:5,]
 
 In this case, we will use the inverse of the distance to LANL as a covariate as
 no other information about the areas is available. Distances have been computed
-using function \code{spDistsN1()}. Given that coordinates are expressed in
+using function \code{spDistsN1()} from package \pkg{sp}. Given that coordinates are expressed in
 longitude and latitude  great circle distances are used.
 
 <<>>=
@@ -675,10 +723,10 @@ brainst$CLUSTER[ stcl[[1]] ] <- "CLUSTER"
 \begin{figure}[!h]
 \centering
 <<echo = FALSE, fig=TRUE>>=
-print(stplot(brainst[, , "CLUSTER"], at = c(0, 0.5, 1.5), 
+print(stplot(brainst[, , "CLUSTER"], at = c(0, 0.5, 1.5), col = "#4D4D4D",
   col.regions = c("white", "gray")))
 @
-\caption{Spatio-temporal cluster of brain cancer detected in New Mexico.}
+\caption{Spatio-temporal most significantly cluster of brain cancer detected in New Mexico.}
 \label{fig:NMcluster}
 \end{figure}
 
@@ -693,9 +741,9 @@ distributions for the data should be used.  \citet{RD:2010} discuss this issue
 and they have extended model-based cluster detection methods to account for
 zero-inflation. 
 
-For count data, a zero-inflated Poisson could be used. In this case,  observed
-number of cases come from a mixture distribution of a Poisson and a distribution
-wih all mass at zero. Probabilities are as follows:
+For count data, a zero-inflated Poisson model could be used. In this case,
+observed number of cases come from a mixture distribution of a Poisson and a
+distribution with all mass at zero. Probabilities are as follows:
 
 $$
 Pr(O_i=n_i)=
@@ -708,10 +756,10 @@ Pr(O_i=n_i)=
 $$
 \noindent
 Here $Po(O_i|\theta_i E_i)$ represents the probability of observing $O_i$ cases
-using a Poisson distribution with mean $\theta_i E_i$. $\pi$ represents the
+using a Poisson distribution with mean $\theta_i E_i$. $\pi_i$ represents the
 proportion of zeroes observed that do not come from the Poisson distribution.
 
-Relative risk $\theta_i$ can be modelled using a log-linear model to depend on
+Relative risks $\theta_i$ can be modelled using a log-linear model to depend on
 some relevant risk factors. Also, it is common that all $\pi_i$'s are taken
 equal to a single value $\pi$.
 
@@ -825,7 +873,7 @@ An index for the areas in each of the detected cluster can be obtained with
 function \code{knbinary()}. This function will return a \code{data.frame} with
 all the dummy cluster variables, i.e., the \code{data.frame} will have as many
 columns as clusters and a number of rows equal to the number of areas. Entries
-will be 1 if an areas is in a given cluster and 0 otherwise. This indices can
+will be 1 if the corresponding  areas are in a cluster and 0 otherwise. This indices can
 be used for a number of analyses, such as checking whether two clusters overlap
 or computing the number of times an area is included in a cluster. In the
 following example we obtain the representation of all the clusters detected and
@@ -833,16 +881,17 @@ the first one, the most significant, is added as a new column to the original
 \code{SpatialPolygonsDataFrame} to be displayed in Figure~\ref{fig:Navarrecl}.
 
 <<>>=
-nav.clusters <- knbinary(brainnav, nav.cl0)
+nav.clusters <- get.knclusters(brainnav, nav.cl0)
 brainnav$CLUSTER <- ""
-brainnav$CLUSTER [ nav.clusters[, 1] == 1 ] <- "CLUSTER"
+brainnav$CLUSTER [ nav.clusters[[1]] ] <- "CLUSTER"
 brainnav$CLUSTER <- as.factor(brainnav$CLUSTER)
 @
 
 \begin{figure}[!h]
 \centering
 <<fig=TRUE, echo=FALSE>>=
-print(spplot(brainnav, "CLUSTER", col.regions = c("white", "grey")) )
+print(spplot(brainnav, "CLUSTER",  col = "#4D4D4D", 
+  col.regions = c("white", "grey")) )
 @
 \caption{Cluster of brain cancer detected in Navarre (Spain).}
 \label{fig:Navarrecl}
@@ -852,7 +901,7 @@ print(spplot(brainnav, "CLUSTER", col.regions = c("white", "grey")) )
 \section{Mixed-effects models for cluster detection}
 \label{sec:mixed}
 
-Mixed-effects can be incorporated into our models to account for unmeasured
+Random effects can be incorporated into our models to account for unmeasured
 risk factors. Cluster detection will be performed as usual, but we should keep
 in mind that by including random effects and dummy cluster covariates there may
 be a clash between the two. By using dummy variables we are intentionally
@@ -863,7 +912,7 @@ Random effects are particularly useful to model over-dispersion in count data.
 For the Poisson case, this will mean that the relative risk can be modelled as:
 
 \begin{eqnarray}
-\log(\theta_i) & =  &\log(E_i) + \alpha + \beta x_i + \gamma_j c^{(j)}_i + u_i\\
+\log(\mu_i) & =  &\log(E_i) + \alpha + \beta x_i + \gamma_j c^{(j)}_i + u_i\\
 u_i & \sim &  N(0, \sigma^2_u)
 \end{eqnarray}
 \noindent
@@ -895,7 +944,7 @@ From the results, it is clear that when no covariates are included data are clea
 Hence, a Poisson distribution will not be appropriate to model the observed counts in each
 tract.
 
-The same tests applied to the model with covariates produces a similar result:
+The same tests applied to the model with covariates produce a similar result:
 
 <<>>=
 DeanB(ny.m1)
@@ -907,7 +956,9 @@ that data are over-dispersed. Hence, we will aim at detecting clusters using a
 Poison regression with independent random effects to account for census
 tract-level heterogeneity.
 
-\subsection{Cluster detection with no covariates}
+\subsection{Cluster detection}
+
+\subsubsection{Cluster detection with no covariates}
 
 The baseline model with no covariate will now be fitted with function
 \code{glmer()} from package \pkg{lme4} \citep{lme4:2015}. This function
@@ -932,14 +983,25 @@ ny.clmm0
 @
 
 After accounting for overdispersion, the number of clusters detected is
-\Sexpr{nrow(ny.clmm0)}. These are shown in Figure~\ref{}. The largest cluster
-detected before has now dissappeared and only the two smallest clusters remain.
-This may be due to the fact that XXXXXXXX.  The two remaining clusters have the
+\Sexpr{nrow(ny.clmm0)}. These are shown in Figure~\ref{fig:NYclmm}. The largest
+cluster detected before has now dissappeared and only the two smallest clusters
+remain.  This may be due to the fact that the first cluster has the smallest
+SMR and risk. Hence, allowing for extra-variation will make the discrepancy
+between observed and expected less extreme and this cluster will be the first
+one to be declared as non-singnificant.  The two remaining clusters have the
 same size and a very similar risk than in the previous case.
 
+<<eval = FALSE, echo = FALSE>>=
+#Compute SMR in clusters
+cls <- get.knclusters(NY8, ny.cl0)
+lapply(cls, function(X) {
+  res <- c(sum(NY8$Observed[X]), sum(NY8$Expected[X]))
+  c(res, res[1]/res[2])
+})
 
+@
 
-\subsection{Cluster detection with covariates}
+\subsubsection{Cluster detection with covariates}
 
 <<>>=
 ny.mm1 <- glmer(Observed ~ offset(log(Expected)) + PCTOWNHOME + 
@@ -967,24 +1029,34 @@ seen how including covariates explains some of the extra-variation and that by
 including random effects the significance of the clusters is also reduced. A
 summary of the clusters detected can be found in Figure~\ref{fig:NYclmm}.
 
+As in the example in Section~\ref{subsec:ex:NY}, we have created two clusters variables
+to display the clusters obtained:
+
+<<>>=
+NY8$CLUSTERMM0 <- get.allknclusters(NY8, ny.clmm0)
+NY8$CLUSTERMM1 <- get.allknclusters(NY8, ny.clmm1)
+@
 
 
 \begin{figure}[!h]
 \centering
 <<echo=FALSE, fig=TRUE, width = 10, height = 5>>=
-par(mfrow = c(1,2))
 
-#No covariates
-plot(NY8)
-points(ny.clmm0[,1:2], pch=19, col="red")
+ny.mapmm0 <- spplot(NY8, c("CLUSTERMM0"), col.regions = c("white", "gray"),
+    col = "#4D4D4D", colorkey = FALSE) + 
+  layer(lpoints(ny.clmm0$x, ny.clmm0$y, pch = 19))
 
-#With covariates
-plot(NY8)
-points(ny.clmm1[,1:2], pch=19, col="red")
+ny.mapmm1 <- spplot(NY8, c("CLUSTERMM1"), col.regions = c("white", "gray"),
+     col = "#4D4D4D", colorkey = FALSE) +
+  layer(lpoints(ny.clmm1$x, ny.clmm1$y, pch = 19))
+
+grid.arrange(ny.mapmm0, ny.mapmm1, ncol = 2)
+
 @
-\caption{Clusters detected with no covariate adjustment (left) and after adjusting for
-  covariates (right) using a mixed-effects model to account for overdispersion
-of the data.}
+\caption{Clusters detected with no covariate adjustment (left) and after
+adjusting for covariates (right) using a mixed-effects model to account for
+overdispersion of the data.  Areas in clusters are shaded in gray and cluster
+centres are represented by blue dots.}
 \label{fig:NYclmm}
 \end{figure}
 
