@@ -2,6 +2,7 @@
 \encoding{latin1}
 \docType{data}
 \alias{NY8}
+\alias{TCE}
 \title{Leukemia in an eight-county region of upstate New York, 1978-1982.}
 \description{This data set provides the number of incident leukemia cases per census tract in an eight-county
 region of upstate New York in the period 1978-1982. In addition, the data set also includes information about
@@ -10,6 +11,8 @@ the population in 1980,
 the inverse of the distance to the nearest Trichloroethene (TCE) site,
 the percentage of people aged 65 or more, and
 the percentage of people who own their home.
+
+The dataset also provides the locations of the TCE sites.
 }
 \usage{data(NY8)}
 \format{A SpatialPolygonsDataFrame with 281 polygons representing the census tracts, and the following information about each census tract:
