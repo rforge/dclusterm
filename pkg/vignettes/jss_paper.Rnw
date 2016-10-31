@@ -13,7 +13,7 @@ options(prompt = "R> ", continue = "+  ", width = 70, useFancyQuotes = FALSE)
 \usepackage{amssymb}
 %% need no \usepackage{Sweave.sty}
 
-\usepackage{showlabels}
+%\usepackage{shmwlabels}
 
 %\VignetteIndexEntry{Model-based detection of disease clusters}
 
@@ -169,13 +169,13 @@ Finally, a discussion and some final remarks are provided in Section
 \ref{sec:disc}.
 
 
-\begin{verbatim}
-FIXME:
-
-##' Significance of the clusters is obtained with a Monte Carlo procedure
-##' or based on the chi-square distribution (glm, glmer or zeroinfl models)
-##' or DIC (inla models).
-\end{verbatim}
+%\begin{verbatim}
+%FIXME:
+%
+%##' Significance of the clusters is obtained with a Monte Carlo procedure
+%##' or based on the chi-square distribution (glm, glmer or zeroinfl models)
+%##' or DIC (inla models).
+%\end{verbatim}
 
 
 \section{Generalised linear models for cluster detection}
@@ -329,8 +329,9 @@ in the data is made of a single date entry (\code{"1972-01-01"}) and that it is
 just a convenient way of having our data in a \code{STFDF} object.
 
 <<results = hide>>=
-NY8st <- STFDF(as(NY8, "SpatialPolygons"), xts(1, as.Date("1972-01-01")), NY8@data, 
-  endTime = as.POSIXct(strptime(c("1972-01-01"), "%Y-%m-%d"), tz = "GMT"))
+NY8st <- STFDF(as(NY8, "SpatialPolygons"), xts(1, as.Date("1972-01-01")),
+  NY8@data, endTime = as.POSIXct(strptime(c("1972-01-01"), "%Y-%m-%d"),
+  tz = "GMT"))
 @
 
 
@@ -374,7 +375,8 @@ so that other models can be compared to this one (for example, using the AIC or
 the log--likelihood) to assess whether they provide a better fit. 
 
 <<results=hide>>=
-ny.m0 <- glm(Observed ~ offset(log(Expected)) + 1, family = "poisson", data = NY8)
+ny.m0 <- glm(Observed ~ offset(log(Expected)) + 1, family = "poisson",
+  data = NY8)
 @
 
 Function \code{DetectClustersModel()} will take this baseline model (using
@@ -425,7 +427,7 @@ ny.cl0 <- DetectClustersModel(NY8st,
 Below is a summary of the clusters detected. Dates can be ignored as this is a
 purely spatial cluster analysis. In the case of spatio-temporal clusters, dates
 shown define the temporal range of the cluster.  Values \code{x} and \code{y}
-defined the cluster centre, \code{size} is the number of areas (or individuals)
+defined the cluster centre, \code{size} is the number of areas 
 in the cluster, \code{statistic} represents the point estimate of the
 associated cluster coefficient Also, note that only clusters with a lower
 \code{pvalue} than argument \code{alpha} are returned.  \code{cluster}
@@ -481,8 +483,9 @@ factors. First of all, we will fit a Poisson regression with the 3 covariates
 mentioned earlier. As it can be seen, all three are significant:
 
 <<>>=
-ny.m1 <- glm(Observed ~ offset(log(Expected)) + PCTOWNHOME + PCTAGE65P + PEXPOSURE,
-  family = "poisson", data = NY8)
+form.m1 <- 
+ny.m1 <- glm(Observed ~ offset(log(Expected)) + PCTOWNHOME + PCTAGE65P + 
+  PEXPOSURE, family = "poisson", data = NY8)
 summary(ny.m1)
 @
 
@@ -806,8 +809,8 @@ appropriateness of a Poisson distribution for this data. Fitting a log-linear
 model (with no covariates) gives the following model:
 
 <<>>=
-nav.m0 <- glm(OBSERVED ~ offset(log(EXPECTED)) + 1, family = "poisson", data = brainnav)
-
+nav.m0 <- glm(OBSERVED ~ offset(log(EXPECTED)) + 1, family = "poisson",
+  data = brainnav)
 summary(nav.m0)
 @
 
@@ -815,8 +818,8 @@ Furthermore, a quasipoisson model has been fit in order to asses any
 extra-variation in the data:
 
 <<>>=
-nav.m0q <- glm(OBSERVED ~ offset(log(EXPECTED)) + 1, family = "quasipoisson", 
-   data = brainnav)
+nav.m0q <- glm(OBSERVED ~ offset(log(EXPECTED)) + 1, data = brainnav,
+  family = "quasipoisson")
 summary(nav.m0q)
 @
 \noindent
@@ -829,8 +832,8 @@ Here is the resulting model:
 
 
 <<>>=
-nav.m0zip <- zeroinfl(OBSERVED ~ offset(log(EXPECTED)) + 1 | 1, data = brainnav,
-  dist = "poisson", x = TRUE)
+nav.m0zip <- zeroinfl(OBSERVED ~ offset(log(EXPECTED)) + 1 | 1,
+  data = brainnav, dist = "poisson", x = TRUE)
 summary(nav.m0zip)
 @
 
@@ -855,8 +858,9 @@ different types of models in \proglang{R} for cluster detection.
 
 
 <<results = hide>>=
-nav.cl0 <- DetectClustersModel(brainnavst, coordinates(brainnav), fractpop = 0.25, 
-   alpha = 0.05, typeCluster = "S", R = NULL, model0 = nav.m0zip)
+nav.cl0 <- DetectClustersModel(brainnavst, coordinates(brainnav),
+  fractpop = 0.25, alpha = 0.05, typeCluster = "S", R = NULL,
+  model0 = nav.m0zip)
 @
 
 The output will show the following clusters:
@@ -871,7 +875,7 @@ p-value, which is shown in Figure~\ref{fig:Navarrecl}.
 
 An index for the areas in each of the detected cluster can be obtained with
 function \code{knbinary()}. This function will return a \code{data.frame} with
-all the dummy cluster variables, i.e., the \code{data.frame} will have as many
+all the dummy cluster variables, i.e., the returned \code{data.frame} will have as many
 columns as clusters and a number of rows equal to the number of areas. Entries
 will be 1 if the corresponding  areas are in a cluster and 0 otherwise. This indices can
 be used for a number of analyses, such as checking whether two clusters overlap
@@ -1095,9 +1099,9 @@ zero-inflated data and over-dispersed data.
 \section{Acknowledgements}
 
 This package was initially developed by Paula Moraga as a Google Summer of Code
-Project.  Virgilio G\'omez-Rubio acknowledges support from grant PPIC-2014-001-P
-funded by JCCM-FEDER, and grant MTM2013-42323 funded by MINECO.
-
+Project.  Virgilio G\'omez-Rubio has been supported by grant PPIC-2014-001,
+funded by Consejer\'ia de Educaci\'on, Cultura y Deportes (JCCM) and FEDER, and
+grant MTM2016-77501-P, funded by Ministerio de Econom\'ia y Competitividad.
 
 \bibliography{DClusterm}
 %\bibliographystyle{chicago}
