@@ -67,8 +67,8 @@ CreateGridDClusterm <- function(stfdf, radius, step) {
 ##' "glmer" for generalized linear mixed model (glmer {lme4}),
 ##' "zeroinfl" for zero-inflated models (zeroinfl {pscl}), or
 ##' "inla" for generalized linear, generalized linear mixed or zero-inflated models.
-##' @param numCPUS Number of cpus used when using snowfall to run the method.
-##' If snowfall is not used numCPUS is NULL.
+##' @param numCPUS Number of cpus used when using parallel  to run the method.
+##' If parallel is not used numCPUS is NULL.
 ##'
 ##' @return data frame with information of the clusters with the maximum
 ##' log-likelihood ratio or minimum DIC for each center and start and end dates.

@@ -6,11 +6,25 @@ Date: 2016-10-19
 Author: Virgilio Gomez-Rubio, Paula Esther Moraga Serrano, Barry
     Rowlingson
 Maintainer: Virgilio Gomez-Rubio <virgilio.gomez@uclm.es>
-Depends: R (>= 2.9.0), parallel, sp, splancs, spacetime, DCluster, pscl, RColorBrewer, lme4
-Suggests: INLA
+Depends:
+    R (>= 2.9.0),
+    parallel,
+    sp,
+    splancs,
+    spacetime,
+    DCluster,
+    pscl,
+    RColorBrewer,
+    lme4
+Suggests:
+    INLA
 Description: Model-based methods for the detection of disease clusters.
 License: GPL-3
 LazyLoad: yes
 LazyData: yes
-Collate: 'Functions1PAU.R' 'Functions2PAU.R' 'glm.isclusterPAU.R'
+Collate:
+    'Functions1PAU.R'
+    'Functions2PAU.R'
+    'glm.isclusterPAU.R'
     'knutils.R'
+RoxygenNote: 5.0.1
