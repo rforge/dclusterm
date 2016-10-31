@@ -57,7 +57,7 @@ different criteria.
 Because of our model-based approach, cluster detection can be performed using
 different types of likelihoods and latent effects. We cover the detection of
 spatial and spatio-temporal clusters, as well as how to account for covariates,
-deal with zero-inflated datasets and overdispersion in the data.
+zero-inflated datasets and overdispersion in the data.
 
 }
 
@@ -109,7 +109,7 @@ URL: \url{http://www.lancaster.ac.uk/fhm/about-us/people/barry-rowlingson}\\
 \section{Introduction}
 
 The analysis of epidemiological data at small area level often involves
-accounting for possible risks factors and other important covariates using
+accounting for possible risk factors and other important covariates using
 different types of regression models. However, it is not uncommon that after a
 number of covariates have been accounted for, residuals still show a spatial
 distribution that defines some groups of areas with unusual high
@@ -147,7 +147,7 @@ statistic) is selected. Significance of this cluster is assessed with a Monte
 Carlo test that also provides the p-value.
 
 In this paper we will describe how some methods that provide a link between
-GLMs and SSS have been implemented in the \pkg{DClusterm} package for the
+GLMs and SSS which have been implemented in the \pkg{DClusterm} package for the
 \proglang{R} software, so that the detection of disease clusters is approached
 from a regression point of view. As described later, this will involve fitting
 many different GLMs for which dummy variables that represent possible clusters
@@ -187,9 +187,9 @@ Finally, a discussion and some final remarks are provided in Section
 the SSS, and show that the test statistic for a given cluster is equivalent to
 fitting a GLM using a cluster variable as a predictor.  This cluster variable
 is a dummy variable which is 1 for the areas in the cluster and 0 for the areas
-outside the cluster. By including cluster covariates in the mode we obtain an
+outside the cluster. By including cluster covariates in the model we obtain an
 estimate of the increased risk (as measured by its associated coefficient) and
-its significant (by means of the associated p-value, for example).
+its significance (by means of the associated p-value, for example).
 
 For example, for a Poisson model with expected counts $E_i$ we could have the
 following distribution for the observed cases $O_i$:
@@ -204,13 +204,13 @@ $$
 $\log(E_i)$ is an offset to account for the population structure (age, gender,
 etc.).  $\theta_i$ is the relative risk and it measures any deviation (increase
 or decrease) in the incidence of the disease from the expected number of cases.
-Finally, $x_i$ represents a covariate with possible risk factors associated to
+Finally, $x_i$ represents a covariate with possible risk factors associated with
 the disease.
 
 Fitting this model will provide estimates $\hat\alpha$ and $\hat\beta$.
 This will account for the (spatial) effects of the covariates. In order
 to include the cluster variable the effects of the covariates will be kept
-fixed. Hence, the clusters covariates will be used in a model with fixed
+fixed. Hence, the cluster covariates will be used in a model with fixed
 coefficients for the covariates:
 
 $$
@@ -240,16 +240,16 @@ Testing different clusters will produce many different cluster covariates.  We
 can use model selection techniques to select the most important cluster in the
 area.  In particular, the log-likelihood can be used to compare the model with
 the cluster variable to the null model (i.e., the one with the covariates
-only). Note that we are interested in clusters with a high risk and, because of
-that, we are only interested in clusters whose associated coefficient is
+only). Note that we are interested in clusters with a high risk, and so 
+we are only interested in clusters whose associated coefficient is
 significantly higher than zero.
 
 Regarding the effect of the covariates, it is possible to perform a cluster
 detection without considering covariates in the model. Then a cluster detection
 accounting for the covariates will likely provide a different number of
 clusters. By comparing the clusters detected in both cases we will be able to
-find what clusters are linked to underlying risk factors included in the model
-and what clusters remain unexplained by the covariates. In the examples that we
+find which clusters are linked to underlying risk factors included in the model
+and which clusters remain unexplained by the covariates. In the examples that we
 included in this paper we will always consider both scenarios to better
 understand how cluster detection works with these methods.
 
@@ -294,7 +294,7 @@ data(NY8)
 @
 
 A number of cases could not be linked to their actual location and they were
-distributed uniformly over the study are, making the counts real numbers
+distributed uniformly over the study area, making the counts real numbers
 instead of integers. We have rounded these values as we intend to use a Poisson
 likelihood for the analysis. Furthermore, expected counts are computed using
 the overall incidence ratio (i.e., total number of cases divided by the total
@@ -394,7 +394,7 @@ reached. When testing for significant cluster variables, argument \code{alpha}
 defines the significance level.
 
 \code{DetectClustersModel()} can detect spatial and spatio-temporal clusters,
-that is why its first argument is a space-time object. The type of 
+which is why its first argument is a space-time object. The type of 
 clusters that are investigated is defined by argument \code{typeCluster}.
 In the example we have used \code{typeCluster = "S"}.
 
@@ -412,7 +412,7 @@ options(mc.cores = 4)
 
 In the following example, to reduce the computational burden, we have only
 looked for clusters around 5 areas (whose rows in \code{NY8} are defined in
-variable \code{idxcl}). In a real application we advice the use of all
+variable \code{idxcl}). In a real application we advise the use of all
 locations (area centroids or actual locations of individual data).
 
 <<results=hide>>=
@@ -429,10 +429,10 @@ purely spatial cluster analysis. In the case of spatio-temporal clusters, dates
 shown define the temporal range of the cluster.  Values \code{x} and \code{y}
 defined the cluster centre, \code{size} is the number of areas 
 in the cluster, \code{statistic} represents the point estimate of the
-associated cluster coefficient Also, note that only clusters with a lower
+associated cluster coefficient. Also, note that only clusters with a lower
 \code{pvalue} than argument \code{alpha} are returned.  \code{cluster}
 indicates whether the cluster is a significant one. Finally, note how detected
-clusters are ordered by increasing value of \code{pvalue}, so that most 
+clusters are ordered by increasing value of \code{pvalue}, so that the most 
 significant clusters are reported first.
 
 <<>>=   
@@ -506,7 +506,7 @@ ny.cl1
 @
 
 Similarly as in the previous example, we can use function
-\code{get.allkncluster()} to get the indices of the aras in the clusters and
+\code{get.allkncluster()} to get the indices of the areas in the clusters and
 add a new variable to the \code{SpatialPolygonsDataFrame}:
 
 <<>>=
@@ -516,7 +516,7 @@ NY8$CLUSTER1 <- get.allknclusters(NY8, ny.cl1)
 
 Figure~\ref{fig:NYcl} shows the clusters detected after adjusting for
 covariates.  Compared to the example with no covariate adjustment, one cluster
-has dissappeared. Hence, that cluster has been explained by the effect of the
+has disappeared. Hence, that cluster has been explained by the effect of the
 covariates. Another cluster is a bit smaller in size, which means that
 covariates only explain a small part of it. The most significant cluster remains
 the same. In all cases, cluster significance has been reduced by the effect of
@@ -635,10 +635,10 @@ of the counties in New Mexico by using function \code{coordinates()} from the
 NM.coords <- coordinates(brainst@sp)
 @
 
-Cluster detection with function \code{DetectClustersModel()} takes now
+Cluster detection with function \code{DetectClustersModel()} takes
 arguments \code{minDateUser} and \code{maxDateUser} to define the minimum and
 maximum times that are considered when looking for clusters. In this example
-the time period have been constrained to 1985--1989.  Furthermore,
+the time period has been constrained to 1985--1989.  Furthermore,
 \code{typeCluster = "ST"} is used to look for spatio-temporal clusters.
 
 
@@ -729,7 +729,7 @@ brainst$CLUSTER[ stcl[[1]] ] <- "CLUSTER"
 print(stplot(brainst[, , "CLUSTER"], at = c(0, 0.5, 1.5), col = "#4D4D4D",
   col.regions = c("white", "gray")))
 @
-\caption{Spatio-temporal most significantly cluster of brain cancer detected in New Mexico.}
+\caption{Most significant spatio-temporal cluster of brain cancer detected in New Mexico.}
 \label{fig:NMcluster}
 \end{figure}
 
@@ -814,7 +814,7 @@ nav.m0 <- glm(OBSERVED ~ offset(log(EXPECTED)) + 1, family = "poisson",
 summary(nav.m0)
 @
 
-Furthermore, a quasipoisson model has been fit in order to asses any
+Furthermore, a quasipoisson model has been fitted in order to assess any
 extra-variation in the data:
 
 <<>>=
@@ -827,7 +827,7 @@ The dispersion parameter in the previous model seems to be higher than 1,
 which may mean that the Poisson distribution is not appropriate.
 
 For this reason, and following \citet{Ugarteetal:2004}, a zero-inflated Poisson
-model has been fit using function \code{zeroinfl()} from package \pkg{pscl}.
+model has been fitted using function \code{zeroinfl()} from package \pkg{pscl}.
 Here is the resulting model:
 
 
@@ -840,7 +840,7 @@ summary(nav.m0zip)
 Hence, the zero-inflated Poisson model will be used now to detect clusters
 of disease. As in the example on the New York leukemia dataset, a \pkg{spacetime}
 object will store all the information. The column for the expected counts must
-be named \code{Expected}, and this is our first step now. Note also that,
+be named \code{Expected}, and this is our first step. Note also that,
 because only one time period is considered, data will have a single value and
 it is the 1st of January of 1990.
 
@@ -853,7 +853,7 @@ brainnavst <- STFDF(as(brainnav, "SpatialPolygons"),
 @
 
 Function \code{DetectClustersModel()} will perform the cluster detection using
-a \code{zeroinfl} model now. This provides a very flexible way of handling
+a \code{zeroinfl} model. This provides a very flexible way of handling
 different types of models in \proglang{R} for cluster detection.
 
 
@@ -877,7 +877,7 @@ An index for the areas in each of the detected cluster can be obtained with
 function \code{knbinary()}. This function will return a \code{data.frame} with
 all the dummy cluster variables, i.e., the returned \code{data.frame} will have as many
 columns as clusters and a number of rows equal to the number of areas. Entries
-will be 1 if the corresponding  areas are in a cluster and 0 otherwise. This indices can
+will be 1 if the corresponding  areas are in a cluster and 0 otherwise. These indices can
 be used for a number of analyses, such as checking whether two clusters overlap
 or computing the number of times an area is included in a cluster. In the
 following example we obtain the representation of all the clusters detected and
@@ -966,7 +966,7 @@ tract-level heterogeneity.
 
 The baseline model with no covariate will now be fitted with function
 \code{glmer()} from package \pkg{lme4} \citep{lme4:2015}. This function
-is similar to \code{glm()} for GLM's but it will allow us to include random
+is similar to \code{glm()} for GLMs but it will allow us to include random
 effects in the model as part of the \code{formula} argument.
 
 <<>>=
@@ -988,11 +988,11 @@ ny.clmm0
 
 After accounting for overdispersion, the number of clusters detected is
 \Sexpr{nrow(ny.clmm0)}. These are shown in Figure~\ref{fig:NYclmm}. The largest
-cluster detected before has now dissappeared and only the two smallest clusters
+cluster detected before has now disappeared and only the two smallest clusters
 remain.  This may be due to the fact that the first cluster has the smallest
 SMR and risk. Hence, allowing for extra-variation will make the discrepancy
 between observed and expected less extreme and this cluster will be the first
-one to be declared as non-singnificant.  The two remaining clusters have the
+one to be declared as non-significant.  The two remaining clusters have the
 same size and a very similar risk than in the previous case.
 
 <<eval = FALSE, echo = FALSE>>=
@@ -1033,7 +1033,7 @@ seen how including covariates explains some of the extra-variation and that by
 including random effects the significance of the clusters is also reduced. A
 summary of the clusters detected can be found in Figure~\ref{fig:NYclmm}.
 
-As in the example in Section~\ref{subsec:ex:NY}, we have created two clusters variables
+As in the example in Section~\ref{subsec:ex:NY}, we have created two cluster variables
 to display the clusters obtained:
 
 <<>>=
@@ -1087,7 +1087,7 @@ different types of data.  Because of this model-based approach, fixed effects
 non-spatial unmeasured risk factors) can be put in the linear predictor as
 well.
 
-In our examples we have considered well known datasets to show how the
+In our examples we have considered well-known datasets to show how the
 functions in \pkg{DClusterm} tackle the problem of cluster detection.  The
 results are similar to those found in relevant papers where the same datasets
 have been analysed using a similar methodology.  In particular, we have
