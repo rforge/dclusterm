@@ -127,10 +127,10 @@ clusters of disease, i.e., a group of contiguous areas with significant high
 risk.
 
 In order to detect disease clusters, the most widely used method is probably
-the one proposed by \citet{Kulldorff:1997}. This is called the Spatial Scan
-Statistic (SSS) and it will find the most likely cluster. Significance is
-assessed via a Monte Carlo test using a test statistic based on a likelihood
-ratio test for the following hypotheses:
+the Spatial Scan Statistic (SSS) proposed by \citet{Kulldorff:1997}. Given a
+possible cluster $z$, the SSS will compare the relative risk in the cluster
+$\theta_z$ to the relative risk outside the cluster $\theta_{\overline{z}}$
+using the following test:
 
 $$
 \begin{array}{cc}
@@ -138,13 +138,20 @@ H_0: & \theta_z=\theta_{\overline{z}}\\
 H_1: & \theta_z>\theta_{\overline{z}}\\
 \end{array}
 $$
+\noindent
+Here, a likelihood ratio statistic is used.  Many different possible clusters
+are tested in turn  by changing the areas in $z$ and the most likely cluster
+(i.e., the one with the highest value of the test statistic) is selected.
+Significance of this cluster is assessed with a Monte Carlo test that also
+provides the p-value.
 
-Here, $z$ represents a cluster (i.e., a set of contiguous areas), $\theta_z$
-the relative risk in the cluster and $\theta_{\overline{z}}$ the relative risk
-outside the cluster. Many different possible clusters are tested in turn and
-the most likely cluster (i.e., the one with the highest value of the test
-statistic) is selected. Significance of this cluster is assessed with a Monte 
-Carlo test that also provides the p-value.
+In this paper we will describe a novel approach to disease cluster detection
+that provides a link between GLMs and SSS. We have implemented this approach
+via the freely available \pkg{DClusterm} package for the \proglang{R}
+statistical software.  This approach involves fitting many different GLMs for
+which dummy variables that represent possible clusters are included one at a
+time.  Cluster detection is based on selecting a number of dummy cluster
+variables using variable selection methods.
 
 In this paper we will describe how some methods that provide a link between
 GLMs and SSS which have been implemented in the \pkg{DClusterm} package for the
@@ -154,13 +161,12 @@ many different GLMs for which dummy variables that represent possible clusters
 are included one at a time.  Cluster detection is based on selecting a number
 of dummy cluster variables using variable selection methods.
 
-
 This paper is organised as follows. Section \ref{sec:GLM} will introduce the
-link between GLM and SSS. Next, in Section \ref{sec:spacetime} we describe how
-to extend these ideas to detect clusters in space and time. The detection of
-disease clusters for zero-inflated data is discussed in Section
-\ref{sec:zeroinfl}. Section \ref{sec:mixed} shows how to include random effects
-in the detection of disease clusters.  
+link between GLM and SSS. Next, in Section \ref{sec:spacetime}
+\citep{Pebesma:2012} we describe how to extend these ideas to detect clusters
+in space and time. The detection of disease clusters for zero-inflated data is
+discussed in Section \ref{sec:zeroinfl}. Section \ref{sec:mixed} shows how to
+include random effects in the detection of disease clusters.  
 %FIXME: Include multivariate methods?
 %A multivariate approach for the
 %detection of disease clusters of two diseases has been included in Section
@@ -183,7 +189,7 @@ Finally, a discussion and some final remarks are provided in Section
 
 \subsection{General description}
 
-\citet{Jung:2009,ZhangLinCSDA:2009} provide a explicit link between GLMs and
+\citet{Jung:2009,ZhangLinCSDA:2009} provide an explicit link between GLMs and
 the SSS, and show that the test statistic for a given cluster is equivalent to
 fitting a GLM using a cluster variable as a predictor.  This cluster variable
 is a dummy variable which is 1 for the areas in the cluster and 0 for the areas
@@ -201,7 +207,7 @@ $$
 \log(\mu_i) = \log(E_i) + \alpha + \beta x_i 
 $$
 \noindent
-$\log(E_i)$ is an offset to account for the population structure (age, gender,
+We let $\log(E_i)$ denote an offset to account for the population structure (age, gender,
 etc.).  $\theta_i$ is the relative risk and it measures any deviation (increase
 or decrease) in the incidence of the disease from the expected number of cases.
 Finally, $x_i$ represents a covariate with possible risk factors associated with
@@ -232,7 +238,7 @@ c^{(j)}_i=
 \right.
 $$
 \noindent
-$\gamma_j$ is a measure of the risk in the cluster. We are only interested in
+Here, $\gamma_j$ is a measure of the risk in the cluster. We are only interested in
 clusters whose coefficient is significantly higher than 0 (i.e., increased
 risk), hence those with a significant negative coefficient will be ignored.
 
@@ -244,7 +250,7 @@ only). Note that we are interested in clusters with a high risk, and so
 we are only interested in clusters whose associated coefficient is
 significantly higher than zero.
 
-Regarding the effect of the covariates, it is possible to perform a cluster
+Regarding the effect of the covariates, it is possible to perform  cluster
 detection without considering covariates in the model. Then a cluster detection
 accounting for the covariates will likely provide a different number of
 clusters. By comparing the clusters detected in both cases we will be able to
@@ -268,7 +274,9 @@ expensive methods, such as Markov Chain Monte Carlo.
 \subsection{Leukemia in upstate New York}
 \label{subsec:ex:NY}
 
-The \texttt{NY8} dataset is available in package \texttt{DClusterm} and it
+We first consider an example where we model counts of leukemia cases in
+upstate New York. These data are provided in the 
+\texttt{NY8} dataset, available in package \texttt{DClusterm}. It
 provides cases of leukemia in different census tracts in upstate New York.
 This data set has been analysed by several authors
 \citep{Walletetal:1992,WallerGotway:2004}.  The location of leukemia is thought
@@ -277,14 +285,13 @@ area. Figure~\ref{fig:NYmap} shows the Standardised Mortality Ratios of the
 census tracts and the locations of the industries using TCE.
 
 In order to measure exposure, the inverse of the distance to the nearest TCE
-site has been used (\code{PEXPOSURE}). In addition, two other socioeconomic
-covariates have been used: the percentage of people aged 65 or more
-(\code{PCTAGE65P}) and the percentage of people who own their home
-(\code{PCTOWNHOME}).
+site has been used (variable \code{PEXPOSURE} in the dataset). In addition, two
+other socioeconomic covariates have been used: the percentage of people aged 65
+or more (variable \code{PCTAGE65P}) and the percentage of people who own their
+home (variable \code{PCTOWNHOME}).
 
-This dataset is included in package \pkg{DClusterm} as \code{NY8}. Hence, our
-first
-action is to load some required packages and the dataset itself.
+Hence, our first action is to load some required packages and the dataset
+itself.
 
 <<results = hide>>=
 library(DClusterm)
