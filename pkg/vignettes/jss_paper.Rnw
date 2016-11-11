@@ -162,17 +162,17 @@ are included one at a time.  Cluster detection is based on selecting a number
 of dummy cluster variables using variable selection methods.
 
 This paper is organised as follows. Section \ref{sec:GLM} will introduce the
-link between GLM and SSS. Next, in Section \ref{sec:spacetime}
-\citep{Pebesma:2012} we describe how to extend these ideas to detect clusters
-in space and time. The detection of disease clusters for zero-inflated data is
-discussed in Section \ref{sec:zeroinfl}. Section \ref{sec:mixed} shows how to
-include random effects in the detection of disease clusters.  
-%FIXME: Include multivariate methods?
-%A multivariate approach for the
+link between GLM and SSS. Next, in Section \ref{sec:mixed} we show how to
+include random effects in the detection of disease clusters to account for
+over-dispersion.  The detection of disease clusters for zero-inflated data is
+discussed in Section \ref{sec:zeroinfl}. Section \ref{sec:spacetime}
+describes how to extend these ideas to detect clusters in
+space and time.  Finally, a discussion and some final remarks are provided in
+Section \ref{sec:disc}.
+
+%FIXME: Include multivariate methods?  A multivariate approach for the
 %detection of disease clusters of two diseases has been included in Section
 %\ref{sec:bivar}. 
-Finally, a discussion and some final remarks are provided in Section
-\ref{sec:disc}.
 
 
 %\begin{verbatim}
@@ -556,188 +556,166 @@ are represented by blue dots.}
 
 
 
-\section{Spatio-temporal clusters}
-\label{sec:spacetime}
+\section{Mixed-effects models for cluster detection}
+\label{sec:mixed}
 
-%\input{NM.tex}
+Random effects can be incorporated into our models to account for unmeasured
+risk factors. Cluster detection will be performed as usual, but we should keep
+in mind that by including random effects and dummy cluster covariates there may
+be a clash between the two. By using dummy variables we are intentionally
+looking for unexplained spatial variation in the data. Hence, random effects
+should aim at modelling a different structure in the data.
 
-\citet{Jung:2009} discusses how to extend model-based approaches for the
-detection of spatial disease clusters to space and time. 
-\citet{GomezRubioetal:2015} propose the following model:
+Random effects are particularly useful to model over-dispersion in count data.
+For the Poisson case, this will mean that the relative risk can be modelled as:
 
-\begin{equation} 
-\log(\mu_{i,t}) =  \log(E_{i,t}) + \gamma_j c^{(j)}_{i,t}
-\label{eq:stcluster}
-\end{equation}
+\begin{eqnarray}
+\log(\mu_i) & =  &\log(E_i) + \alpha + \beta x_i + \gamma_j c^{(j)}_i + u_i\\
+u_i & \sim &  N(0, \sigma^2_u)
+\end{eqnarray}
 \noindent
-\noindent
-where $\mu_{i,t}$ is the mean of area $i$ at time $t$ and $c^{(j)}_{i,t}$ a
-cluster dummy variable for spatio-temporal cluster $j$. 
+where $u_i$ represents a random effect Normally distributed with zero mean and
+variance $\sigma^2_u$. Note that random effects can be defined to be spatially
+correlated, as suggested by \citet{BilanciaDemarinis:2014}. However, this can
+produce a clash between the dummy cluster variables and the random effects.
 
-Note how now data are indexed according to space and time. Dummy cluster
-variables are defined as in the spatial case, by considering areas in the
-cluster according to their distance to the cluster centre, for data within a
-particular time period.  When defining a temporal cluster, areas are aggregated
-using all possible temporal windows up to a predefined temporal range.
+\subsection{Leukemia in upstate New York}
 
 
-\subsection{Brain cancer in New Mexico}
 
-The \code{brainNM} dataset (included in \pkg{DClusterm}) contains yearly cases
-of brain cancer in New Mexico from 1973 to 1991 (inclusive) in a
-\pkg{spacetime} object. The data set has been taken from the SaTScan website
-and the area boundaries from the U.S.  Census Bureau. In addition, the location
-of Los Alamos National Laboratory (LANL) has been included (from Wikipedia).
-Inverse distance to this site can be used to test for increased risk in the
-areas around the Laboratory as no other covariates are available. 
-
-<<echo = FALSE, eval = FALSE>>=
-library(DClusterm)
-#debug(DetectClustersModel)
-#debug(glmAndZIP.iscluster)
-#debug(CalcStatsAllClusters)
-#library(snowfall)
-@
+We go back to the example on the leukemia incidence in upstate New York to show
+how models can include random effects and, at the same time, detect disease
+clusters. In this particular example, random effects will be important in order
+to reflect any over-dispersion present in the data. For this reason, our first
+step here is to test the data for over-dispersion using Dean's $P_B$ and $P'_B$
+score tests \citep[see,][for details]{Dean:1992}.  These two tests have been
+implemented in functions \code{DeanB()} and \code{DeanB2()} in the
+\pkg{DCluster} package.  They both take a \code{glm} object and perform the
+score tests:
 
 <<>>=
-data(brainNM)
+DeanB(ny.m0)
+DeanB2(ny.m0)
 @
 
-Expected counts have been obtained using age and sex standardisation over the
-whole period of time. Hence, yearly differences are likely to be seen when
-plotting the data. Standardised Mortality Ratios have been plotted in
-Figure~\ref{fig:NMSMR}.
+From the results, it is clear that when no covariates are included data are clearly over-dispersed.
+Hence, a Poisson distribution will not be appropriate to model the observed counts in each
+tract.
 
-\begin{figure}[!h]
-\centering
-<<echo=FALSE, fig=TRUE>>=
-print(stplot(brainst[, , "SMR"], cuts = 8, 
-  col.regions = brewer.pal(9, "Oranges")))
+The same tests applied to the model with covariates produce a similar result:
+
+<<>>=
+DeanB(ny.m1)
+DeanB2(ny.m1)
 @
-\caption{Standardised Mortality Ratios of brain cancer in New Mexico.}
-\label{fig:NMSMR}
-\end{figure}
 
-
+Although p-values have increased, they are both small and we may still consider
+that data are over-dispersed. Hence, we will aim at detecting clusters using a
+Poison regression with independent random effects to account for census
+tract-level heterogeneity.
 
 \subsection{Cluster detection}
 
 \subsubsection{Cluster detection with no covariates}
 
-Similarly as in the purely spatial case, a Poisson model with no 
-covariates will be fitted first:
+The baseline model with no covariate will now be fitted with function
+\code{glmer()} from package \pkg{lme4} \citep{lme4:2015}. This function
+is similar to \code{glm()} for GLMs but it will allow us to include random
+effects in the model as part of the \code{formula} argument.
 
 <<>>=
-nm.m0 <- glm(Observed ~ offset(log(Expected)) + 1, family = "poisson", 
-  data = brainst)
-summary(nm.m0)
+ny.mm0 <- glmer(Observed ~ offset(log(Expected)) + (1 | AREANAME), 
+  data = as(NY8, "data.frame"), family = "poisson")
+summary(ny.mm0)
 @
 
-Before proceeding to disease cluster detection, we have extracted the centroids
-of the counties in New Mexico by using function \code{coordinates()} from the
-\code{sp} slot in the \code{STIDF} object that stores the data.
-
-
-<<results=hide>>=
-NM.coords <- coordinates(brainst@sp)
+<<eval = TRUE>>=
+ny.clmm0 <- DetectClustersModel(NY8st,
+  thegrid = as.data.frame(NY8)[idxcl, c("x", "y")],
+  fractpop = .15, alpha = 0.05,
+  typeCluster = "S", R = NULL, model0 = ny.mm0)
 @
-
-Cluster detection with function \code{DetectClustersModel()} takes
-arguments \code{minDateUser} and \code{maxDateUser} to define the minimum and
-maximum times that are considered when looking for clusters. In this example
-the time period has been constrained to 1985--1989.  Furthermore,
-\code{typeCluster = "ST"} is used to look for spatio-temporal clusters.
-
-
-<<results=hide>>=
-nm.cl0 <- DetectClustersModel(brainst, NM.coords,
-  minDateUser = "1985-01-01", maxDateUser = "1989-01-01",
-  fractpop = .15, alpha = 0.05, typeCluster = "ST", R = NULL, 
-  model0 = nm.m0)
-@
-\noindent
-\Sexpr{nrow(nm.cl0)} possible clusters have been found this time. However,
-note that most of them overlap and may be different configurations of the
-same cluster. The first 5
-are summarised below:
-
-<<>>= 
-nm.cl0[1:5,]
-@
-
-\subsubsection{Cluster detection after adjusting for covariates}
-
-In this case, we will use the inverse of the distance to LANL as a covariate as
-no other information about the areas is available. Distances have been computed
-using function \code{spDistsN1()} from package \pkg{sp}. Given that coordinates are expressed in
-longitude and latitude  great circle distances are used.
 
 <<>>=
-dst <- spDistsN1(pts = NM.coords, pt = losalamos, longlat = TRUE)
+ny.clmm0
 @
 
-Distances need to be put together in a way that values are available for all
-time periods.  In this case, given that distances do not change over time, a
-vector is created by repeating the vector of distances as many times as time
-slots (years) we have in the dataset.
+After accounting for overdispersion, the number of clusters detected is
+\Sexpr{nrow(ny.clmm0)}. These are shown in Figure~\ref{fig:NYclmm}. The largest
+cluster detected before has now disappeared and only the two smallest clusters
+remain.  This may be due to the fact that the first cluster has the smallest
+SMR and risk. Hence, allowing for extra-variation will make the discrepancy
+between observed and expected less extreme and this cluster will be the first
+one to be declared as non-significant.  The two remaining clusters have the
+same size and a very similar risk than in the previous case.
+
+<<eval = FALSE, echo = FALSE>>=
+#Compute SMR in clusters
+cls <- get.knclusters(NY8, ny.cl0)
+lapply(cls, function(X) {
+  res <- c(sum(NY8$Observed[X]), sum(NY8$Expected[X]))
+  c(res, res[1]/res[2])
+})
+
+@
+
+\subsubsection{Cluster detection with covariates}
 
 <<>>=
-nyears <- length(unique(brainst$Year))
-brainst$IDLANL <- rep(1/dst, nyears)
+ny.mm1 <- glmer(Observed ~ offset(log(Expected)) + PCTOWNHOME + 
+  PCTAGE65P + PEXPOSURE + (1 | AREANAME),
+  data = as(NY8, "data.frame"), family = "poisson")
+summary(ny.mm1)
 @
 
-With all these data we are now able to fit a baseline model.
+
+<<eval = TRUE>>=
+ny.clmm1 <- DetectClustersModel(NY8st,
+  thegrid = as.data.frame(NY8)[idxcl, c("x", "y")],
+  fractpop = .15, alpha = 0.05,
+  typeCluster = "S", R = NULL, model0 = ny.mm1)
+@
 
 <<>>=
-nm.m1 <- glm(Observed ~ offset(log(Expected)) + IDLANL,
-   family = "poisson", data = brainst)
-summary(nm.m1)
+ny.clmm1
 @
 
-Note how now the included covariate is not significant. For illustrative
-purposes, we will still keep the covariate in our model for the cluster
-detection. However, non-significant covariates will have a tiny impact on the
-clusters detected as they will not produce a change in the expected number of
-cases.
+When overdispersion and covariates are included in the model, only one of the
+clusters remains with size 1 and a slightly reduced estimate of the cluster
+coefficient.  This should not come as a surprise given that we have already
+seen how including covariates explains some of the extra-variation and that by
+including random effects the significance of the clusters is also reduced. A
+summary of the clusters detected can be found in Figure~\ref{fig:NYclmm}.
 
-<<results=hide>>=
-nm.cl1 <- DetectClustersModel(brainst, NM.coords, fractpop = 0.15, 
-   alpha = 0.05, minDateUser = "1985-01-01", maxDateUser = "1989-01-01",
-   typeCluster = "ST", R = NULL, model0 = nm.m1)
-@
-
-The number of clusters detected in this case is \Sexpr{nrow(nm.cl1)}, very
-similar to the \Sexpr{nrow(nm.cl0)} found when no covariates where included in
-the model. This was expected as the included covariate was not significant.  By
-inspecting the five most significant clusters we can observe that they are very
-similar to the ones detected before:
+As in the example in Section~\ref{subsec:ex:NY}, we have created two cluster variables
+to display the clusters obtained:
 
 <<>>=
-nm.cl1[1:5,]
+NY8$CLUSTERMM0 <- get.allknclusters(NY8, ny.clmm0)
+NY8$CLUSTERMM1 <- get.allknclusters(NY8, ny.clmm1)
 @
-\noindent
-Note how these clusters only cover a few areas, but over several years.
 
-In order to exploit the output from \code{DetectClustersModel()}, function
-\code{get.stclusters()} will take the data and this output to return a list
-with the indices of the areas in the clusters. The next example shows how to
-add a new variable to \code{brainst} with the space-time regions in the most
-significant cluster, which is displayed in Figure~\ref{fig:NMcluster}.
-
-<<>>=
-stcl <- get.stclusters(brainst, nm.cl0)
-brainst$CLUSTER <- ""
-brainst$CLUSTER[ stcl[[1]] ] <- "CLUSTER"
-@
 
 \begin{figure}[!h]
 \centering
-<<echo = FALSE, fig=TRUE>>=
-print(stplot(brainst[, , "CLUSTER"], at = c(0, 0.5, 1.5), col = "#4D4D4D",
-  col.regions = c("white", "gray")))
+<<echo=FALSE, fig=TRUE, width = 10, height = 5>>=
+
+ny.mapmm0 <- spplot(NY8, c("CLUSTERMM0"), col.regions = c("white", "gray"),
+    col = "#4D4D4D", colorkey = FALSE) + 
+  layer(lpoints(ny.clmm0$x, ny.clmm0$y, pch = 19))
+
+ny.mapmm1 <- spplot(NY8, c("CLUSTERMM1"), col.regions = c("white", "gray"),
+     col = "#4D4D4D", colorkey = FALSE) +
+  layer(lpoints(ny.clmm1$x, ny.clmm1$y, pch = 19))
+
+grid.arrange(ny.mapmm0, ny.mapmm1, ncol = 2)
+
 @
-\caption{Most significant spatio-temporal cluster of brain cancer detected in New Mexico.}
-\label{fig:NMcluster}
+\caption{Clusters detected with no covariate adjustment (left) and after
+adjusting for covariates (right) using a mixed-effects model to account for
+overdispersion of the data.  Areas in clusters are shaded in gray and cluster
+centres are represented by blue dots.}
+\label{fig:NYclmm}
 \end{figure}
 
 
@@ -909,168 +887,198 @@ print(spplot(brainnav, "CLUSTER",  col = "#4D4D4D",
 \end{figure}
 
 
-\section{Mixed-effects models for cluster detection}
-\label{sec:mixed}
 
-Random effects can be incorporated into our models to account for unmeasured
-risk factors. Cluster detection will be performed as usual, but we should keep
-in mind that by including random effects and dummy cluster covariates there may
-be a clash between the two. By using dummy variables we are intentionally
-looking for unexplained spatial variation in the data. Hence, random effects
-should aim at modelling a different structure in the data.
 
-Random effects are particularly useful to model over-dispersion in count data.
-For the Poisson case, this will mean that the relative risk can be modelled as:
 
-\begin{eqnarray}
-\log(\mu_i) & =  &\log(E_i) + \alpha + \beta x_i + \gamma_j c^{(j)}_i + u_i\\
-u_i & \sim &  N(0, \sigma^2_u)
-\end{eqnarray}
+
+\section{Spatio-temporal clusters}
+\label{sec:spacetime}
+
+%\input{NM.tex}
+
+\citet{Jung:2009} discusses how to extend model-based approaches for the
+detection of spatial disease clusters to space and time. 
+\citet{GomezRubioetal:2015} propose the following model:
+
+\begin{equation} 
+\log(\mu_{i,t}) =  \log(E_{i,t}) + \gamma_j c^{(j)}_{i,t}
+\label{eq:stcluster}
+\end{equation}
 \noindent
-where $u_i$ represents a random effect Normally distributed with zero mean and
-variance $\sigma^2_u$. Note that random effects can be defined to be spatially
-correlated, as suggested by \citet{BilanciaDemarinis:2014}. However, this can
-produce a clash between the dummy cluster variables and the random effects.
+\noindent
+where $\mu_{i,t}$ is the mean of area $i$ at time $t$ and $c^{(j)}_{i,t}$ a
+cluster dummy variable for spatio-temporal cluster $j$.  Random effects can
+also be included in equation~(\ref{eq:stcluster}) as described in
+Section~\ref{sec:mixed} and zero-inflated distributions can also be considered
+as in Section~\ref{sec:zeroinfl}.
 
-\subsection{Leukemia in upstate New York}
 
 
+Note how now data are indexed according to space and time. Dummy cluster
+variables are defined as in the spatial case, by considering areas in the
+cluster according to their distance to the cluster centre, for data within a
+particular time period.  When defining a temporal cluster, areas are aggregated
+using all possible temporal windows up to a predefined temporal range.
 
-We go back to the example on the leukemia incidence in upstate New York to show
-how models can include random effects and, at the same time, detect disease
-clusters. In this particular example, random effects will be important in order
-to reflect any over-dispersion present in the data. For this reason, our first
-step here is to test the data for over-dispersion using Dean's $P_B$ and $P'_B$
-score tests \citep[see,][for details]{Dean:1992}.  These two tests have been
-implemented in functions \code{DeanB()} and \code{DeanB2()} in the
-\pkg{DCluster} package.  They both take a \code{glm} object and perform the
-score tests:
 
-<<>>=
-DeanB(ny.m0)
-DeanB2(ny.m0)
+\subsection{Brain cancer in New Mexico}
+
+The \code{brainNM} dataset (included in \pkg{DClusterm}) contains yearly cases
+of brain cancer in New Mexico from 1973 to 1991 (inclusive) in a
+\pkg{spacetime} object. The data set has been taken from the SaTScan website
+and the area boundaries from the U.S.  Census Bureau. In addition, the location
+of Los Alamos National Laboratory (LANL) has been included (from Wikipedia).
+Inverse distance to this site can be used to test for increased risk in the
+areas around the Laboratory as no other covariates are available. 
+
+<<echo = FALSE, eval = FALSE>>=
+library(DClusterm)
+#debug(DetectClustersModel)
+#debug(glmAndZIP.iscluster)
+#debug(CalcStatsAllClusters)
+#library(snowfall)
 @
 
-From the results, it is clear that when no covariates are included data are clearly over-dispersed.
-Hence, a Poisson distribution will not be appropriate to model the observed counts in each
-tract.
-
-The same tests applied to the model with covariates produce a similar result:
-
 <<>>=
-DeanB(ny.m1)
-DeanB2(ny.m1)
+data(brainNM)
 @
 
-Although p-values have increased, they are both small and we may still consider
-that data are over-dispersed. Hence, we will aim at detecting clusters using a
-Poison regression with independent random effects to account for census
-tract-level heterogeneity.
+Expected counts have been obtained using age and sex standardisation over the
+whole period of time. Hence, yearly differences are likely to be seen when
+plotting the data. Standardised Mortality Ratios have been plotted in
+Figure~\ref{fig:NMSMR}.
+
+\begin{figure}[!h]
+\centering
+<<echo=FALSE, fig=TRUE>>=
+print(stplot(brainst[, , "SMR"], cuts = 8, 
+  col.regions = brewer.pal(9, "Oranges")))
+@
+\caption{Standardised Mortality Ratios of brain cancer in New Mexico.}
+\label{fig:NMSMR}
+\end{figure}
+
+
 
 \subsection{Cluster detection}
 
 \subsubsection{Cluster detection with no covariates}
 
-The baseline model with no covariate will now be fitted with function
-\code{glmer()} from package \pkg{lme4} \citep{lme4:2015}. This function
-is similar to \code{glm()} for GLMs but it will allow us to include random
-effects in the model as part of the \code{formula} argument.
+Similarly as in the purely spatial case, a Poisson model with no 
+covariates will be fitted first:
 
 <<>>=
-ny.mm0 <- glmer(Observed ~ offset(log(Expected)) + (1 | AREANAME), 
-  data = as(NY8, "data.frame"), family = "poisson")
-summary(ny.mm0)
+nm.m0 <- glm(Observed ~ offset(log(Expected)) + 1, family = "poisson", 
+  data = brainst)
+summary(nm.m0)
 @
 
-<<eval = TRUE>>=
-ny.clmm0 <- DetectClustersModel(NY8st,
-  thegrid = as.data.frame(NY8)[idxcl, c("x", "y")],
-  fractpop = .15, alpha = 0.05,
-  typeCluster = "S", R = NULL, model0 = ny.mm0)
+Before proceeding to disease cluster detection, we have extracted the centroids
+of the counties in New Mexico by using function \code{coordinates()} from the
+\code{sp} slot in the \code{STIDF} object that stores the data.
+
+
+<<results=hide>>=
+NM.coords <- coordinates(brainst@sp)
 @
+
+Cluster detection with function \code{DetectClustersModel()} takes
+arguments \code{minDateUser} and \code{maxDateUser} to define the minimum and
+maximum times that are considered when looking for clusters. In this example
+the time period has been constrained to 1985--1989.  Furthermore,
+\code{typeCluster = "ST"} is used to look for spatio-temporal clusters.
+
+
+<<results=hide>>=
+nm.cl0 <- DetectClustersModel(brainst, NM.coords,
+  minDateUser = "1985-01-01", maxDateUser = "1989-01-01",
+  fractpop = .15, alpha = 0.05, typeCluster = "ST", R = NULL, 
+  model0 = nm.m0)
+@
+\noindent
+\Sexpr{nrow(nm.cl0)} possible clusters have been found this time. However,
+note that most of them overlap and may be different configurations of the
+same cluster. The first 5
+are summarised below:
+
+<<>>= 
+nm.cl0[1:5,]
+@
+
+\subsubsection{Cluster detection after adjusting for covariates}
+
+In this case, we will use the inverse of the distance to LANL as a covariate as
+no other information about the areas is available. Distances have been computed
+using function \code{spDistsN1()} from package \pkg{sp}. Given that coordinates are expressed in
+longitude and latitude  great circle distances are used.
 
 <<>>=
-ny.clmm0
+dst <- spDistsN1(pts = NM.coords, pt = losalamos, longlat = TRUE)
 @
 
-After accounting for overdispersion, the number of clusters detected is
-\Sexpr{nrow(ny.clmm0)}. These are shown in Figure~\ref{fig:NYclmm}. The largest
-cluster detected before has now disappeared and only the two smallest clusters
-remain.  This may be due to the fact that the first cluster has the smallest
-SMR and risk. Hence, allowing for extra-variation will make the discrepancy
-between observed and expected less extreme and this cluster will be the first
-one to be declared as non-significant.  The two remaining clusters have the
-same size and a very similar risk than in the previous case.
-
-<<eval = FALSE, echo = FALSE>>=
-#Compute SMR in clusters
-cls <- get.knclusters(NY8, ny.cl0)
-lapply(cls, function(X) {
-  res <- c(sum(NY8$Observed[X]), sum(NY8$Expected[X]))
-  c(res, res[1]/res[2])
-})
-
-@
-
-\subsubsection{Cluster detection with covariates}
+Distances need to be put together in a way that values are available for all
+time periods.  In this case, given that distances do not change over time, a
+vector is created by repeating the vector of distances as many times as time
+slots (years) we have in the dataset.
 
 <<>>=
-ny.mm1 <- glmer(Observed ~ offset(log(Expected)) + PCTOWNHOME + 
-  PCTAGE65P + PEXPOSURE + (1 | AREANAME),
-  data = as(NY8, "data.frame"), family = "poisson")
-summary(ny.mm1)
+nyears <- length(unique(brainst$Year))
+brainst$IDLANL <- rep(1/dst, nyears)
 @
 
-
-<<eval = TRUE>>=
-ny.clmm1 <- DetectClustersModel(NY8st,
-  thegrid = as.data.frame(NY8)[idxcl, c("x", "y")],
-  fractpop = .15, alpha = 0.05,
-  typeCluster = "S", R = NULL, model0 = ny.mm1)
-@
+With all these data we are now able to fit a baseline model.
 
 <<>>=
-ny.clmm1
+nm.m1 <- glm(Observed ~ offset(log(Expected)) + IDLANL,
+   family = "poisson", data = brainst)
+summary(nm.m1)
 @
 
-When overdispersion and covariates are included in the model, only one of the
-clusters remains with size 1 and a slightly reduced estimate of the cluster
-coefficient.  This should not come as a surprise given that we have already
-seen how including covariates explains some of the extra-variation and that by
-including random effects the significance of the clusters is also reduced. A
-summary of the clusters detected can be found in Figure~\ref{fig:NYclmm}.
+Note how now the included covariate is not significant. For illustrative
+purposes, we will still keep the covariate in our model for the cluster
+detection. However, non-significant covariates will have a tiny impact on the
+clusters detected as they will not produce a change in the expected number of
+cases.
 
-As in the example in Section~\ref{subsec:ex:NY}, we have created two cluster variables
-to display the clusters obtained:
+<<results=hide>>=
+nm.cl1 <- DetectClustersModel(brainst, NM.coords, fractpop = 0.15, 
+   alpha = 0.05, minDateUser = "1985-01-01", maxDateUser = "1989-01-01",
+   typeCluster = "ST", R = NULL, model0 = nm.m1)
+@
+
+The number of clusters detected in this case is \Sexpr{nrow(nm.cl1)}, very
+similar to the \Sexpr{nrow(nm.cl0)} found when no covariates where included in
+the model. This was expected as the included covariate was not significant.  By
+inspecting the five most significant clusters we can observe that they are very
+similar to the ones detected before:
 
 <<>>=
-NY8$CLUSTERMM0 <- get.allknclusters(NY8, ny.clmm0)
-NY8$CLUSTERMM1 <- get.allknclusters(NY8, ny.clmm1)
+nm.cl1[1:5,]
 @
+\noindent
+Note how these clusters only cover a few areas, but over several years.
 
+In order to exploit the output from \code{DetectClustersModel()}, function
+\code{get.stclusters()} will take the data and this output to return a list
+with the indices of the areas in the clusters. The next example shows how to
+add a new variable to \code{brainst} with the space-time regions in the most
+significant cluster, which is displayed in Figure~\ref{fig:NMcluster}.
+
+<<>>=
+stcl <- get.stclusters(brainst, nm.cl0)
+brainst$CLUSTER <- ""
+brainst$CLUSTER[ stcl[[1]] ] <- "CLUSTER"
+@
 
 \begin{figure}[!h]
 \centering
-<<echo=FALSE, fig=TRUE, width = 10, height = 5>>=
-
-ny.mapmm0 <- spplot(NY8, c("CLUSTERMM0"), col.regions = c("white", "gray"),
-    col = "#4D4D4D", colorkey = FALSE) + 
-  layer(lpoints(ny.clmm0$x, ny.clmm0$y, pch = 19))
-
-ny.mapmm1 <- spplot(NY8, c("CLUSTERMM1"), col.regions = c("white", "gray"),
-     col = "#4D4D4D", colorkey = FALSE) +
-  layer(lpoints(ny.clmm1$x, ny.clmm1$y, pch = 19))
-
-grid.arrange(ny.mapmm0, ny.mapmm1, ncol = 2)
-
+<<echo = FALSE, fig=TRUE>>=
+print(stplot(brainst[, , "CLUSTER"], at = c(0, 0.5, 1.5), col = "#4D4D4D",
+  col.regions = c("white", "gray")))
 @
-\caption{Clusters detected with no covariate adjustment (left) and after
-adjusting for covariates (right) using a mixed-effects model to account for
-overdispersion of the data.  Areas in clusters are shaded in gray and cluster
-centres are represented by blue dots.}
-\label{fig:NYclmm}
+\caption{Most significant spatio-temporal cluster of brain cancer detected in New Mexico.}
+\label{fig:NMcluster}
 \end{figure}
-
 
 
 
