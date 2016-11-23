@@ -116,15 +116,15 @@ distribution that defines some groups of areas with unusual high
 epidemiological risk. Hence, in many occasions it is not clear whether all
 spatial risk factors have been included in our model.
 
-Public health data are often aggregated over small administrative areas because
-of confidentiality issues, but it is not uncommon that individual data are
-available. Generalized Linear Models \citep[GLM,][]{McCullaghNelder:1989} are a
-common framework for disease mapping to model aggregated and individual data.
-GLMs not only model Poisson or Binomial responses, but they can also link the
-outcome to a linear predictor on the covariates (and, possibly, other
-effects).  However, until recently, it was not clear how to use GLMs to detect
-clusters of disease, i.e., a group of contiguous areas with significant high
-risk.
+Public health data are often aggregated over small administrative areas due to
+issues of confidentiality. However, individual data are often available as
+well, and Generalized Linear Models \citep[GLM,][]{McCullaghNelder:1989} are a
+common framework used in disease mapping for modeling aggregated and
+individual-level information.  GLMs not only model Poisson or Binomial
+responses, but they can also link the outcome to a linear predictor on the
+covariates (and, possibly, other effects).  However, until recently, it was not
+clear how to use GLMs to detect clusters of disease, i.e., a group of
+contiguous areas with significant high risk.
 
 In order to detect disease clusters, the most widely used method is probably
 the Spatial Scan Statistic (SSS) proposed by \citet{Kulldorff:1997}. Given a
@@ -139,27 +139,20 @@ H_1: & \theta_z>\theta_{\overline{z}}\\
 \end{array}
 $$
 \noindent
-Here, a likelihood ratio statistic is used.  Many different possible clusters
-are tested in turn  by changing the areas in $z$ and the most likely cluster
-(i.e., the one with the highest value of the test statistic) is selected.
-Significance of this cluster is assessed with a Monte Carlo test that also
-provides the p-value.
+This test is performed via the use of a likelihood ratio statistic, where many
+different possible clusters are tested in turn by changing the areas in $z$ and
+the most likely cluster (i.e., the one with the highest value of the test
+statistic) is selected. Significance of this cluster is assessed with a Monte
+Carlo test that also provides the p-value.
 
-In this paper we will describe a novel approach to disease cluster detection
-that provides a link between GLMs and SSS. We have implemented this approach
-via the freely available \pkg{DClusterm} package for the \proglang{R}
-statistical software.  This approach involves fitting many different GLMs for
-which dummy variables that represent possible clusters are included one at a
-time.  Cluster detection is based on selecting a number of dummy cluster
-variables using variable selection methods.
 
-In this paper we will describe how some methods that provide a link between
-GLMs and SSS which have been implemented in the \pkg{DClusterm} package for the
-\proglang{R} software, so that the detection of disease clusters is approached
-from a regression point of view. As described later, this will involve fitting
-many different GLMs for which dummy variables that represent possible clusters
-are included one at a time.  Cluster detection is based on selecting a number
-of dummy cluster variables using variable selection methods.
+In this paper we describe a novel approach to disease cluster detection that
+provides a link between GLMs and SSS. We have implemented this approach via the
+free, open source \pkg{DClusterm} package for the \proglang{R} statistical
+software. This approach involves fitting many different GLMs for which dummy
+variables that represent possible clusters are included one at a time. Cluster
+detection is based on selecting a number of dummy cluster variables using
+variable selection methods. 
 
 This paper is organized as follows. Section \ref{sec:GLM} will introduce the
 link between GLM and SSS. Next, in Section \ref{sec:mixed} we show how to
@@ -189,44 +182,45 @@ Section \ref{sec:disc}.
 
 \subsection{General description}
 
-\citet{Jung:2009,ZhangLinCSDA:2009} provide an explicit link between GLMs and
-the SSS, and show that the test statistic for a given cluster is equivalent to
-fitting a GLM using a cluster variable as a predictor.  This cluster variable
-is a dummy variable which is 1 for the areas in the cluster and 0 for the areas
-outside the cluster. By including cluster covariates in the model we obtain an
-estimate of the increased risk (as measured by its associated coefficient) and
-its significance (by means of the associated p-value, for example).
+An explicit link between GLM's and the SSS is provided by
+\citet{Jung:2009,ZhangLinCSDA:2009} who show that the test statistic for a
+given cluster is equivalent to fitting a GLM using a cluster variable as
+predictor.  This cluster variable is a dummy variable which is 1 for the areas
+in the cluster and 0 for the areas outside the cluster. By including cluster
+covariates in the model we obtain an estimate of the increased risk (as
+measured by its associated coefficient) and its significance (by means of the
+associated p-value, for example).
 
-For example, for a Poisson model with expected counts $E_i$ we could have the
-following distribution for the observed cases $O_i$:
 
-$$ O_i \sim Po(E_i \theta_i)
+We demonstrate our aproach by first considering a Poisson model with
+expected counts $E_i$ and observed cases $O_i$ modeled as:
+
+
+$$
+O_i \sim Po(E_i \theta_i)
 $$
 
 $$
 \log(\mu_i) = \log(E_i) + \alpha + \beta x_i 
 $$
 \noindent
-We let $\log(E_i)$ denote an offset to account for the population structure (age, gender,
-etc.).  $\theta_i$ is the relative risk and it measures any deviation (increase
-or decrease) in the incidence of the disease from the expected number of cases.
-Finally, $x_i$ represents a covariate with possible risk factors associated with
-the disease.
+Here $\log(E_i)$ denotes an offset to account for the population ``exposure''
+(age, gender, etc.) and   $\theta_i$ is the relative risk and it measures any
+deviation (increase or decrease) in the incidence of the disease from the
+expected number of cases.  Finally, $x_i$ represents a covariate associated
+with the outcome of interest.
 
-Fitting this model will provide estimates $\hat\alpha$ and $\hat\beta$.
-This will account for the (spatial) effects of the covariates. In order
-to include the cluster variable the effects of the covariates will be kept
-fixed. Hence, the cluster covariates will be used in a model with fixed
-coefficients for the covariates:
+After fitting this model, we obtain estimates $\hat\alpha$ and $\hat\beta$
+which account for the effects of non-cluster covariates in the model.  We
+include the cluster covariates as follows:
+
 
 $$
 \log(\mu_i) = \log(E_i) + \hat\alpha + \hat\beta x_i + \gamma_j c_i^{(j)}
 $$
 \noindent
-This means that the offset now is $\log(E_i)+\hat\alpha+\hat\beta x_i$.
-$c_i^{(j)}$ is a dummy cluster variable associated to a cluster $j$,
-with $j$ an index over the list of all possible clusters being tested,  and
-defined as
+The overall intercept is now $\log(E_i) + \hat\alpha + \hat\beta x_i$ and
+$c_i^{(j)}$ denotes a dummy variable associated with cluster $j$, with $j$ denoting an index over the list of all possible clusters being tested, defined as
 
 $$
 c^{(j)}_i=
@@ -238,35 +232,35 @@ c^{(j)}_i=
 \right.
 $$
 \noindent
-Here, $\gamma_j$ is a measure of the risk in the cluster. We are only
+Here, $\gamma_j$ is a measure of the risk within cluster $j$. We are only
 interested in clusters whose coefficient is significantly higher than 0 (i.e.,
-increased risk), hence those with a significant negative coefficient will be
-ignored.  Testing different clusters will produce many different cluster
-covariates.  We can use model selection techniques to select the most important
-cluster in the study region. In particular, the log-likelihood can be used to
-compare the model with the cluster variable to the null model (i.e., the one
-with the covariates only). 
+increased risk). Hence those with a significant negative coefficient will be
+ignored.  We use model selection techniques to select the most important
+cluster in the study region. As such, the log-likelihood can be used to compare
+the model with the cluster variables to the null model (i.e., the one with no
+cluster covariates at all).
 
 %Note that we are interested in clusters with a high risk, and
 %so we are only interested in clusters whose associated coefficient is
 %significantly higher than zero.
 
-Regarding the effect of the covariates, it is possible to perform  cluster
-detection without considering covariates in the model. Then a cluster detection
-accounting for the covariates will likely provide a different number of
-clusters. By comparing the clusters detected in both cases we will be able to
+It is possible to perform cluster detection without considering non-cluster
+based covariates in the model. Here, cluster detection accounting for the
+non-cluster based covariates will likely provide a different number of clusters
+than models fit without these variables.  By comparing the clusters detected in
+both models (with and without non-cluster based covariates), we will be able to
 find which clusters are linked to underlying risk factors included in the model
-and which clusters remain unexplained by the covariates. In the examples that we
-include in this paper we will always consider both scenarios to better
-understand how cluster detection works with these methods.
+and which clusters remain unexplained by these other variables. In the examples
+that we include in this paper, we will consider both scenarios to better
+understand how cluster detection works.
 
-
-\citet{BilanciaDemarinis:2014,GomezRubioetal:2015} describe a similar approach
-to the detection of disease clusters using Bayesian hierarchical models. The
-Integrated Nested Laplace Approximation (INLA) is used in both cases for model
-fitting as it provides computational benefits over other computationally
-expensive methods, such as Markov Chain Monte Carlo.
-
+Similar approaches to detection of disease clusters have been proposed
+by \citet{BilanciaDemarinis:2014,GomezRubioetal:2015} who describe
+a similar approach to the detection of disease clusters using Bayesian
+hierarchical models. The Integrated Nested Laplace Approximation (INLA)
+is used in both cases for model fitting as it provides computational
+benefits over other computationally expensive methods, such as 
+Markov Chain Monte Carlo.
 
 %NY8 Example
 
@@ -436,12 +430,13 @@ Below is a summary of the clusters detected. Dates can be ignored as this is a
 purely spatial cluster analysis. In the case of spatio-temporal clusters, dates
 shown define the temporal range of the cluster.  Values \code{x} and \code{y}
 defined the cluster centre, \code{size} is the number of areas 
-in the cluster, \code{statistic} represents the point estimate of the
-associated cluster coefficient. Also, note that only clusters with a lower
-\code{pvalue} than argument \code{alpha} are returned.  \code{cluster}
-indicates whether the cluster is a significant one. Finally, note how detected
-clusters are ordered by increasing value of \code{pvalue}, so that the most 
-significant clusters are reported first.
+in the cluster, \code{statistic} is the value of the test statistic and
+\code{risk} represents the point estimate of the associated cluster
+coefficient. Also, note that only clusters with a lower \code{pvalue} than
+argument \code{alpha} are returned.  \code{cluster} indicates whether the
+cluster is a significant one. Finally, note how detected clusters are ordered
+by increasing value of \code{pvalue}, so that the most significant clusters are
+reported first.
 
 <<>>=   
 ny.cl0
