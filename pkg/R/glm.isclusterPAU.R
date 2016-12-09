@@ -176,6 +176,7 @@ glmAndZIP.iscluster <- function(stfdf, idxorder, minDateCluster,
           (-2*logLik(model0) + 2*logLik(m1))/2, 0)
        },
        inla = {
+         require(INLA)
          if(is.null(model0$.args$E)) {
            esperados <- model0$summary.fitted.values[, "mean"]
          } else {
