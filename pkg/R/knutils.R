@@ -209,11 +209,7 @@ slimknclusters<-function(d, knresults, minsize = 1)
         clusters <- c()
         while(length(idxcl) > 0)
         {
-
-                print(knresults[idxcl[1], ])
-
                 cl <- idxcl[1]
-
 
                 if(length(idxcl) > 0)
                 {
@@ -226,7 +222,7 @@ slimknclusters<-function(d, knresults, minsize = 1)
                 }
                 else
                 {
-                idxcl <- c() #idxcl[-c(1)]
+                  idxcl <- c() #idxcl[-c(1)]
                 }
 
                 clusters <- c(clusters, cl)
