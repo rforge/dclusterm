@@ -174,10 +174,64 @@ PlotClustersNoOverlap <- function(statsAllClustersNoOverlap, colors, map) {
       nameClusters[indClustersPlot], cex=1, font=2)),
      main = paste("Start date", sortMinDateCluster[i]))
 
-    #FIXME: This is only valid for Windows
-    windows()
-    
+    dev.new()
+
     plot(p1)
     #print(p1, position = c(0+(i-1)/lsort,0,i/lsort,1), more=T)
   }
 }
+
+#' Remove overlapping clusters
+#
+#' This function slims the number of clusters down.
+#' The spatial scan statistic is known to detect duplicated
+#' clusters. This function aims to reduce the number of clusters
+#' by removing duplicated and overlapping clusters.
+#'
+#' @param d Data.frame with data used in the detection of clusters.
+#' @param knresults Object returned by function opgam() with the clusters detected.
+#' @param minsize Minimum size of cluster (default to 1).
+#'
+#' @return A subset of knresults with non-overlaping clusters of at least
+#' minsize size.
+#'
+
+slimknclusters<-function(d, knresults, minsize = 1)
+{
+        #Filter by minsize
+        knresults <- knresults[which(knresults$size >= minsize), ]
+
+        #Ordering according to the test statistic
+        idxcl <- rev(order(knresults$statistic))
+
+        knbin <- knbinary(d, knresults)
+
+        clusters <- c()
+        while(length(idxcl) > 0)
+        {
+
+                print(knresults[idxcl[1], ])
+
+                cl <- idxcl[1]
+
+
+                if(length(idxcl) > 0)
+                {
+                  res <- apply(as.matrix(knbin[, idxcl]), 2,
+                        function(X, clbin){sum(X * clbin)},
+                        clbin = knbin[, cl])
+                   #Here is where we decide what clusters to remove
+                   idxrem <- which(res > 0)
+                   idxcl <- idxcl[-c(1, idxrem)]
+                }
+                else
+                {
+                idxcl <- c() #idxcl[-c(1)]
+                }
+
+                clusters <- c(clusters, cl)
+        }
+
+        return(knresults[clusters, ])
+}
+
