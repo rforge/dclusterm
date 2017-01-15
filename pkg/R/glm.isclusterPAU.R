@@ -20,6 +20,8 @@
 ##' @param maxDateCluster end date of the cluster.
 ##' @param fractpop maximum fraction of the total population inside the cluster.
 ##' @param model0 Initial model (including covariates).
+##' @param ClusterSizeContribution Variable used to check the fraction of the 
+##' population at risk in the cluster
 ##' This can be "glm" for generalized linear models (glm {stats}),
 ##' "glmer" for generalized linear mixed model (glmer {lme4}),
 ##' "zeroinfl" for zero-inflated models (zeroinfl {pscl}), or
@@ -30,7 +32,7 @@
 ##' of the cluster with the maximum log-likelihood ratio or minimum DIC.
 ##'
 glmAndZIP.iscluster <- function(stfdf, idxorder, minDateCluster,
-  maxDateCluster, fractpop, model0) {
+  maxDateCluster, fractpop, model0, ClusterSizeContribution) {
 
   d0 <- stfdf@data
 
@@ -84,8 +86,8 @@ glmAndZIP.iscluster <- function(stfdf, idxorder, minDateCluster,
     d0$CLUSTER <- SetVbleCluster(stfdf, idTime, idSpace)
 
     # cluster size must be smaller than fractpop of the total
-    if((sum(d0$CLUSTER * stfdf[['Expected']]) - 
-     fractpop * sum(stfdf[['Expected']])) < 0) {
+    if((sum(d0$CLUSTER * stfdf[[ClusterSizeContribution]]) - 
+     fractpop * sum(stfdf[[ClusterSizeContribution]])) < 0) {
 
 
       # Formula to refit the cluster coefficient only

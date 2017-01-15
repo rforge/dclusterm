@@ -79,7 +79,7 @@ School of Mathematical Sciences\\
 Queensland University of Technology\\
 GPO Box 2434, Brisbane, QLD 4001, Australia\\
 E-mail: \email{paula.moragaserrano@qut.edu.au}\\
-URL:\url{http://staff.qut.edu.au/staff/moragase/}\\
+URL: \url{http://staff.qut.edu.au/staff/moragase/}\\
 \\
 John Molitor\\
 College of Public Health and Human Sciences\\
@@ -350,7 +350,7 @@ p2 <- spplot(NY8, "PCTOWNHOME", cuts = 8, col.regions = brewer.pal(9, "Blues"),
    main = "PCTOWNHOME")
 p3 <- spplot(NY8, "PCTAGE65P", cuts = 8, col.regions = brewer.pal(9, "Greens"),
    main = "PCTAGE65P")
-p4 <- spplot(NY8, "PEXPOSURE", cuts = 8, col.regions = rev(brewer.pal(9, "Reds")),
+p4 <- spplot(NY8, "PEXPOSURE", cuts = 8, col.regions = brewer.pal(9, "Reds"),
    main = "PEXPOSURE")
 
 #Display plots
@@ -422,7 +422,7 @@ idxcl <- c(120, 12, 89, 139, 146)
 ny.cl0 <- DetectClustersModel(NY8st,
  thegrid = as.data.frame(NY8)[idxcl, c("x", "y")], 
  fractpop = .15, alpha = 0.05, radius = Inf, step = NULL,
- typeCluster = "S", R = NULL, model0 = ny.m0)
+ typeCluster = "S", R = NULL, model0 = ny.m0, ClusterSizeContribution = "POP8")
 @
 
 
@@ -501,7 +501,7 @@ that adjusts for covariates instead:
 ny.cl1<-DetectClustersModel(NY8st, 
   thegrid = as.data.frame(NY8)[idxcl, c("x", "y")], 
   fractpop = .15, alpha = .05,
-  typeCluster = "S", R = NULL, model0 = ny.m1)
+  typeCluster = "S", R = NULL, model0 = ny.m1, ClusterSizeContribution = "POP8")
 @
 
 <<>>=
@@ -629,7 +629,8 @@ summary(ny.mm0)
 ny.clmm0 <- DetectClustersModel(NY8st,
   thegrid = as.data.frame(NY8)[idxcl, c("x", "y")],
   fractpop = .15, alpha = 0.05,
-  typeCluster = "S", R = NULL, model0 = ny.mm0)
+  typeCluster = "S", R = NULL, model0 = ny.mm0,
+  ClusterSizeContribution = "POP8")
 @
 
 <<>>=
@@ -669,7 +670,8 @@ summary(ny.mm1)
 ny.clmm1 <- DetectClustersModel(NY8st,
   thegrid = as.data.frame(NY8)[idxcl, c("x", "y")],
   fractpop = .15, alpha = 0.05,
-  typeCluster = "S", R = NULL, model0 = ny.mm1)
+  typeCluster = "S", R = NULL, model0 = ny.mm1,
+  ClusterSizeContribution = "POP8")
 @
 
 <<>>=
@@ -841,7 +843,7 @@ different types of models in \proglang{R} for cluster detection.
 <<results = hide>>=
 nav.cl0 <- DetectClustersModel(brainnavst, coordinates(brainnav),
   fractpop = 0.25, alpha = 0.05, typeCluster = "S", R = NULL,
-  model0 = nav.m0zip)
+  model0 = nav.m0zip, ClusterSizeContribution = "EXPECTED")
 @
 
 The output will show the following clusters:
@@ -989,7 +991,7 @@ the time period has been constrained to 1985--1989.  Furthermore,
 nm.cl0 <- DetectClustersModel(brainst, NM.coords,
   minDateUser = "1985-01-01", maxDateUser = "1989-01-01",
   fractpop = .15, alpha = 0.05, typeCluster = "ST", R = NULL, 
-  model0 = nm.m0)
+  model0 = nm.m0, ClusterSizeContribution = "Expected")
 @
 \noindent
 \Sexpr{nrow(nm.cl0)} possible clusters have been found this time. However,
@@ -1039,7 +1041,8 @@ cases.
 <<results=hide>>=
 nm.cl1 <- DetectClustersModel(brainst, NM.coords, fractpop = 0.15, 
    alpha = 0.05, minDateUser = "1985-01-01", maxDateUser = "1989-01-01",
-   typeCluster = "ST", R = NULL, model0 = nm.m1)
+   typeCluster = "ST", R = NULL, model0 = nm.m1,
+   ClusterSizeContribution = "Expected")
 @
 
 The number of clusters detected in this case is \Sexpr{nrow(nm.cl1)}, very

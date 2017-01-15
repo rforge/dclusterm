@@ -6,7 +6,8 @@
 \usage{
 DetectClustersModel(stfdf, thegrid = NULL, radius = Inf, step = NULL,
   fractpop, alpha, typeCluster, minDateUser = min(time(stfdf@time)),
-  maxDateUser = max(time(stfdf@time)), R = NULL, model0)
+  maxDateUser = max(time(stfdf@time)), R = NULL, model0,
+  ClusterSizeContribution = "Population")
 }
 \arguments{
 \item{stfdf}{spatio-temporal class object containing the data. See
@@ -41,7 +42,9 @@ or "S" spatial clusters.}
 distribution or DIC, R is NULL. If the cluster's significance is calculated using a
 Monte Carlo procedure, R represents the number replicates under the null hypothesis.}
 
-\item{model0}{Initial model (including covariates).
+\item{model0}{Initial model (including covariates).}
+
+\item{ClusterSizeContribution}{Indicates the variable to be used as the population at risk in the cluster. This is the variable name to be used by 'fractpop' when checking the fraction of the population inside the cluster. The default column name is 'Population'.
 This can be "glm" for generalized linear models (glm {stats}),
 "glmer" for generalized linear mixed model (glmer {lme4}),
 "zeroinfl" for zero-inflated models (zeroinfl {pscl}), or

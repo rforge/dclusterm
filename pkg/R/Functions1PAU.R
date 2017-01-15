@@ -32,6 +32,7 @@
 ##' distribution or DIC, R is NULL. If the cluster's significance is calculated using a
 ##' Monte Carlo procedure, R represents the number replicates under the null hypothesis.
 ##' @param model0 Initial model (including covariates).
+##' @param ClusterSizeContribution Indicates the variable to be used as the population at risk in the cluster. This is the variable name to be used by 'fractpop' when checking the fraction of the population inside the cluster. The default column name is 'Population'.
 ##' This can be "glm" for generalized linear models (glm {stats}),
 ##' "glmer" for generalized linear mixed model (glmer {lme4}),
 ##' "zeroinfl" for zero-inflated models (zeroinfl {pscl}), or
@@ -47,7 +48,7 @@
 DetectClustersModel <- function(stfdf, thegrid = NULL, radius = Inf,
   step = NULL, fractpop, alpha, typeCluster,
   minDateUser = min(time(stfdf@time)), maxDateUser = max(time(stfdf@time)),
-  R = NULL, model0) {
+  R = NULL, model0, ClusterSizeContribution = "Population") {
 
   # Create column with ID. Unique identifier
   stfdf[['ID']] <- 1:nrow(stfdf@data)
@@ -110,7 +111,7 @@ DetectClustersModel <- function(stfdf, thegrid = NULL, radius = Inf,
   # Statistic of each cluster
   statsAllClusters <- CalcStatsAllClusters(thegrid, CalcStatClusterGivenCenter,
     stfdf, rr,  typeCluster, sortDates, idMinDateCluster, idMaxDateCluster,
-    fractpop, model0, numCPUS)
+    fractpop, model0, ClusterSizeContribution, numCPUS)
 
 
   # Remove rows where sizeCluster == -1
@@ -162,7 +163,8 @@ DetectClustersModel <- function(stfdf, thegrid = NULL, radius = Inf,
       # Statistic of each cluster
       statsAllClustersMC <- CalcStatsAllClusters(thegrid, 
         CalcStatClusterGivenCenter, stfdfMC, rr, typeCluster, sortDates, 
-        idMinDateCluster, idMaxDateCluster, fractpop, model0, numCPUS)
+        idMinDateCluster, idMaxDateCluster, fractpop, model0,
+        ClusterSizeContribution,numCPUS)
 
       maxStatisticRReplicas[i] <- max(statsAllClustersMC$statistic)
 

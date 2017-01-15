@@ -6,7 +6,7 @@
 or minimum DIC of all the clusters with the same center and start and end dates.}
 \usage{
 CalcStatClusterGivenCenter(point, stfdf, rr, minDateCluster, maxDateCluster,
-  fractpop, model0)
+  fractpop, model0, ClusterSizeContribution)
 }
 \arguments{
 \item{point}{vector with the coordinates of the center of the cluster.}
@@ -21,7 +21,10 @@ CalcStatClusterGivenCenter(point, stfdf, rr, minDateCluster, maxDateCluster,
 
 \item{fractpop}{maximum fraction of the total population inside the cluster.}
 
-\item{model0}{Initial model (including covariates).
+\item{model0}{Initial model (including covariates).}
+
+\item{ClusterSizeContribution}{Variable used to check the fraction of the 
+population at risk in the cluster
 This can be "glm" for generalized linear models (glm {stats}),
 "glmer" for generalized linear mixed model (glmer {lme4}),
 "zeroinfl" for zero-inflated models (zeroinfl {pscl}), or

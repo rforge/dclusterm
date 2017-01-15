@@ -7,7 +7,7 @@ for each center and start and end dates.}
 \usage{
 CalcStatsAllClusters(thegrid, CalcStatClusterGivenCenter, stfdf, rr,
   typeCluster, sortDates, idMinDateCluster, idMaxDateCluster, fractpop, model0,
-  numCPUS)
+  ClusterSizeContribution, numCPUS)
 }
 \arguments{
 \item{thegrid}{grid with the coordinates of the centers of the clusters
@@ -39,6 +39,9 @@ This can be "glm" for generalized linear models (glm {stats}),
 "glmer" for generalized linear mixed model (glmer {lme4}),
 "zeroinfl" for zero-inflated models (zeroinfl {pscl}), or
 "inla" for generalized linear, generalized linear mixed or zero-inflated models.}
+
+\item{ClusterSizeContribution}{Variable used to check the fraction of the 
+population at risk in the cluster}
 
 \item{numCPUS}{Number of cpus used when using parallel  to run the method.
 If parallel is not used numCPUS is NULL.}

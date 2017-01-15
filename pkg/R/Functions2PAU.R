@@ -67,6 +67,8 @@ CreateGridDClusterm <- function(stfdf, radius, step) {
 ##' "glmer" for generalized linear mixed model (glmer {lme4}),
 ##' "zeroinfl" for zero-inflated models (zeroinfl {pscl}), or
 ##' "inla" for generalized linear, generalized linear mixed or zero-inflated models.
+##' @param ClusterSizeContribution Variable used to check the fraction of the 
+##' population at risk in the cluster
 ##' @param numCPUS Number of cpus used when using parallel  to run the method.
 ##' If parallel is not used numCPUS is NULL.
 ##'
@@ -77,7 +79,7 @@ CreateGridDClusterm <- function(stfdf, radius, step) {
 ##'
 CalcStatsAllClusters <- function(thegrid, CalcStatClusterGivenCenter, stfdf,
   rr, typeCluster, sortDates, idMinDateCluster, idMaxDateCluster, fractpop,
-  model0, numCPUS){
+  model0, ClusterSizeContribution, numCPUS){
 
   # Temporal dimension here, spatial dimension inside glmAndZIP.iscluster
   if(typeCluster == "ST"){
@@ -88,7 +90,7 @@ CalcStatsAllClusters <- function(thegrid, CalcStatClusterGivenCenter, stfdf,
           statClusterGivenCenter <- apply(thegrid, 1, 
             CalcStatClusterGivenCenter, stfdf, rr, 
             minDateCluster = sortDates[i],
-            maxDateCluster = sortDates[j], fractpop, model0)
+            maxDateCluster = sortDates[j], fractpop, model0, ClusterSizeContribution)
         } else {
 
     #SNOWFALL
@@ -102,7 +104,7 @@ CalcStatsAllClusters <- function(thegrid, CalcStatClusterGivenCenter, stfdf,
             statClusterGivenCenter <- parApply(cl = NULL, thegrid, 1, 
             CalcStatClusterGivenCenter, stfdf, rr,
             minDateCluster = sortDates[i], maxDateCluster = sortDates[j], 
-            fractpop, model0)
+            fractpop, model0, ClusterSizeContribution)
         }
 
         statsAllClusters <- 
@@ -119,7 +121,7 @@ CalcStatsAllClusters <- function(thegrid, CalcStatClusterGivenCenter, stfdf,
     if(is.null(numCPUS)) {
       statsAllClusters <- apply(thegrid, 1, CalcStatClusterGivenCenter, stfdf, 
         rr, minDateCluster = sortDates[i], maxDateCluster = sortDates[j],
-        fractpop, model0)
+        fractpop, model0, ClusterSizeContribution)
     } else {
 #SNOWFALL
 #FIXME: Remove this commented code
@@ -131,7 +133,7 @@ CalcStatsAllClusters <- function(thegrid, CalcStatClusterGivenCenter, stfdf,
         statsAllClusters <- parApply(cl = NULL, thegrid, 1, 
           CalcStatClusterGivenCenter, stfdf, 
           rr, minDateCluster = sortDates[i], maxDateCluster = sortDates[j], 
-          fractpop, model0)
+          fractpop, model0, ClusterSizeContribution)
     }
 
     statsAllClusters <- do.call(rbind, statsAllClusters)
@@ -164,6 +166,8 @@ CalcStatsAllClusters <- function(thegrid, CalcStatClusterGivenCenter, stfdf,
 ##' @param maxDateCluster end date of the cluster.
 ##' @param fractpop maximum fraction of the total population inside the cluster.
 ##' @param model0 Initial model (including covariates).
+##' @param ClusterSizeContribution Variable used to check the fraction of the 
+##' population at risk in the cluster
 ##' This can be "glm" for generalized linear models (glm {stats}),
 ##' "glmer" for generalized linear mixed model (glmer {lme4}),
 ##' "zeroinfl" for zero-inflated models (zeroinfl {pscl}), or
@@ -174,7 +178,7 @@ CalcStatsAllClusters <- function(thegrid, CalcStatClusterGivenCenter, stfdf,
 ##' the risk of the cluster with the maximum log-likelihood ratio or minimum DIC.
 ##'
 CalcStatClusterGivenCenter <- function(point, stfdf, rr, minDateCluster,
-  maxDateCluster, fractpop, model0) {
+  maxDateCluster, fractpop, model0, ClusterSizeContribution) {
 
 
   coordx <- coordinates(stfdf@sp)[, 1]
@@ -192,7 +196,7 @@ CalcStatClusterGivenCenter <- function(point, stfdf, rr, minDateCluster,
   idxorder <- idxorder[idx[idxorder]]
 
   cl <- glmAndZIP.iscluster(stfdf = stfdf, idxorder = idxorder, 
-    minDateCluster, maxDateCluster, fractpop, model0)
+    minDateCluster, maxDateCluster, fractpop, model0, ClusterSizeContribution)
   return( cbind(data.frame(x = point[1], y = point[2]), cl) )
 }
 
