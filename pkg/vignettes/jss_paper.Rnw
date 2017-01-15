@@ -39,15 +39,15 @@ options(prompt = "R> ", continue = "+  ", width = 70, useFancyQuotes = FALSE)
 
 %% an abstract and keywords
 \Abstract{
-The detection of regions with unusual high risk plays an important role in
+The detection of regions with unusually high risk plays an important role in
 disease mapping and the analysis of public health data. In particular, the
 detection of groups of areas (i.e., clusters) where the risk is significantly 
 high is often conducted by Public Health authorities.
 
-Many methods have been proposed for the detection of disease clusters, most of
-them based on moving windows, such as Kulldorff's Spatial Scan Statistics
-(SSS).  Here we describe a model-based approach for the detection of disease
-clusters implemented in the \pkg{DClusterm} package. Our model-based
+Many methods have been proposed for the detection of these disease clusters,
+most of them based on moving windows, such as Kulldorff's Spatial Scan
+Statistics (SSS).  Here we describe a model-based approach for the detection of
+disease clusters implemented in the \pkg{DClusterm} package. Our model-based
 approach is based on representing a large number of possible clusters by dummy
 variables and then fitting many generalized linear models to the data where
 these covariates are included one at a time. Cluster detection is done by
@@ -123,7 +123,7 @@ common framework used in disease mapping for modeling aggregated and
 individual-level information.  GLMs not only model Poisson or Binomial
 responses, but they can also link the outcome to a linear predictor on the
 covariates (and, possibly, other effects).  However, until recently, it was not
-clear how to use GLMs to detect clusters of disease, i.e., a group of
+clear how to use GLMs to detect clusters of disease, a group of
 contiguous areas with significant high risk.
 
 In order to detect disease clusters, the most widely used method is probably
@@ -148,11 +148,11 @@ Carlo test that also provides the p-value.
 
 In this paper we describe a novel approach to disease cluster detection that
 provides a link between GLMs and SSS. We have implemented this approach via the
-free, open source \pkg{DClusterm} package for the \proglang{R} statistical
-software. This approach involves fitting many different GLMs for which dummy
-variables that represent possible clusters are included one at a time. Cluster
-detection is based on selecting a number of dummy cluster variables using
-variable selection methods. 
+free and open source \pkg{DClusterm} package for the \proglang{R} statistical
+software \citep{R:2016}. This approach involves fitting many different GLMs for
+which dummy variables that represent possible clusters are included one at a
+time. Cluster detection is based on selecting a number of dummy cluster
+variables using variable selection methods. 
 
 This paper is organized as follows. Section \ref{sec:GLM} will introduce the
 link between GLM and SSS. Next, in Section \ref{sec:mixed} we show how to
@@ -205,7 +205,7 @@ $$
 $$
 \noindent
 Here $\log(E_i)$ denotes an offset to account for the population ``exposure''
-(age, gender, etc.) and   $\theta_i$ is the relative risk and it measures any
+(age, gender, etc.) and  $\theta_i$ is the relative risk and it measures any
 deviation (increase or decrease) in the incidence of the disease from the
 expected number of cases.  Finally, $x_i$ represents a covariate associated
 with the outcome of interest.
@@ -308,7 +308,7 @@ NY8$Observed <- round(NY8$Cases)
 
 NY8$Expected  <- NY8$POP8 * sum(NY8$Observed) / sum(NY8$POP8)
 
-NY8$SMR <- NY8$Observed/NY8$Expected
+NY8$SMR <- NY8$Observed / NY8$Expected
 @
 
 The centres of the areas will be stored in columns named \code{x} and \code{y}.
@@ -323,7 +323,8 @@ NY8$y <- coordinates(NY8)[, 2]
 @
 
 As \pkg{DClusterm} is designed to detect clusters in space and time, it will
-always expect data to be from one of the classes in package \pkg{spacetime} to
+always expect data to be from one of the classes in package \pkg{spacetime} 
+\citep{Pebesma:2012} to
 store all the data, even if they are available for a single period of time. In
 this case, a \code{STFDF} object is created to store all the data but note that
 in this case we do not have a truly space-time dataset. Hence, the time series
@@ -344,14 +345,14 @@ library(RColorBrewer)
 
 #Save plots
 p1 <- spplot(NY8, "SMR", cuts = 8, col.regions = brewer.pal(9, "Oranges"),
-   main = "Standardised Mortality Ratio", 
+  main = "Standardised Mortality Ratio", 
   sp.layout = list(list("sp.points", TCE, col = "red")))
 p2 <- spplot(NY8, "PCTOWNHOME", cuts = 8, col.regions = brewer.pal(9, "Blues"),
-   main = "PCTOWNHOME")
+  main = "PCTOWNHOME")
 p3 <- spplot(NY8, "PCTAGE65P", cuts = 8, col.regions = brewer.pal(9, "Greens"),
-   main = "PCTAGE65P")
+  main = "PCTAGE65P")
 p4 <- spplot(NY8, "PEXPOSURE", cuts = 8, col.regions = brewer.pal(9, "Reds"),
-   main = "PEXPOSURE")
+  main = "PEXPOSURE")
 
 #Display plots
 print(p1, position = c(0, 0.5, 0.5, 1), more = TRUE)
@@ -390,10 +391,12 @@ Argument \code{thegrid} will take a 2-column \code{data.frame} (with names
 centres is not defined, then a rectangular grid is used with a distance between
 adjacent points defined by argument \code{step}.  Dummy cluster variables are
 created around these points by adding areas to the cluster until a certain
-percentage of the population (defined by argument \code{fractpop}) or until a
-certain distance about the centre (defined by argument \code{radius}) has been
-reached. When testing for significant cluster variables, argument \code{alpha}
-defines the significance level.
+percentage of the population (defined by argument \code{fractpop}), with the
+column to be used to compute the population at risk in the cluster defined by
+parameter \code{ClusterSizeContribution}, or until a certain distance about the
+centre (defined by argument \code{radius}) has been reached. When testing for
+significant cluster variables, argument \code{alpha} defines the significance
+level.
 
 \code{DetectClustersModel()} can detect spatial and spatio-temporal clusters,
 which is why its first argument is a space-time object. The type of 
@@ -420,9 +423,10 @@ locations (area centroids or actual locations of individual data).
 <<results=hide>>=
 idxcl <- c(120, 12, 89, 139, 146)
 ny.cl0 <- DetectClustersModel(NY8st,
- thegrid = as.data.frame(NY8)[idxcl, c("x", "y")], 
- fractpop = .15, alpha = 0.05, radius = Inf, step = NULL,
- typeCluster = "S", R = NULL, model0 = ny.m0, ClusterSizeContribution = "POP8")
+  thegrid = as.data.frame(NY8)[idxcl, c("x", "y")], 
+  fractpop = 0.15, alpha = 0.05, radius = Inf, step = NULL,
+  typeCluster = "S", R = NULL, model0 = ny.m0,
+  ClusterSizeContribution = "POP8")
 @
 
 
@@ -486,7 +490,6 @@ factors. First of all, we will fit a Poisson regression with the 3 covariates
 mentioned earlier. As it can be seen, all three are significant:
 
 <<>>=
-form.m1 <- 
 ny.m1 <- glm(Observed ~ offset(log(Expected)) + PCTOWNHOME + PCTAGE65P + 
   PEXPOSURE, family = "poisson", data = NY8)
 summary(ny.m1)
@@ -498,10 +501,11 @@ detection is performed as in the previous example, but now we use the model
 that adjusts for covariates instead:
 
 <<results=hide>>=
-ny.cl1<-DetectClustersModel(NY8st, 
+ny.cl1 <- DetectClustersModel(NY8st, 
   thegrid = as.data.frame(NY8)[idxcl, c("x", "y")], 
-  fractpop = .15, alpha = .05,
-  typeCluster = "S", R = NULL, model0 = ny.m1, ClusterSizeContribution = "POP8")
+  fractpop = 0.15, alpha = 0.05,
+  typeCluster = "S", R = NULL, model0 = ny.m1,
+  ClusterSizeContribution = "POP8")
 @
 
 <<>>=
@@ -533,11 +537,11 @@ library(gridExtra)
 library(latticeExtra)
 
 ny.map0 <- spplot(NY8, c("CLUSTER0"), col.regions = c("white", "gray"),
-    col = "#4D4D4D", colorkey = FALSE) +
+  col = "#4D4D4D", colorkey = FALSE) +
   layer(lpoints(ny.cl0$x, ny.cl0$y, pch = 19))
 
 ny.map1 <- spplot(NY8, c("CLUSTER1"), col.regions = c("white", "gray"),
-     col = "#4D4D4D", colorkey = FALSE) +
+  col = "#4D4D4D", colorkey = FALSE) +
   layer(lpoints(ny.cl1$x, ny.cl1$y, pch = 19))
 
 grid.arrange(ny.map0, ny.map1, ncol = 2)
@@ -570,7 +574,7 @@ For the Poisson case, this will mean that the relative risk can be modelled as:
 u_i & \sim &  N(0, \sigma^2_u)
 \end{eqnarray}
 \noindent
-where $u_i$ represents a random effect Normally distributed with zero mean and
+where $u_i$ represents a random effect normally distributed with zero mean and
 variance $\sigma^2_u$. Note that random effects can be defined to be spatially
 correlated, as suggested by \citet{BilanciaDemarinis:2014}. However, this can
 produce a clash between the dummy cluster variables and the random effects.
@@ -586,8 +590,8 @@ to reflect any over-dispersion present in the data. For this reason, our first
 step here is to test the data for over-dispersion using Dean's $P_B$ and $P'_B$
 score tests \citep[see,][for details]{Dean:1992}.  These two tests have been
 implemented in functions \code{DeanB()} and \code{DeanB2()} in the
-\pkg{DCluster} package.  They both take a \code{glm} object and perform the
-score tests:
+\pkg{DCluster} \citep{DCluster:2005} package.  They both take a \code{glm}
+object and perform the score tests:
 
 <<>>=
 DeanB(ny.m0)
@@ -625,11 +629,10 @@ ny.mm0 <- glmer(Observed ~ offset(log(Expected)) + (1 | AREANAME),
 summary(ny.mm0)
 @
 
-<<eval = TRUE>>=
+<<eval = TRUE, results = hide>>=
 ny.clmm0 <- DetectClustersModel(NY8st,
-  thegrid = as.data.frame(NY8)[idxcl, c("x", "y")],
-  fractpop = .15, alpha = 0.05,
-  typeCluster = "S", R = NULL, model0 = ny.mm0,
+  thegrid = as.data.frame(NY8)[idxcl, c("x", "y")], fractpop = 0.15,
+  alpha = 0.05, typeCluster = "S", R = NULL, model0 = ny.mm0,
   ClusterSizeContribution = "POP8")
 @
 
@@ -666,11 +669,10 @@ summary(ny.mm1)
 @
 
 
-<<eval = TRUE>>=
+<<eval = TRUE, results = hide>>=
 ny.clmm1 <- DetectClustersModel(NY8st,
-  thegrid = as.data.frame(NY8)[idxcl, c("x", "y")],
-  fractpop = .15, alpha = 0.05,
-  typeCluster = "S", R = NULL, model0 = ny.mm1,
+  thegrid = as.data.frame(NY8)[idxcl, c("x", "y")], fractpop = 0.15,
+  alpha = 0.05, typeCluster = "S", R = NULL, model0 = ny.mm1,
   ClusterSizeContribution = "POP8")
 @
 
@@ -699,11 +701,11 @@ NY8$CLUSTERMM1 <- get.allknclusters(NY8, ny.clmm1)
 <<echo=FALSE, fig=TRUE, width = 10, height = 5>>=
 
 ny.mapmm0 <- spplot(NY8, c("CLUSTERMM0"), col.regions = c("white", "gray"),
-    col = "#4D4D4D", colorkey = FALSE) + 
+  col = "#4D4D4D", colorkey = FALSE) + 
   layer(lpoints(ny.clmm0$x, ny.clmm0$y, pch = 19))
 
 ny.mapmm1 <- spplot(NY8, c("CLUSTERMM1"), col.regions = c("white", "gray"),
-     col = "#4D4D4D", colorkey = FALSE) +
+  col = "#4D4D4D", colorkey = FALSE) +
   layer(lpoints(ny.clmm1$x, ny.clmm1$y, pch = 19))
 
 grid.arrange(ny.mapmm0, ny.mapmm1, ncol = 2)
@@ -736,7 +738,7 @@ Pr(O_i=n_i)=
 \left\{
 \begin{array}{ll}
 \pi_i+(1-\pi_i)Po(0|\theta_iE_i) & n_i=0\\
-(1-\pi_i)Po(n_i|\theta_iE_i) & n_i=1,2,\ldots\\
+(1-\pi_i)Po(n_i|\theta_iE_i) & n_i=1, 2, \ldots\\
 \end{array}
 \right.
 $$
@@ -810,7 +812,8 @@ The dispersion parameter in the previous model seems to be higher than 1,
 which may mean that the Poisson distribution is not appropriate.
 
 For this reason, and following \citet{Ugarteetal:2004}, a zero-inflated Poisson
-model has been fitted using function \code{zeroinfl()} from package \pkg{pscl}.
+model has been fitted using function \code{zeroinfl()} from package \pkg{pscl}
+\citep{pscl:2008}.
 Here is the resulting model:
 
 
@@ -990,7 +993,7 @@ the time period has been constrained to 1985--1989.  Furthermore,
 <<results=hide>>=
 nm.cl0 <- DetectClustersModel(brainst, NM.coords,
   minDateUser = "1985-01-01", maxDateUser = "1989-01-01",
-  fractpop = .15, alpha = 0.05, typeCluster = "ST", R = NULL, 
+  fractpop = 0.15, alpha = 0.05, typeCluster = "ST", R = NULL, 
   model0 = nm.m0, ClusterSizeContribution = "Expected")
 @
 \noindent
@@ -1007,8 +1010,9 @@ nm.cl0[1:5,]
 
 In this case, we will use the inverse of the distance to LANL as a covariate as
 no other information about the areas is available. Distances have been computed
-using function \code{spDistsN1()} from package \pkg{sp}. Given that coordinates are expressed in
-longitude and latitude  great circle distances are used.
+using function \code{spDistsN1()} from package \pkg{sp} \citep{sp:2005}. Given
+that coordinates are expressed in longitude and latitude  great circle
+distances are used.
 
 <<>>=
 dst <- spDistsN1(pts = NM.coords, pt = losalamos, longlat = TRUE)
@@ -1021,14 +1025,14 @@ slots (years) we have in the dataset.
 
 <<>>=
 nyears <- length(unique(brainst$Year))
-brainst$IDLANL <- rep(1/dst, nyears)
+brainst$IDLANL <- rep(1 / dst, nyears)
 @
 
 With all these data we are now able to fit a baseline model.
 
 <<>>=
 nm.m1 <- glm(Observed ~ offset(log(Expected)) + IDLANL,
-   family = "poisson", data = brainst)
+  family = "poisson", data = brainst)
 summary(nm.m1)
 @
 
@@ -1040,9 +1044,9 @@ cases.
 
 <<results=hide>>=
 nm.cl1 <- DetectClustersModel(brainst, NM.coords, fractpop = 0.15, 
-   alpha = 0.05, minDateUser = "1985-01-01", maxDateUser = "1989-01-01",
-   typeCluster = "ST", R = NULL, model0 = nm.m1,
-   ClusterSizeContribution = "Expected")
+  alpha = 0.05, minDateUser = "1985-01-01", maxDateUser = "1989-01-01",
+  typeCluster = "ST", R = NULL, model0 = nm.m1,
+  ClusterSizeContribution = "Expected")
 @
 
 The number of clusters detected in this case is \Sexpr{nrow(nm.cl1)}, very
@@ -1102,18 +1106,18 @@ non-spatial unmeasured risk factors) can be put in the linear predictor as
 well.
 
 In our examples we have considered well-known datasets to show how the
-functions in \pkg{DClusterm} tackle the problem of cluster detection.  The
-results are similar to those found in relevant papers where the same datasets
-have been analyzed using a similar methodology.  In particular, we have
-considered the case of the detection of clusters in space and space-time,
-zero-inflated data and over-dispersed data. 
+functions in the \pkg{DClusterm} package tackle the problem of cluster
+detection.  The results are similar to those found in relevant papers where the
+same datasets have been analyzed using a similar methodology.  In particular,
+we have considered the case of the detection of clusters in space and
+space-time, zero-inflated data and over-dispersed data. 
 
 
 
 \section{Acknowledgments}
 
 This package was initially developed by Paula Moraga as a Google Summer of Code
-Project.  Virgilio G\'omez-Rubio has been supported by grant PPIC-2014-001,
+project.  Virgilio G\'omez-Rubio has been supported by grant PPIC-2014-001,
 funded by Consejer\'ia de Educaci\'on, Cultura y Deportes (JCCM) and FEDER, and
 grant MTM2016-77501-P, funded by Ministerio de Econom\'ia y Competitividad.
 
