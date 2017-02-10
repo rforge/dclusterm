@@ -46,7 +46,7 @@ high is often conducted by Public Health authorities.
 
 Many methods have been proposed for the detection of these disease clusters,
 most of them based on moving windows, such as Kulldorff's Spatial Scan
-Statistics (SSS).  Here we describe a model-based approach for the detection of
+Statistics.  Here we describe a model-based approach for the detection of
 disease clusters implemented in the \pkg{DClusterm} package. Our model-based
 approach is based on representing a large number of possible clusters by dummy
 variables and then fitting many generalized linear models to the data where
@@ -132,12 +132,12 @@ possible cluster $z$, the SSS will compare the relative risk in the cluster
 $\theta_z$ to the relative risk outside the cluster $\theta_{\overline{z}}$
 using the following test:
 
-$$
+\begin{equation}
 \begin{array}{cc}
 H_0: & \theta_z=\theta_{\overline{z}}\\
 H_1: & \theta_z>\theta_{\overline{z}}\\
 \end{array}
-$$
+\end{equation}
 \noindent
 This test is performed via the use of a likelihood ratio statistic, where many
 different possible clusters are tested in turn by changing the areas in $z$ and
@@ -289,10 +289,10 @@ Hence, our first action is to load some required packages \citep{xts:2014} and
 the dataset itself.
 
 <<results = hide>>=
-library(DClusterm)
-library(xts)
+library("DClusterm")
+library("xts")
 
-data(NY8)
+data("NY8")
 @
 
 A number of cases could not be linked to their actual location and they were
@@ -341,7 +341,7 @@ NY8st <- STFDF(as(NY8, "SpatialPolygons"), xts(1, as.Date("1972-01-01")),
 \begin{figure}[h]
 \centering
 <<fig=TRUE, echo=FALSE>>=
-library(RColorBrewer)
+library("RColorBrewer")
 
 #Save plots
 p1 <- spplot(NY8, "SMR", cuts = 8, col.regions = brewer.pal(9, "Oranges"),
@@ -533,8 +533,8 @@ the covariates.
 \begin{figure}[!h]
 \centering
 <<echo=FALSE, fig=TRUE, width = 10, height = 5>>=
-library(gridExtra)
-library(latticeExtra)
+library("gridExtra")
+library("latticeExtra")
 
 ny.map0 <- spplot(NY8, c("CLUSTER0"), col.regions = c("white", "gray"),
   col = "#4D4D4D", colorkey = FALSE) +
@@ -624,7 +624,7 @@ is similar to \code{glm()} for GLMs but it will allow us to include random
 effects in the model as part of the \code{formula} argument.
 
 <<>>=
-library(lme4)
+library("lme4")
 ny.mm0 <- glmer(Observed ~ offset(log(Expected)) + (1 | AREANAME), 
   data = as(NY8, "data.frame"), family = "poisson")
 summary(ny.mm0)
@@ -768,11 +768,11 @@ detection of disease clusters of rare diseases.
 
 
 <<echo=FALSE, results=hide>>=
-library(DClusterm)
+library("DClusterm")
 #library(snowfall)
 #library(pscl)
 
-data(Navarre)
+data("Navarre")
 @
 
 
@@ -819,7 +819,7 @@ Here is the resulting model:
 
 
 <<>>=
-library(pscl)
+library("pscl")
 nav.m0zip <- zeroinfl(OBSERVED ~ offset(log(EXPECTED)) + 1 | 1,
   data = brainnav, dist = "poisson", x = TRUE)
 summary(nav.m0zip)
@@ -935,7 +935,7 @@ Inverse distance to this site can be used to test for increased risk in the
 areas around the Laboratory as no other covariates are available. 
 
 <<echo = FALSE, eval = FALSE>>=
-library(DClusterm)
+library("DClusterm")
 #debug(DetectClustersModel)
 #debug(glmAndZIP.iscluster)
 #debug(CalcStatsAllClusters)
@@ -943,7 +943,7 @@ library(DClusterm)
 @
 
 <<>>=
-data(brainNM)
+data("brainNM")
 @
 
 Expected counts have been obtained using age and sex standardization over the
