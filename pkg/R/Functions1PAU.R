@@ -1,6 +1,6 @@
-##' Detects clusters and computes their significance.
+##' @title Detects clusters and computes their significance.
 ##' 
-##' Searches all possible clusters with start and end dates within minDateUser
+##' @description Searches all possible clusters with start and end dates within minDateUser
 ##' and maxDateUser, so that the maximum fraction of the total population inside
 ##' the cluster is less than fractpop, and the maximum distance to the center is
 ##' less than radius.
@@ -238,9 +238,9 @@ DetectClustersModel <- function(stfdf, thegrid = NULL, radius = Inf,
 
 
 
-##' Removes the overlapping clusters.
+##' @title Removes the overlapping clusters.
 ##' 
-##' Function DetectClustersModel() detects duplicated clusters.
+##' @description Function DetectClustersModel() detects duplicated clusters.
 ##' This function reduces the number of clusters by removing the overlapping
 ##' clusters.
 ##'

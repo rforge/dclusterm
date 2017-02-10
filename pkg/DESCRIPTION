@@ -24,4 +24,4 @@ Collate:
     'Functions2PAU.R'
     'glm.isclusterPAU.R'
     'knutils.R'
-RoxygenNote: 5.0.1
+RoxygenNote: 6.0.0

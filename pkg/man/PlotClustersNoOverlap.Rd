@@ -25,4 +25,3 @@ This function plots the detected clusters that do not overlap.
 There are as many windows as different start dates. All clusters
 with the same start date are represented in the same window.
 }
-

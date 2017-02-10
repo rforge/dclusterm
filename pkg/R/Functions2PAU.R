@@ -1,6 +1,6 @@
-##' Creates grid over the study area.
+##' @title Creates grid over the study area.
 ##' 
-##' If the argument thegrid of DetectClustersModel() is null, this function is
+##' @description If the argument thegrid of DetectClustersModel() is null, this function is
 ##' used to create a rectangular grid with a given step.
 ##' If step is NULL the step used is equal to 0.2*radius.
 ##' The grid contains the coordinates of the centers of the clusters explored.
@@ -38,10 +38,10 @@ CreateGridDClusterm <- function(stfdf, radius, step) {
 
 
 
-##' Obtains the clusters with the maximum log-likelihood ratio or minimum DIC
+##' @title Obtains the clusters with the maximum log-likelihood ratio or minimum DIC
 ##' for each center and start and end dates.
 ##' 
-##' This function explores all possible clusters changing their center and start
+##' @description This function explores all possible clusters changing their center and start
 ##' and end dates. For each center and time periods, it obtains the cluster with
 ##' the maximum log-likelihood ratio or minimum DIC so that the maximum fraction
 ##' of the total population inside the cluster is less than fractpop, 
@@ -149,10 +149,10 @@ CalcStatsAllClusters <- function(thegrid, CalcStatClusterGivenCenter, stfdf,
 
 
 
-##' Calls the function to obtain the cluster with the maximum log-likelihood ratio
+##' @title Calls the function to obtain the cluster with the maximum log-likelihood ratio
 ##' or minimum DIC of all the clusters with the same center and start and end dates.
 ##' 
-##' This function orders the regions according to the distance to a given center
+##' @description This function orders the regions according to the distance to a given center
 ##' and selects the regions with distance to the center less than sqrt(rr).
 ##' Then it calls glmAndZIP.iscluster() to obtain the cluster with the maximum
 ##' log-likelihood ratio or minimum DIC of all the clusters with the same center

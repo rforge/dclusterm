@@ -68,4 +68,3 @@ The significance of the clusters is obtained with a Monte Carlo procedure
 or based on the chi-square distribution (glm, glmer or zeroinfl models)
 or DIC (inla models).
 }
-

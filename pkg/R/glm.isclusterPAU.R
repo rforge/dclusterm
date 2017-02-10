@@ -1,7 +1,7 @@
-##' Obtains the cluster with the maximum log-likelihood ratio or minimum DIC
+##' @title Obtains the cluster with the maximum log-likelihood ratio or minimum DIC
 ##' of all the clusters with the same center and start and end dates.
 ##' 
-##' This function constructs all the clusters with start date equal to
+##' @description This function constructs all the clusters with start date equal to
 ##' minDateCluster, end date equal to maxDateCluster, and with center specified
 ##' by the first element of idxorder, so that the maximum fraction of the total
 ##' population inside the cluster is less than fractpop, and the maximum
@@ -225,10 +225,10 @@ glmAndZIP.iscluster <- function(stfdf, idxorder, minDateCluster,
 
 
 
-##' Constructs a variable that indicates the locations and times that pertain
+##' @title Constructs a variable that indicates the locations and times that pertain
 ##' to a cluster.
 ##' 
-##' This function constructs a variable that indicates the locations and times
+##' @description This function constructs a variable that indicates the locations and times
 ##' that pertain to a cluster. Each position of the variable is equal to 1 if
 ##' it corresponds to a location and time inside the cluster, and 0 otherwise.
 ##' This is one of the explanatory variables used in the glmAndZIP.iscluster

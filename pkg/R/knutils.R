@@ -1,6 +1,6 @@
-##' Computes the probability that a model parameter is <=k from inla marginals
+##' @title Computes the probability that a model parameter is <=k from inla marginals
 ##'
-##' This function will be used to calculate the P(coeficient variable cluster <=0)
+##' @description This function will be used to calculate the P(coeficient variable cluster <=0)
 ##'
 ##' @param func is the inla marginals of the model parameter
 ##' @param k is the cutoff
@@ -23,9 +23,9 @@ computeprob <- function(func, k) {
 
 
 
-##' Gets areas in a spatio-temporal cluster
+##' @title Gets areas in a spatio-temporal cluster
 ##
-##' This function is similar to get.knclusters but it also allows
+##' @description This function is similar to get.knclusters but it also allows
 ##' for spatio-temporal clusters.
 ##
 ##' @param stfdf A sp or spacetime object with the information about the data.
@@ -66,9 +66,9 @@ get.stclusters <- function(stfdf, results) {
 
 
 
-##' Constructs data frame with clusters in binary format.
+##' @title Constructs data frame with clusters in binary format.
 ##'
-##' This function constructs a data frame with number of columns equal to the
+##' @description This function constructs a data frame with number of columns equal to the
 ##' number of clusters. Each column is a binary representation of one of the
 ##' clusters. The position i of the column is equal to 1 if the polygon i is
 ##' in the cluster or 0 if it is not in the cluster.
@@ -99,12 +99,12 @@ knbinary <- function(datamap, knresults) {
 }
 
 
-##' Merges clusters so that they are identifed as levels of a factor.
+##' @title Merges clusters so that they are identifed as levels of a factor.
 ##'
-##' Given a data frame with clusters that do not overlap 
+##' @description Given a data frame with clusters that do not overlap 
 ##' this function merges the clusters and construct a factor.
 ##' The levels of the factor are "NCL" if the polygon of the map is not
-##' in any cluster, and "CLi" if the polygon i is in cluster i.
+##' in any cluster, and "CL" if the polygon i is in cluster i.
 ##'
 ##' @param datamap data of the SpatialPolygonsDataFrame with the polygons
 ##' of the map.
@@ -127,9 +127,9 @@ mergeknclusters <- function(datamap, knresults, indClustersPlot) {
 
 
 
-##' Plots the clusters that do not overlap.
+##' @title Plots the clusters that do not overlap.
 ##' 
-##' This function plots the detected clusters that do not overlap.
+##' @description This function plots the detected clusters that do not overlap.
 ##' There are as many windows as different start dates. All clusters
 ##' with the same start date are represented in the same window.
 ##'
@@ -181,9 +181,9 @@ PlotClustersNoOverlap <- function(statsAllClustersNoOverlap, colors, map) {
   }
 }
 
-#' Remove overlapping clusters
+#' @title Remove overlapping clusters
 #
-#' This function slims the number of clusters down.
+#' @description This function slims the number of clusters down.
 #' The spatial scan statistic is known to detect duplicated
 #' clusters. This function aims to reduce the number of clusters
 #' by removing duplicated and overlapping clusters.

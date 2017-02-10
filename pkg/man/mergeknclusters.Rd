@@ -25,6 +25,5 @@ factor with levels that represent the clusters.
 Given a data frame with clusters that do not overlap 
 this function merges the clusters and construct a factor.
 The levels of the factor are "NCL" if the polygon of the map is not
-in any cluster, and "CLi" if the polygon i is in cluster i.
+in any cluster, and "CL" if the polygon i is in cluster i.
 }
-

@@ -27,4 +27,3 @@ it corresponds to a location and time inside the cluster, and 0 otherwise.
 This is one of the explanatory variables used in the glmAndZIP.iscluster
 function to model the observed cases.
 }
-

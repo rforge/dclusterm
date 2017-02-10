@@ -43,4 +43,3 @@ log-likelihood ratio or minimum DIC of all the clusters with the same center
 and start and end dates, and where the maximum fraction of the total
 population inside the cluster is less than fractpop.
 }
-

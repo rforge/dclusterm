@@ -22,4 +22,3 @@ used to create a rectangular grid with a given step.
 If step is NULL the step used is equal to 0.2*radius.
 The grid contains the coordinates of the centers of the clusters explored.
 }
-

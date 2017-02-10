@@ -59,4 +59,3 @@ the maximum log-likelihood ratio or minimum DIC so that the maximum fraction
 of the total population inside the cluster is less than fractpop, 
 and the maximum distance to the center is less than radius.
 }
-

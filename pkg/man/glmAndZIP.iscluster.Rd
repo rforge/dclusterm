@@ -47,4 +47,3 @@ or the DIC (if model is inla) is calculated.
 The cluster with maximum value of the log-likelihood ratio or
 minimum DIC is returned.
 }
-

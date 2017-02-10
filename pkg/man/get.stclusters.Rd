@@ -2,9 +2,7 @@
 % Please edit documentation in R/knutils.R
 \name{get.stclusters}
 \alias{get.stclusters}
-\title{Gets areas in a spatio-temporal cluster
-This function is similar to get.knclusters but it also allows
-for spatio-temporal clusters.}
+\title{Gets areas in a spatio-temporal cluster}
 \usage{
 get.stclusters(stfdf, results)
 }
@@ -17,8 +15,6 @@ get.stclusters(stfdf, results)
 A list with as many elements as clusters in 'results'
 }
 \description{
-Gets areas in a spatio-temporal cluster
 This function is similar to get.knclusters but it also allows
 for spatio-temporal clusters.
 }
-

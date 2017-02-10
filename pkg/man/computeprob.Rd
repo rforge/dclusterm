@@ -17,4 +17,3 @@ probability model coefficient <=k
 \description{
 This function will be used to calculate the P(coeficient variable cluster <=0)
 }
-

@@ -27,4 +27,3 @@ number of clusters. Each column is a binary representation of one of the
 clusters. The position i of the column is equal to 1 if the polygon i is
 in the cluster or 0 if it is not in the cluster.
 }
-
