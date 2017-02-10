@@ -164,7 +164,7 @@ glmAndZIP.iscluster <- function(stfdf, idxorder, minDateCluster,
           (deviance(model0) - deviance(m1))/2, 0)
        }, 
        glmer = {
-         m1 <- glmer(newformula, data = d0, family = modelFamilyGlmGlmer,
+         m1 <- lme4::glmer(newformula, data = d0, family = modelFamilyGlmGlmer,
                      offset=fittedwithoutre)
          riskAux <- ((coef(m1))[[1]][, 1])[1]
          estadisticoAux <- ifelse(riskAux > 0, 
@@ -178,14 +178,13 @@ glmAndZIP.iscluster <- function(stfdf, idxorder, minDateCluster,
           (-2*logLik(model0) + 2*logLik(m1))/2, 0)
        },
        inla = {
-         require(INLA)
          if(is.null(model0$.args$E)) {
            esperados <- model0$summary.fitted.values[, "mean"]
          } else {
            esperados <- exp(model0$summary.linear.predictor[, "mean"] +
             log(model0$.args$E))
          }
-         m1 <- inla(newformula, family = modelFamilyINLA, data = d0,
+         m1 <- INLA::inla(newformula, family = modelFamilyINLA, data = d0,
           E = esperados, control.inla = list(h = 0.01), 
           control.compute = list(dic = TRUE, mlik=TRUE), verbose = FALSE)
 

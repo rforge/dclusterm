@@ -1,8 +1,8 @@
 Package: DClusterm
 Type: Package
-Title: Model-based detection of disease clusters
+Title: Model-Based Detection of Disease Clusters
 Version: 0.1
-Date: 2016-10-19
+Date: 2017-02-10
 Author: Virgilio Gomez-Rubio, Paula Esther Moraga Serrano, Barry
     Rowlingson
 Maintainer: Virgilio Gomez-Rubio <virgilio.gomez@uclm.es>
@@ -10,14 +10,11 @@ Depends:
     R (>= 2.9.0),
     parallel,
     sp,
-    splancs,
     spacetime,
-    DCluster,
-    pscl,
-    RColorBrewer,
-    lme4
+    DCluster
 Suggests:
     INLA
+Imports: methods, xts, lme4, pscl, RColorBrewer, gridExtra, latticeExtra
 Description: Model-based methods for the detection of disease clusters.
 License: GPL-3
 LazyLoad: yes

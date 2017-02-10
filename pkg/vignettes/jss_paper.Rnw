@@ -285,8 +285,8 @@ other socioeconomic covariates have been used: the percentage of people aged 65
 or more (variable \code{PCTAGE65P}) and the percentage of people who own their
 home (variable \code{PCTOWNHOME}).
 
-Hence, our first action is to load some required packages and the dataset
-itself.
+Hence, our first action is to load some required packages \citep{xts:2014} and
+the dataset itself.
 
 <<results = hide>>=
 library(DClusterm)
@@ -410,7 +410,7 @@ cores as implemented in package \pkg{parallel}.  The number of cores to use is
 defined in option \code{mc.cores} (now 4 cores are used):
 
 <<echo = TRUE>>=
-options(mc.cores = 4)
+options(mc.cores = 1)
 @
 
 
@@ -624,6 +624,7 @@ is similar to \code{glm()} for GLMs but it will allow us to include random
 effects in the model as part of the \code{formula} argument.
 
 <<>>=
+library(lme4)
 ny.mm0 <- glmer(Observed ~ offset(log(Expected)) + (1 | AREANAME), 
   data = as(NY8, "data.frame"), family = "poisson")
 summary(ny.mm0)
@@ -818,6 +819,7 @@ Here is the resulting model:
 
 
 <<>>=
+library(pscl)
 nav.m0zip <- zeroinfl(OBSERVED ~ offset(log(EXPECTED)) + 1 | 1,
   data = brainnav, dist = "poisson", x = TRUE)
 summary(nav.m0zip)
