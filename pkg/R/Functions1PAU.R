@@ -45,6 +45,17 @@
 ##' the risk of the cluster, and a boolean indicating if it is a
 ##' cluster (TRUE in all cases).
 ##'
+##' @references
+##'
+##' Bilancia M, Demarinis G (2014) Bayesian scanning of spatial disease rates
+##' with the Integrated Nested Laplace Approximation (INLA). Statistical
+##' Methods & Applications 23(1): 71 - 94. \url{http://dx.doi.org/10.1007/s10260-013-0241-8}
+##'
+##' Jung I (2009) A generalized linear models approach to spatial scan 
+##' statistics for covariate adjustment. Statistics in Medicine 28(7): 1131 - 1143.
+##'
+##' Fast Bayesian classification for disease mapping and the detection of 
+##' disease clusters (2017) Gomez-Rubio V, Molitor J, Moraga P. Submitted.
 ##'
 ##' @examples
 ##' library("DClusterm")
