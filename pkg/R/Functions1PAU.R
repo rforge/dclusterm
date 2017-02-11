@@ -45,6 +45,40 @@
 ##' the risk of the cluster, and a boolean indicating if it is a
 ##' cluster (TRUE in all cases).
 ##'
+##'
+##' @examples
+##' library("DClusterm")
+##' library("xts")
+##' data("NY8")
+##'
+##' NY8$Observed <- round(NY8$Cases)
+##' NY8$Expected  <- NY8$POP8 * sum(NY8$Observed) / sum(NY8$POP8)
+##'
+##' NY8$x <- coordinates(NY8)[, 1]
+##' NY8$y <- coordinates(NY8)[, 2]
+##'
+##' NY8st <- STFDF(as(NY8, "SpatialPolygons"), xts(1, as.Date("1972-01-01")),
+##' NY8@data, endTime = as.POSIXct(strptime(c("1972-01-01"), "%Y-%m-%d"),
+##' tz = "GMT"))
+##'
+##' #Model to account for covariates
+##' ny.m1 <- glm(Observed ~ offset(log(Expected)) + PCTOWNHOME + PCTAGE65P +
+##' PEXPOSURE, family = "poisson", data = NY8)
+##'
+##' #Indices of areas that are possible cluster centres
+##' idxcl <- c(120, 12, 89, 139, 146)
+##' 
+##' #Cluster detection adjusting for covariates
+##' ny.cl1 <- DetectClustersModel(NY8st,
+##' thegrid = as.data.frame(NY8)[idxcl, c("x", "y")],
+##' fractpop = 0.15, alpha = 0.05,
+##' typeCluster = "S", R = NULL, model0 = ny.m1,
+##' ClusterSizeContribution = "POP8")
+##'
+##' #Display results
+##' ny.cl1
+##'
+##'
 DetectClustersModel <- function(stfdf, thegrid = NULL, radius = Inf,
   step = NULL, fractpop, alpha, typeCluster,
   minDateUser = min(time(stfdf@time)), maxDateUser = max(time(stfdf@time)),
