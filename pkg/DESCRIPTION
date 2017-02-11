@@ -17,6 +17,7 @@ Suggests:
 Imports: methods, xts, lme4, pscl, RColorBrewer, gridExtra, latticeExtra
 Description: Model-based methods for the detection of disease clusters
   using GLMs, GLMMs and zero-inflated models.
+Additional_repositories: https://www.math.ntnu.no/inla/R/stable
 License: GPL-3
 LazyLoad: yes
 LazyData: yes
