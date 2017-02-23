@@ -1,6 +1,6 @@
 all: pdf 
 
-pdf: jss_paper.pdf
+pdf: DClusterm.pdf
 
 %.pdf: %.tex
 	pdflatex $*

@@ -196,13 +196,10 @@ We demonstrate our aproach by first considering a Poisson model with
 expected counts $E_i$ and observed cases $O_i$ modeled as:
 
 
-$$
-O_i \sim Po(E_i \theta_i)
-$$
-
-$$
+\begin{eqnarray}
+O_i \sim Po(E_i \theta_i) \nonumber\\
 \log(\mu_i) = \log(E_i) + \alpha + \beta x_i 
-$$
+\end{eqnarray}
 \noindent
 Here $\log(E_i)$ denotes an offset to account for the population ``exposure''
 (age, gender, etc.) and  $\theta_i$ is the relative risk and it measures any
@@ -215,14 +212,14 @@ which account for the effects of non-cluster covariates in the model.  We
 include the cluster covariates as follows:
 
 
-$$
+\begin{equation}
 \log(\mu_i) = \log(E_i) + \hat\alpha + \hat\beta x_i + \gamma_j c_i^{(j)}
-$$
+\end{equation}
 \noindent
 The overall intercept is now $\log(E_i) + \hat\alpha + \hat\beta x_i$ and
 $c_i^{(j)}$ denotes a dummy variable associated with cluster $j$, with $j$ denoting an index over the list of all possible clusters being tested, defined as
 
-$$
+\begin{equation}
 c^{(j)}_i=
 \left\{
 \begin{array}{cl}
@@ -230,7 +227,7 @@ c^{(j)}_i=
 0 & \textrm{otherwise}
 \end{array}
 \right.
-$$
+\end{equation}
 \noindent
 Here, $\gamma_j$ is a measure of the risk within cluster $j$. We are only
 interested in clusters whose coefficient is significantly higher than 0 (i.e.,
@@ -337,6 +334,8 @@ NY8st <- STFDF(as(NY8, "SpatialPolygons"), xts(1, as.Date("1972-01-01")),
   tz = "GMT"))
 @
 
+%Cite package
+\nocite{RColorBrewer:2014}
 
 \begin{figure}[h]
 \centering
@@ -410,7 +409,7 @@ cores as implemented in package \pkg{parallel}.  The number of cores to use is
 defined in option \code{mc.cores} (now 4 cores are used):
 
 <<echo = TRUE>>=
-options(mc.cores = 1)
+options(mc.cores = 4)
 @
 
 
@@ -529,6 +528,8 @@ covariates only explain a small part of it. The most significant cluster remains
 the same. In all cases, cluster significance has been reduced by the effect of
 the covariates.
 
+%Cite packages
+\nocite{gridExtra:2016,latticeExtra:2016}
 
 \begin{figure}[!h]
 \centering
@@ -570,7 +571,7 @@ Random effects are particularly useful to model over-dispersion in count data.
 For the Poisson case, this will mean that the relative risk can be modelled as:
 
 \begin{eqnarray}
-\log(\mu_i) & =  &\log(E_i) + \alpha + \beta x_i + \gamma_j c^{(j)}_i + u_i\\
+\log(\mu_i) & =  &\log(E_i) + \alpha + \beta x_i + \gamma_j c^{(j)}_i + u_i\nonumber\\
 u_i & \sim &  N(0, \sigma^2_u)
 \end{eqnarray}
 \noindent
@@ -734,7 +735,7 @@ For count data, a zero-inflated Poisson model could be used. In this case,
 observed number of cases come from a mixture distribution of a Poisson and a
 distribution with all mass at zero. Probabilities are as follows:
 
-$$
+\begin{equation}
 Pr(O_i=n_i)=
 \left\{
 \begin{array}{ll}
@@ -742,7 +743,7 @@ Pr(O_i=n_i)=
 (1-\pi_i)Po(n_i|\theta_iE_i) & n_i=1, 2, \ldots\\
 \end{array}
 \right.
-$$
+\end{equation}
 \noindent
 Here $Po(O_i|\theta_i E_i)$ represents the probability of observing $O_i$ cases
 using a Poisson distribution with mean $\theta_i E_i$. $\pi_i$ represents the
@@ -769,8 +770,6 @@ detection of disease clusters of rare diseases.
 
 <<echo=FALSE, results=hide>>=
 library("DClusterm")
-#library(snowfall)
-#library(pscl)
 
 data("Navarre")
 @
@@ -911,7 +910,7 @@ detection of spatial disease clusters to space and time.
 \noindent
 where $\mu_{i,t}$ is the mean of area $i$ at time $t$ and $c^{(j)}_{i,t}$ a
 cluster dummy variable for spatio-temporal cluster $j$.  Random effects can
-also be included in equation~(\ref{eq:stcluster}) as described in
+also be included in Equation~\ref{eq:stcluster} as described in
 Section~\ref{sec:mixed} and zero-inflated distributions can also be considered
 as in Section~\ref{sec:zeroinfl}.
 
@@ -936,10 +935,6 @@ areas around the Laboratory as no other covariates are available.
 
 <<echo = FALSE, eval = FALSE>>=
 library("DClusterm")
-#debug(DetectClustersModel)
-#debug(glmAndZIP.iscluster)
-#debug(CalcStatsAllClusters)
-#library(snowfall)
 @
 
 <<>>=
