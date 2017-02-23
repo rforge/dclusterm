@@ -12,9 +12,7 @@ Depends:
     sp,
     spacetime,
     DCluster
-Suggests:
-    INLA
-Imports: methods, xts, lme4, pscl, RColorBrewer, gridExtra, latticeExtra
+Imports: methods, xts, lme4, pscl, RColorBrewer, gridExtra, latticeExtra, INLA
 Description: Model-based methods for the detection of disease clusters
   using GLMs, GLMMs and zero-inflated models.
 Additional_repositories: https://www.math.ntnu.no/inla/R/stable
@@ -22,8 +20,8 @@ License: GPL-3
 LazyLoad: yes
 LazyData: yes
 Collate:
-    'Functions1PAU.R'
-    'Functions2PAU.R'
-    'glm.isclusterPAU.R'
+    'Functions1.R'
+    'Functions2.R'
+    'glm.iscluster.R'
     'knutils.R'
 RoxygenNote: 6.0.0

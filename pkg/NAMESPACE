@@ -11,7 +11,8 @@ import(
   DCluster,
   RColorBrewer,
   parallel,
-  xts
+  xts,
+  INLA
 )
 importFrom("lme4", "glmer")
 importFrom("pscl", "zeroinfl")

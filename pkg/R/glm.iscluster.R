@@ -178,20 +178,24 @@ glmAndZIP.iscluster <- function(stfdf, idxorder, minDateCluster,
           (-2*logLik(model0) + 2*logLik(m1))/2, 0)
        },
        inla = {
+         if(requireNamespace("INLA", quietly = TRUE)) {
          if(is.null(model0$.args$E)) {
            esperados <- model0$summary.fitted.values[, "mean"]
          } else {
            esperados <- exp(model0$summary.linear.predictor[, "mean"] +
             log(model0$.args$E))
          }
-         m1 <- INLA::inla(newformula, family = modelFamilyINLA, data = d0,
+         m1 <- inla(newformula, family = modelFamilyINLA, data = d0,
           E = esperados, control.inla = list(h = 0.01), 
           control.compute = list(dic = TRUE, mlik=TRUE), verbose = FALSE)
 
          riskAux <- m1$summary.fixed[1]
          estadisticoAux <- ifelse(riskAux > 0, as.numeric(m1$dic$dic), Inf)
          pvalueAux <- computeprob(m1$marginals.fixed$CLUSTER, 0)
+       } else {
+        stop("INLA package not avilable.")
        }
+      } 
       )
 
       if(modelType != "inla") {
