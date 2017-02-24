@@ -120,7 +120,7 @@ Public health data are often aggregated over small administrative areas due to
 issues of confidentiality. However, individual data are often available as
 well, and Generalized Linear Models \citep[GLM,][]{McCullaghNelder:1989} are a
 common framework used in disease mapping for modeling aggregated and
-individual-level information.  GLMs not only model Poisson or Binomial
+individual-level information.  GLMs not only model Poisson or binomial
 responses, but they can also link the outcome to a linear predictor on the
 covariates (and, possibly, other effects).  However, until recently, it was not
 clear how to use GLMs to detect clusters of disease, a group of
@@ -145,6 +145,21 @@ the most likely cluster (i.e., the one with the highest value of the test
 statistic) is selected. Significance of this cluster is assessed with a Monte
 Carlo test that also provides the p-value.
 
+
+Several \proglang{R} packages include an implementation of the SSS.
+\pkg{DCluster} \citep{DCluster:2005} implements the orginal version of the SSS
+for spatial binomial and Poisson data and can compute cluster significancy by
+means of bootstrap or a Gumbel distribution. Package \pkg{SpatialEpi}
+\citep{SpatialEpi:2016} also implements the SSS for binomial or Poisson data
+and assesses significancy using a Monte Carlo test.  \pkg{rsatscan}
+\citep{rsatscan:2015} provides a set of functions to create the necessary data
+files and run the SaTScan\textsuperscript{TM} software (for Windows) from
+\proglang{R}. Hence, spatio-temporal detection of disease clusters
+can also be performed. Package \pkg{scanstatistics} \citep{scanstatistics:2016}
+implements a number of space-time scan statistics, that includes
+spatio-temporal versions of the SSS. Similarly as the original SSS,
+these implementations lack of a general way of adjusting for covariates
+and assessing the significancy of non-primary clusters.
 
 In this paper we describe a novel approach to disease cluster detection that
 provides a link between GLMs and SSS. We have implemented this approach via the
@@ -409,7 +424,7 @@ cores as implemented in package \pkg{parallel}.  The number of cores to use is
 defined in option \code{mc.cores} (now 4 cores are used):
 
 <<echo = TRUE>>=
-options(mc.cores = 4)
+options(mc.cores = 1)
 @
 
 
@@ -726,7 +741,7 @@ centers are represented by blue dots.}
 
 The analysis of rare diseases often involves datasets where there are many
 areas with zero counts, leading to zero-inflated data. In this situation the
-Poisson or Binomial likelihoods may not be suitable to fit a model and other
+Poisson or binomial likelihoods may not be suitable to fit a model and other
 distributions for the data should be used.  \citet{RD:2010} discuss this issue
 and they have extended model-based cluster detection methods to account for
 zero-inflation. 
