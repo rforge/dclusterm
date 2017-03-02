@@ -297,7 +297,7 @@ other socioeconomic covariates have been used: the percentage of people aged 65
 or more (variable \code{PCTAGE65P}) and the percentage of people who own their
 home (variable \code{PCTOWNHOME}).
 
-Hence, our first action is to load some required packages \citep{xts:2014} and
+Hence, our first action is to load some required packages, such as \pkg{xts} \citep{xts:2014}, and
 the dataset itself.
 
 <<results = hide>>=
@@ -376,9 +376,9 @@ print(p4, position = c(0.5, 0, 1, 0.5))
 
 @
 \caption{Standardised Mortality Ratios and covariates of the incidence of
-Leukemia in upstate New York dataset. PEXPOSURE is the inverse of the distance
-to the nearest TCE site, PCTAGE65P is the percentage people aged 65 or more,
-and PCTOWNHOME is the percentage of people who own their home. The red
+Leukemia in upstate New York dataset. \code{PEXPOSURE} is the inverse of the distance
+to the nearest TCE site, \code{PCTAGE65P} is the percentage people aged 65 or more,
+and \code{PCTOWNHOME} is the percentage of people who own their home. The red
 crosses in the top-left map mark the locations of the TCE sites.}
 \label{fig:NYmap}
 \end{figure}
@@ -424,7 +424,7 @@ cores as implemented in package \pkg{parallel}.  The number of cores to use is
 defined in option \code{mc.cores} (now 4 cores are used):
 
 <<echo = TRUE>>=
-options(mc.cores = 1)
+options(mc.cores = 4)
 @
 
 
@@ -516,9 +516,8 @@ that adjusts for covariates instead:
 
 <<results=hide>>=
 ny.cl1 <- DetectClustersModel(NY8st, 
-  thegrid = as.data.frame(NY8)[idxcl, c("x", "y")], 
-  fractpop = 0.15, alpha = 0.05,
-  typeCluster = "S", R = NULL, model0 = ny.m1,
+  thegrid = as.data.frame(NY8)[idxcl, c("x", "y")], fractpop = 0.15, 
+  alpha = 0.05, typeCluster = "S", R = NULL, model0 = ny.m1,
   ClusterSizeContribution = "POP8")
 @
 
