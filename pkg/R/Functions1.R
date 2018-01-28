@@ -9,12 +9,14 @@
 ##' or based on the chi-square distribution (glm, glmer or zeroinfl models)
 ##' or DIC (inla models).
 ##'
-##' @param stfdf spatio-temporal class object containing the data. See
-##' STFDF-class {spacetime} for details. It contains an object of class
-##' Spatial with the coordinates, a time object holding time information,
-##' an endTime vector of class POSIXct holding end points of time intervals,
-##' and a data.frame with vectors Observed, Expected and potential covariates
-##' in each location and time. Note that the function DetectClustersModel
+##' @param stfdf object containing the data.
+##' If data is spatial, stfdf is a SpatialPolygonsDataFrame object from sp.
+##' If data is spatio-temporal, stfdf is a STFDF object from spacetime.
+##' The data contain a SpatialPolygons object with the coordinates,
+##' and if applicable, a time object holding time information,
+##' an endTime vector of class POSIXct holding end points of time intervals.
+##' It also contain a data.frame with the Observed, Expected and potential covariates
+##' in each location and time (if applicable). Note that the function DetectClustersModel
 ##' does not use the endTime vector. We can define endTime, for example,
 ##' as the vector of class POSIXct which contains the same dates as the ones
 ##' contained in the time object. 
@@ -68,9 +70,6 @@
 ##' NY8$x <- coordinates(NY8)[, 1]
 ##' NY8$y <- coordinates(NY8)[, 2]
 ##'
-##' NY8st <- STFDF(as(NY8, "SpatialPolygons"), xts(1, as.Date("1972-01-01")),
-##' NY8@data, endTime = as.POSIXct(strptime(c("1972-01-01"), "%Y-%m-%d"),
-##' tz = "GMT"))
 ##'
 ##' #Model to account for covariates
 ##' ny.m1 <- glm(Observed ~ offset(log(Expected)) + PCTOWNHOME + PCTAGE65P +
@@ -80,7 +79,7 @@
 ##' idxcl <- c(120, 12, 89, 139, 146)
 ##' 
 ##' #Cluster detection adjusting for covariates
-##' ny.cl1 <- DetectClustersModel(NY8st,
+##' ny.cl1 <- DetectClustersModel(NY8,
 ##' thegrid = as.data.frame(NY8)[idxcl, c("x", "y")],
 ##' fractpop = 0.15, alpha = 0.05,
 ##' typeCluster = "S", R = NULL, model0 = ny.m1,
@@ -91,9 +90,26 @@
 ##'
 ##'
 DetectClustersModel <- function(stfdf, thegrid = NULL, radius = Inf,
-  step = NULL, fractpop, alpha, typeCluster,
-  minDateUser = min(time(stfdf@time)), maxDateUser = max(time(stfdf@time)),
+  step = NULL, fractpop, alpha, typeCluster = "S",
+  minDateUser = NULL, maxDateUser = NULL,
   R = NULL, model0, ClusterSizeContribution = "Population") {
+  
+  
+  #############################
+  # If data is spatial, stfdf is a SpatialPolygonsDataFrame object. We need to convert it to STFDF. We add date as.Date("1970-01-01").
+  # If data is spatio-temporal, stfdf is a STFDF object.
+  if(class(stfdf) == "SpatialPolygonsDataFrame"){
+    stfdf <- STFDF(as(stfdf, "SpatialPolygons"), xts(1, as.Date("1970-01-01")),
+                   stfdf@data, endTime = as.POSIXct(strptime(c("1970-01-01"), "%Y-%m-%d"), tz = "GMT"))
+  }
+  if(is.null(minDateUser)){
+    minDateUser <- min(time(stfdf@time))
+  } 
+  if(is.null(maxDateUser)){
+    maxDateUser <- max(time(stfdf@time))
+  }
+  
+  #############################
 
   # Create column with ID. Unique identifier
   stfdf[['ID']] <- 1:nrow(stfdf@data)
@@ -157,6 +173,14 @@ DetectClustersModel <- function(stfdf, thegrid = NULL, radius = Inf,
   statsAllClusters <- CalcStatsAllClusters(thegrid, CalcStatClusterGivenCenter,
     stfdf, rr,  typeCluster, sortDates, idMinDateCluster, idMaxDateCluster,
     fractpop, model0, ClusterSizeContribution, numCPUS)
+  
+  #######################
+  # Bonferroni correction to deal with multiple testing problem
+  # reject null hypothesis if the p-value is less than alpha/num_tests
+  alphaoriginal <- alpha
+  alpha <- alpha/nrow(statsAllClusters)
+  #######################
+  
 
 
   # Remove rows where sizeCluster == -1
@@ -238,7 +262,6 @@ DetectClustersModel <- function(stfdf, thegrid = NULL, radius = Inf,
     stopCluster(cl)
   }
 
-
   statsAllClusters$pvalue <- vecpvalue
   statsAllClusters$cluster <- veccluster
 
@@ -257,7 +280,7 @@ DetectClustersModel <- function(stfdf, thegrid = NULL, radius = Inf,
   # If there are no clusters return "No clusters found"
   #FIXME: Return a different value, i.e., empty data.frame
   if(dim(statsAllClusters)[1] == 0) {
-    print(paste("No significant clusters found with alpha =", alpha))
+    print(paste("No significant clusters found with alpha =", alphaoriginal))
     return("No clusters found")
   }
 
