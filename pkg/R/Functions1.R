@@ -46,6 +46,10 @@
 ##' the start and end dates, the log-likelihood ratio or DIC, the p-value,
 ##' the risk of the cluster, and a boolean indicating if it is a
 ##' cluster (TRUE in all cases).
+##' It also returns alpha_bonferroni which is the level of significance
+##' adjusted for multiple testing using Bonferroni correction.
+##' Thus, rows that should be considered clusters are the ones with
+##' p-value less than alpha_bonferroni.
 ##'
 ##' @references
 ##'
@@ -178,7 +182,8 @@ DetectClustersModel <- function(stfdf, thegrid = NULL, radius = Inf,
   # Bonferroni correction to deal with multiple testing problem
   # reject null hypothesis if the p-value is less than alpha/num_tests
   alphaoriginal <- alpha
-  alpha <- alpha/nrow(statsAllClusters)
+  #alpha <- alpha/nrow(statsAllClusters)
+  alpha_bonferroni <- alpha/nrow(statsAllClusters)
   #######################
   
 
@@ -298,7 +303,18 @@ DetectClustersModel <- function(stfdf, thegrid = NULL, radius = Inf,
     origin = "1970-01-01", tz = "GMT")
   statsAllClusters$maxDateCluster <- as.POSIXct(statsAllClusters$maxDateCluster,
     origin = "1970-01-01", tz = "GMT")
-
+  
+  
+  #######################
+  # Bonferroni correction to deal with multiple testing problem
+  # Add column alpha_bonferroni = alpha/num_tests
+  # reject null hypothesis if the p-value is less than alpha_bonferroni
+  if(nrow(statsAllClusters) > 0){
+    statsAllClusters$alpha_bonferroni <- alpha_bonferroni
+  }
+  #######################
+  
+  
   return(statsAllClusters)
 }
 
