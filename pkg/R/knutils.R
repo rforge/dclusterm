@@ -231,3 +231,29 @@ slimknclusters<-function(d, knresults, minsize = 1)
         return(knresults[clusters, ])
 }
 
+
+#' @title Extract indices of the areas in the clusters detected
+#
+#' @description This function returns a categorical vector that identifies
+#' to which cluster a given areas belongs. It is the empty string for 
+#' areas not in a cluster.
+#' 
+#' @param spdf Spatial object with data used in the detection of clusters.
+#' @param knresults Table with the clusters detected.
+#'
+#' @return A categorical vector with value the cluster to which area belongs.
+#' It is the empty string for regions not in a cluster.
+#'
+
+get.allknclusters <- function (spdf, knresults) {
+  clusters <- rep("", nrow(spdf))
+
+  knclusters <- get.knclusters(spdf, knresults)
+  if(length(knclusters) >0 ) {
+    clusters[unique(unlist(knclusters))] <- "CLUSTER"
+    clusters <- as.factor(clusters)
+  }
+
+  return(clusters)
+}
+

@@ -24,4 +24,4 @@ Collate:
     'Functions2.R'
     'glm.iscluster.R'
     'knutils.R'
-RoxygenNote: 6.0.0
+RoxygenNote: 6.0.1

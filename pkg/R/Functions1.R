@@ -102,7 +102,11 @@ DetectClustersModel <- function(stfdf, thegrid = NULL, radius = Inf,
   #############################
   # If data is spatial, stfdf is a SpatialPolygonsDataFrame object. We need to convert it to STFDF. We add date as.Date("1970-01-01").
   # If data is spatio-temporal, stfdf is a STFDF object.
+
+  #Spatial object?
+  is.sp <- FALSE
   if(class(stfdf) == "SpatialPolygonsDataFrame"){
+    is.sp <- TRUE
     stfdf <- STFDF(as(stfdf, "SpatialPolygons"), xts(1, as.Date("1970-01-01")),
                    stfdf@data, endTime = as.POSIXct(strptime(c("1970-01-01"), "%Y-%m-%d"), tz = "GMT"))
   }
@@ -314,6 +318,12 @@ DetectClustersModel <- function(stfdf, thegrid = NULL, radius = Inf,
   }
   #######################
   
+  #If stdf is a spatial object, then remove dates
+  if(is.sp) {
+    statsAllClusters <- statsAllClusters[, 
+      -which(names(statsAllClusters) %in% c("minDateCluster", "maxDateCluster")
+   )]
+  }
   
   return(statsAllClusters)
 }
