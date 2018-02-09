@@ -8,8 +8,8 @@
 ##' distance to the center is less than radius.
 ##' For each one of these clusters, the log-likelihood ratio test statistic
 ##' for comparing the alternative model with the cluster versus the null model
-##' of no clusters (if model is glm, glmer or zeroinfl),
-##' or the DIC (if model is inla) is calculated.
+##' of no clusters (if model is \link{glm}, \link{glmer} or \link{zeroinfl}),
+##' or the DIC (if model is \link{inla}) is calculated.
 ##' The cluster with maximum value of the log-likelihood ratio or
 ##' minimum DIC is returned.
 ##'
@@ -22,10 +22,10 @@
 ##' @param model0 Initial model (including covariates).
 ##' @param ClusterSizeContribution Variable used to check the fraction of the 
 ##' population at risk in the cluster
-##' This can be "glm" for generalized linear models (glm {stats}),
-##' "glmer" for generalized linear mixed model (glmer {lme4}),
-##' "zeroinfl" for zero-inflated models (zeroinfl {pscl}), or
-##' "inla" for generalized linear, generalized linear mixed or zero-inflated models.
+##' This can be "glm" for generalized linear models (\link{glm} {stats}),
+##' "glmer" for generalized linear mixed model (\link{glmer} {lme4}),
+##' "zeroinfl" for zero-inflated models (\link{zeroinfl} {pscl}), or
+##' "inla" for generalized linear, generalized linear mixed or zero-inflated models fitted with \link{inla}.
 ##'
 ##' @return vector containing the size, the start and end dates,
 ##' the log-likelihood ratio or DIC, the p-value and the risk
