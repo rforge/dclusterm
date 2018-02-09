@@ -15,7 +15,7 @@ cluster (TRUE in all cases), and the p-value of the cluster.}
 
 \item{colors}{vector with the colors of the clusters.}
 
-\item{map}{SpatialPolygonsDataFrame with the polygons of the map.}
+\item{map}{\link{SpatialPolygonsDataFrame} with the polygons of the map.}
 }
 \value{
 plots of the detected clusters for each start date.

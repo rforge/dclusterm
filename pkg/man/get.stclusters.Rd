@@ -9,7 +9,7 @@ get.stclusters(stfdf, results)
 \arguments{
 \item{stfdf}{A sp or spacetime object with the information about the data.}
 
-\item{results}{Results from a call to DetectClusterModel}
+\item{results}{Results from a call to \link{DetectClusterModel}}
 }
 \value{
 A list with as many elements as clusters in 'results'

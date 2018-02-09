@@ -11,15 +11,15 @@ DetectClustersModel(stfdf, thegrid = NULL, radius = Inf, step = NULL,
 }
 \arguments{
 \item{stfdf}{object containing the data.
-If data is spatial, stfdf is a SpatialPolygonsDataFrame object from sp.
-If data is spatio-temporal, stfdf is a STFDF object from spacetime.
-The data contain a SpatialPolygons object with the coordinates,
+If data is spatial, stfdf is a \link{SpatialPolygonsDataFrame} object from sp.
+If data is spatio-temporal, stfdf is a \link{STFDF} object from spacetime.
+The data contain a \link{SpatialPolygons} object with the coordinates,
 and if applicable, a time object holding time information,
-an endTime vector of class POSIXct holding end points of time intervals.
+an endTime vector of class \link{POSIXct} holding end points of time intervals.
 It also contain a data.frame with the Observed, Expected and potential covariates
 in each location and time (if applicable). Note that the function DetectClustersModel
 does not use the endTime vector. We can define endTime, for example,
-as the vector of class POSIXct which contains the same dates as the ones
+as the vector of class \link{POSIXct} which contains the same dates as the ones
 contained in the time object.}
 
 \item{thegrid}{two-columns matrix containing the points of the grid to be
@@ -47,10 +47,10 @@ Monte Carlo procedure, R represents the number replicates under the null hypothe
 \item{model0}{Initial model (including covariates).}
 
 \item{ClusterSizeContribution}{Indicates the variable to be used as the population at risk in the cluster. This is the variable name to be used by 'fractpop' when checking the fraction of the population inside the cluster. The default column name is 'Population'.
-This can be "glm" for generalized linear models (glm {stats}),
-"glmer" for generalized linear mixed model (glmer {lme4}),
-"zeroinfl" for zero-inflated models (zeroinfl {pscl}), or
-"inla" for generalized linear, generalized linear mixed or zero-inflated models.}
+This can be "glm" for generalized linear models (\link{glm} {stats}),
+"glmer" for generalized linear mixed model (\link{glmer} {lme4}),
+"zeroinfl" for zero-inflated models (\link{zeroinfl} {pscl}), or
+"inla" for generalized linear, generalized linear mixed or zero-inflated models fitted with \link{inla}.}
 }
 \value{
 data frame with information of the detected clusters ordered by its
@@ -71,8 +71,8 @@ the cluster is less than fractpop, and the maximum distance to the center is
 less than radius.
 The search can be done for spatial or spatio-temporal clusters.
 The significance of the clusters is obtained with a Monte Carlo procedure
-or based on the chi-square distribution (glm, glmer or zeroinfl models)
-or DIC (inla models).
+or based on the chi-square distribution (\link{glm}, \link{glmer} or \link{zeroinfl} models)
+or DIC (\link{inla} models).
 }
 \examples{
 library("DClusterm")

@@ -25,10 +25,10 @@ CalcStatClusterGivenCenter(point, stfdf, rr, minDateCluster, maxDateCluster,
 
 \item{ClusterSizeContribution}{Variable used to check the fraction of the 
 population at risk in the cluster
-This can be "glm" for generalized linear models (glm {stats}),
-"glmer" for generalized linear mixed model (glmer {lme4}),
-"zeroinfl" for zero-inflated models (zeroinfl {pscl}), or
-"inla" for generalized linear, generalized linear mixed or zero-inflated models.}
+This can be "glm" for generalized linear models (\link{glm} {stats}),
+"glmer" for generalized linear mixed model (\link{glmer} {lme4}),
+"zeroinfl" for zero-inflated models (\link{zeroinfl} {pscl}), or
+"inla" for generalized linear, generalized linear mixed or zero-inflated models fitted with \link{inla}.}
 }
 \value{
 vector containing the coordinates of the center, the size,
