@@ -218,6 +218,7 @@ Section \ref{sec:disc}.
 \label{sec:GLM}
 
 \subsection{General description}
+\label{subsec:GLMdesc}
 
 An explicit link between GLM's and the SSS is provided by
 \citet{Jung:2009,ZhangLinCSDA:2009} who show that the test statistic for a
@@ -238,7 +239,7 @@ O_i \sim Po(E_i \theta_i) \nonumber\\
 \log(\mu_i) = \log(E_i) + \alpha + \beta x_i 
 \end{eqnarray}
 \noindent
-Here $mu_i$ is the mean of the Poisson distribution (which is equal to $E_i
+Here $\mu_i$ is the mean of the Poisson distribution (which is equal to $E_i
 \theta_i$), $\log(E_i)$ denotes an offset to account for the population
 ``exposure'' (age, gender, etc.) and  $\theta_i$ is the relative risk and it
 measures any deviation (increase or decrease) in the incidence of the disease
@@ -275,6 +276,7 @@ ignored.  We use model selection techniques to select the most important
 cluster in the study region. As such, the log-likelihood can be used to compare
 the model with the cluster variables to the null model (i.e., the one with no
 cluster covariates at all).
+
 
 %Note that we are interested in clusters with a high risk, and
 %so we are only interested in clusters whose associated coefficient is
@@ -443,6 +445,11 @@ level.
 which is why its first argument is a space-time object. The type of 
 clusters that are investigated is defined by argument \code{typeCluster}.
 In the example we have used \code{typeCluster = "S"}.
+
+\textbf{Perhaps remove typeCluster from the list of arguments and
+set it inside DetectClustersModel depending on whether a sp or
+spacetime object is passed.}
+
 
 The output of \code{DetectClustersModel()} returns all clusters found at
 significance level given by the parameter \code{alpha}. In the detection
@@ -615,14 +622,42 @@ centres are represented by blue dots.}
 \label{fig:NYcl}
 \end{figure}
 
+Finally, function \code{slimknclusters} could have been used to remove
+overlapping clusters with less significant coefficients. This procedure will
+sort all detected clusters in decreasing order according to the value of
+\code{statistic} and remove those clusters which overlap with another cluster
+with a larger value of \code{statistics}. This will be similar in spirit to the
+SSS as this will only consider a single cluster around each area and will help
+to control for the multiple testing problem inherent to the problem of the
+detection of disease clusters.
+
+Function \code{slimknclusters} takes three arguments. The first one
+is the spatial or spatio-temporal object used in the call to
+\code{DetectClustersModel}, the second one is the table
+with the clusters detected and the third one is the minimum cluster
+size to consider. By default, this is 1, and it will set the minimum number of
+areas in a cluster to report it.
+
+For example, the following code could be used to reduce the number of
+possible clusters to those non-overlapping cluster with a size of
+at least three in the cluster detection with covariates:
+
+<<>>=
+slimknclusters(NY8, ny.cl1, 3)
+@
+
+In this case, as there are no overlapping clusters the results do not change.
+
 
 
 \section{Mixed-effects models for cluster detection}
 \label{sec:mixed}
 
 Random effects can be incorporated into our models to account for unmeasured
-risk factors. Cluster detection will be performed as usual, but we should keep
-in mind that by including random effects and dummy cluster covariates there may
+risk factors. In this context, random effects will model area-specific intrinsic
+variation not explained by other covariates or cluster variables in the model. 
+Cluster detection will be performed as usual, but we should keep
+in mind that by including random effects and dummy cluster variables there may
 be a clash between the two. By using dummy variables we are intentionally
 looking for unexplained spatial variation in the data. Hence, random effects
 should aim at modelling a different structure in the data. For example,
@@ -631,7 +666,6 @@ and then an identifiability problem between them and the dummy cluster
 covariates may occur, which may lead to poor estimates of the random
 effects and/or the coefficients of the dummy cluster covariates.
 
-Random effects are particularly useful to model over-dispersion in count data.
 For the Poisson case, this will mean that the relative risk can be modelled as:
 
 \begin{eqnarray}
@@ -643,6 +677,12 @@ where $u_i$ represents a random effect normally distributed with zero mean and
 variance $\sigma^2_u$. Note that random effects can be defined to be spatially
 correlated, as suggested by \citet{BilanciaDemarinis:2014}. However, this can
 produce a clash between the dummy cluster variables and the random effects.
+
+Random effects are particularly useful to model over-dispersion in count data,
+which occurs when the variance in the data is greater than the variance defined
+by the statistical model. For example, for a Poisson model the mean and
+variance should be equal. Hence, by including random effects in a Poisson model
+the variance of the data can be different to the mean.
 
 \subsection{Leukemia in upstate New York}
 
@@ -1073,12 +1113,17 @@ nm.cl0 <- DetectClustersModel(brainst, NM.coords,
 \noindent
 \Sexpr{nrow(nm.cl0)} possible clusters have been found this time. However,
 note that most of them overlap and may be different configurations of the
-same cluster. The first 5
-are summarized below:
+same cluster. However, as mentioned earlier, secondary overlapping clusters
+will be removed in the analysis:
 
 <<>>= 
-nm.cl0[1:5,]
+nm.cl0.s <- slimknclusters(brainst, nm.cl0)
+nm.cl0.s
 @
+
+Hence, only \Sexpr{nrow(nm.cl0.s)} remain after removing overlapping clusters
+and these will be the only considered in the analysis.
+
 
 \subsubsection{Cluster detection after adjusting for covariates}
 
@@ -1125,15 +1170,17 @@ nm.cl1 <- DetectClustersModel(brainst, NM.coords, fractpop = 0.15,
 
 The number of clusters detected in this case is \Sexpr{nrow(nm.cl1)}, very
 similar to the \Sexpr{nrow(nm.cl0)} found when no covariates where included in
-the model. This was expected as the included covariate was not significant.  By
-inspecting the five most significant clusters we can observe that they are very
-similar to the ones detected before:
+the model. This was expected as the included covariate was not significant.  
+Similarly as in the previous example, non-overlapping clusters will
+be removed:
 
 <<>>=
-nm.cl1[1:5,]
+nm.cl1.s <- slimknclusters(brainst, nm.cl1)
+nm.cl1.s
 @
-\noindent
-Note how these clusters only cover a few areas, but over several years.
+
+Now, the same \Sexpr{nrow(nm.cl1.s)}  clusters are detected.  Note how these
+clusters only cover a few areas, but over several years.
 
 In order to exploit the output from \code{DetectClustersModel()}, function
 \code{get.stclusters()} will take the data and this output to return a list
@@ -1142,7 +1189,7 @@ add a new variable to \code{brainst} with the space-time regions in the most
 significant cluster, which is displayed in Figure~\ref{fig:NMcluster}.
 
 <<>>=
-stcl <- get.stclusters(brainst, nm.cl0)
+stcl <- get.stclusters(brainst, nm.cl0.s)
 brainst$CLUSTER <- ""
 brainst$CLUSTER[ stcl[[1]] ] <- "CLUSTER"
 @
