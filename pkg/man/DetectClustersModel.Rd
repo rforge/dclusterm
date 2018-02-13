@@ -76,7 +76,6 @@ or DIC (\link{inla} models).
 }
 \examples{
 library("DClusterm")
-library("xts")
 data("NY8")
 
 NY8$Observed <- round(NY8$Cases)
@@ -102,7 +101,6 @@ ClusterSizeContribution = "POP8")
 
 #Display results
 ny.cl1
-
 
 }
 \references{

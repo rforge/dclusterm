@@ -21,3 +21,10 @@ Function DetectClustersModel() detects duplicated clusters.
 This function reduces the number of clusters by removing the overlapping
 clusters.
 }
+\examples{
+library("DClusterm")
+data("brainNM")
+data("brainNM_clusters")
+
+SelectStatsAllClustersNoOverlap(brainst, nm.cl1)
+}

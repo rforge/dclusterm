@@ -65,7 +65,6 @@
 ##'
 ##' @examples
 ##' library("DClusterm")
-##' library("xts")
 ##' data("NY8")
 ##'
 ##' NY8$Observed <- round(NY8$Cases)
@@ -92,7 +91,18 @@
 ##' #Display results
 ##' ny.cl1
 ##'
+##' @export
 ##'
+##' @import DCluster
+##' @import parallel
+##' @import sp
+##' @import spacetime
+##' 
+##' @importFrom methods as 
+##' @importFrom xts xts 
+##' @importFrom stats time pchisq rpois formula fitted
+##' @importFrom stats coef deviance family glm logLik model.matrix
+##' @importFrom grDevices dev.new
 DetectClustersModel <- function(stfdf, thegrid = NULL, radius = Inf,
   step = NULL, fractpop, alpha, typeCluster = "S",
   minDateUser = NULL, maxDateUser = NULL,
@@ -345,6 +355,14 @@ DetectClustersModel <- function(stfdf, thegrid = NULL, radius = Inf,
 ##' @return data frame with the same information than statsAllClusters but only
 ##' for clusters that do not overlap.
 ##'
+##' @examples
+##' library("DClusterm")
+##' data("brainNM")
+##' data("brainNM_clusters")
+##' 
+##' SelectStatsAllClustersNoOverlap(brainst, nm.cl1)
+##' @export
+
 SelectStatsAllClustersNoOverlap <- function(stfdf, statsAllClusters) {
   # statsAllClusters is ordered by statistic value
   coordx <- coordinates(stfdf@sp)[, 1]

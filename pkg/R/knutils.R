@@ -7,6 +7,7 @@
 ##' 
 ##' @return probability model coefficient <=k
 ##'
+##' @export
 computeprob <- function(func, k) {
   idx <- which(func[, 1] <= k)
   if(length(idx) > 0) {
@@ -33,6 +34,7 @@ computeprob <- function(func, k) {
 ##' 
 ##' @return A list with as many elements as clusters in 'results'
 ##'
+##' @export
 get.stclusters <- function(stfdf, results) {
   if(inherits(stfdf, "Spatial")) {
     d <- as.data.frame(coordinates(stfdf))
@@ -85,6 +87,7 @@ get.stclusters <- function(stfdf, results) {
 ##' The position i of the column is equal to 1 if the polygon i is in the cluster
 ##' or 0 if it is not in the cluster.
 ##'
+##' @export
 knbinary <- function(datamap, knresults) {
   clusters <- get.stclusters(datamap, knresults)
   res <- lapply(clusters, function(X, n) {
@@ -117,6 +120,7 @@ knbinary <- function(datamap, knresults) {
 ##'
 ##' @return factor with levels that represent the clusters.
 ##'
+##' @export
 mergeknclusters <- function(datamap, knresults, indClustersPlot) {
   n <- nrow(knresults)
   knbin <- as.matrix(knbinary(datamap, knresults))	
@@ -143,6 +147,7 @@ mergeknclusters <- function(datamap, knresults, indClustersPlot) {
 ##'
 ##' @return plots of the detected clusters for each start date.
 ##'
+##' @export
 PlotClustersNoOverlap <- function(statsAllClustersNoOverlap, colors, map) {
 
   # Name of the clusters. Cluster's order by their significance
@@ -181,20 +186,21 @@ PlotClustersNoOverlap <- function(statsAllClustersNoOverlap, colors, map) {
   }
 }
 
-#' @title Remove overlapping clusters
-#
-#' @description This function slims the number of clusters down.
-#' The spatial scan statistic is known to detect duplicated
-#' clusters. This function aims to reduce the number of clusters
-#' by removing duplicated and overlapping clusters.
-#'
-#' @param d Data.frame with data used in the detection of clusters.
-#' @param knresults Object returned by function opgam() with the clusters detected.
-#' @param minsize Minimum size of cluster (default to 1).
-#'
-#' @return A subset of knresults with non-overlaping clusters of at least
-#' minsize size.
-#'
+##' @title Remove overlapping clusters
+##'
+##' @description This function slims the number of clusters down.
+##' The spatial scan statistic is known to detect duplicated
+##' clusters. This function aims to reduce the number of clusters
+##' by removing duplicated and overlapping clusters.
+##'
+##' @param d Data.frame with data used in the detection of clusters.
+##' @param knresults Object returned by function opgam() with the clusters detected.
+##' @param minsize Minimum size of cluster (default to 1).
+##'
+##' @return A subset of knresults with non-overlaping clusters of at least
+##' minsize size.
+##'
+##' @export
 
 slimknclusters<-function(d, knresults, minsize = 1)
 {
@@ -232,19 +238,20 @@ slimknclusters<-function(d, knresults, minsize = 1)
 }
 
 
-#' @title Extract indices of the areas in the clusters detected
-#
-#' @description This function returns a categorical vector that identifies
-#' to which cluster a given areas belongs. It is the empty string for 
-#' areas not in a cluster.
-#' 
-#' @param spdf Spatial object with data used in the detection of clusters.
-#' @param knresults Table with the clusters detected.
-#'
-#' @return A categorical vector with value the cluster to which area belongs.
-#' It is the empty string for regions not in a cluster.
-#'
-
+##' @title Extract indices of the areas in the clusters detected
+##
+##' @description This function returns a categorical vector that identifies
+##' to which cluster a given areas belongs. It is the empty string for 
+##' areas not in a cluster.
+##' 
+##' @param spdf Spatial object with data used in the detection of clusters.
+##' @param knresults Table with the clusters detected.
+##'
+##' @return A categorical vector with value the cluster to which area belongs.
+##' It is the empty string for regions not in a cluster.
+##'
+##'
+##' @export
 get.allknclusters <- function (spdf, knresults) {
   clusters <- rep("", nrow(spdf))
 
