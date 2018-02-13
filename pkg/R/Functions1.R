@@ -103,6 +103,8 @@
 ##' @importFrom stats time pchisq rpois formula fitted
 ##' @importFrom stats coef deviance family glm logLik model.matrix
 ##' @importFrom grDevices dev.new
+##' @importFrom pscl zeroinfl
+##' @importFrom INLA inla
 DetectClustersModel <- function(stfdf, thegrid = NULL, radius = Inf,
   step = NULL, fractpop, alpha, typeCluster = "S",
   minDateUser = NULL, maxDateUser = NULL,
