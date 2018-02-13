@@ -29,7 +29,7 @@ computeprob <- function(func, k) {
 ##' for spatio-temporal clusters.
 ##
 ##' @param stfdf A sp or spacetime object with the information about the data.
-##' @param results Results from a call to \link{DetectClusterModel}
+##' @param results Results from a call to \link{DetectClustersModel}
 ##' 
 ##' @return A list with as many elements as clusters in 'results'
 ##'

@@ -3,6 +3,10 @@
 \docType{data}
 \alias{NY8}
 \alias{NY8_clusters}
+\alias{ny.m0}
+\alias{ny.m1}
+\alias{ny.cl0}
+\alias{ny.cl1}
 \alias{TCE}
 \title{Leukemia in an eight-county region of upstate New York, 1978-1982.}
 \description{This data set provides the number of incident leukemia cases per census tract in an eight-county
@@ -15,8 +19,9 @@ the percentage of people who own their home.
 
 The dataset also provides the locations of the TCE sites.
 
-File NY8_clusters contains the results of running DetectClustersModel
-on a null model and another one with covariates.
+File NY8_clusters contains the results of running DetectClustersModel on a null
+model ('ny.m0') and another one with covariates ('ny.m1'). The results are in
+'ny.cl0' and 'ny.cl1', respectively.
 
 }
 \usage{data(NY8)}
