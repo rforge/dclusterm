@@ -23,7 +23,7 @@ options(prompt = "R> ", continue = "+  ", width = 70, useFancyQuotes = FALSE)
 
 %% almost as usual
 \author{Virgilio G\'omez-Rubio\\Universidad de Castilla-La Mancha
-\And Paula Moraga\\Queensland University of Technology
+\And Paula Moraga\\Lancaster University
 \AND John Molitor\\Oregon State University
 \And Barry Rowlingson\\Lancaster University
 }
@@ -457,8 +457,8 @@ is smaller than alpha divided by the number of clusters tested.
 In addition, overlapping clusters can be removed with function
 \code{slimkncluster} (see below) so that only clusters with the greatest
 significancy are reported. This will also help to reduce the problem of
-multiple testing as only one possible cluster a given area is reported,
-similarly as the SSS.
+multiple testing as only one possible cluster around a given cluster center is
+reported, similarly as the SSS.
 
 The output of \code{DetectClustersModel()} has a column called
 \code{alpha\_bonferroni} that denotes the level of significance adjusted for
