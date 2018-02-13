@@ -29,8 +29,8 @@ Y           \tab  y coordinate \cr
 POP8        \tab  Population in 1980\cr
 TRACTCAS    \tab  Number of leukemia cases rounded to 2 decimals \cr
 PROPCAS     \tab  Ratio of the number of leukemia cases to the population in 1980 \cr
-PCTOWNHOME  \tab  Percentage of people who own their home \cr
-PCTAGE65P   \tab  Percentage of people aged 65 or more \cr
+PCTOWNHOME  \tab  Proportion of people who own their home \cr
+PCTAGE65P   \tab  Proportion of people aged 65 or more \cr
 Z           \tab  \cr
 AVGIDIST    \tab  \cr
 PEXPOSURE   \tab  Inverse of the distance to the nearest TCE site \cr
