@@ -41,7 +41,7 @@ computeprob <- function(func, k) {
 ##' data("brainNM")
 ##' data("brainNM_clusters")
 ##'
-##' stcl <- get.stclusters(brainst, nm.cl0.s)
+##' stcl <- get.stclusters(brainst, nm.cl0)
 ##' #Get first cluster
 ##' brainst$CLUSTER <- ""
 ##' brainst$CLUSTER[ stcl[[1]] ] <- "CLUSTER"
