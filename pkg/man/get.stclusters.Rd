@@ -18,3 +18,20 @@ A list with as many elements as clusters in 'results'
 This function is similar to get.knclusters but it also allows
 for spatio-temporal clusters.
 }
+\examples{
+library("DClusterm")
+library("RColorBrewer")
+
+data("brainNM")
+data("brainNM_clusters")
+
+stcl <- get.stclusters(brainst, nm.cl0.s)
+#Get first cluster
+brainst$CLUSTER <- ""
+brainst$CLUSTER[ stcl[[1]] ] <- "CLUSTER"
+
+#Plot cluster
+stplot(brainst[, , "CLUSTER"], at = c(0, 0.5, 1.5), col = "#4D4D4D",
+  col.regions = c("white", "gray"))
+
+}

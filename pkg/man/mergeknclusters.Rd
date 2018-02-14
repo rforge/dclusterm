@@ -27,3 +27,18 @@ this function merges the clusters and construct a factor.
 The levels of the factor are "NCL" if the polygon of the map is not
 in any cluster, and "CL" if the polygon i is in cluster i.
 }
+\examples{
+library("DClusterm")
+library("RColorBrewer")
+
+data("NY8")
+data("NY8_clusters")
+
+stcl <- mergeknclusters(NY8, ny.cl1, 1:2)
+#Get first cluster
+NY8$CLUSTER <- stcl
+
+#Plot cluster
+spplot(NY8, "CLUSTER", col.regions = c("white", "lightgray", "gray"))
+
+}
