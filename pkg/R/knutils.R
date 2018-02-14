@@ -34,6 +34,22 @@ computeprob <- function(func, k) {
 ##' 
 ##' @return A list with as many elements as clusters in 'results'
 ##'
+##' @examples
+##' library("DClusterm")
+##' library("RColorBrewer")
+##'
+##' data("brainNM")
+##' data("brainNM_clusters")
+##'
+##' stcl <- get.stclusters(brainst, nm.cl0.s)
+##' #Get first cluster
+##' brainst$CLUSTER <- ""
+##' brainst$CLUSTER[ stcl[[1]] ] <- "CLUSTER"
+##'
+##' #Plot cluster
+##' stplot(brainst[, , "CLUSTER"], at = c(0, 0.5, 1.5), col = "#4D4D4D",
+##'   col.regions = c("white", "gray"))
+##'
 ##' @export
 get.stclusters <- function(stfdf, results) {
   if(inherits(stfdf, "Spatial")) {
@@ -87,6 +103,21 @@ get.stclusters <- function(stfdf, results) {
 ##' The position i of the column is equal to 1 if the polygon i is in the cluster
 ##' or 0 if it is not in the cluster.
 ##'
+##' @examples
+##' library("DClusterm")
+##' library("RColorBrewer")
+##'
+##' data("NY8")
+##' data("NY8_clusters")
+##'
+##' stcl <- knbinary(NY8, ny.cl1)
+##' #Get first cluster
+##' NY8$CLUSTER <- stcl[, 1]
+##'
+##' #Plot cluster
+##' spplot(NY8, "CLUSTER", at = c(0, 0.5, 1.5), col = "#4D4D4D",
+##'   col.regions = c("white", "gray"))
+##'
 ##' @export
 knbinary <- function(datamap, knresults) {
   clusters <- get.stclusters(datamap, knresults)
@@ -119,6 +150,20 @@ knbinary <- function(datamap, knresults) {
 ##' @param indClustersPlot rows of knresults that denote the clusters to be plotted.
 ##'
 ##' @return factor with levels that represent the clusters.
+##'
+##' @examples
+##' library("DClusterm")
+##' library("RColorBrewer")
+##'
+##' data("NY8")
+##' data("NY8_clusters")
+##'
+##' stcl <- mergeknclusters(NY8, ny.cl1, 1:2)
+##' #Get first cluster
+##' NY8$CLUSTER <- stcl
+##'
+##' #Plot cluster
+##' spplot(NY8, "CLUSTER", col.regions = c("white", "lightgray", "gray"))
 ##'
 ##' @export
 mergeknclusters <- function(datamap, knresults, indClustersPlot) {
@@ -200,6 +245,11 @@ PlotClustersNoOverlap <- function(statsAllClustersNoOverlap, colors, map) {
 ##' @return A subset of knresults with non-overlaping clusters of at least
 ##' minsize size.
 ##'
+##' @examples
+##' data("brainNM_clusters")
+##' 
+##' nm.cl1.s <- slimknclusters(brainst, nm.cl1)
+##' nm.cl1.s
 ##' @export
 
 slimknclusters<-function(d, knresults, minsize = 1)
