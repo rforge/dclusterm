@@ -91,10 +91,11 @@ E-mail: \email{John.Molitor@oregonstate.edu}\\
 URL: \url{http://health.oregonstate.edu/people/molitor-john}\\
 \\
 Barry Rowlingson\\
+Centre for Health Informatics, Computing and Statistics (CHICAS)\\
 Lancaster Medical School\\
-Furness Building\\
 Lancaster University\\
-Bailrigg, Lancaster LA1 4YG, United Kingdom\\
+Lancaster, LA1 4YW\\
+United Kingdom\\
 E-mail: \email{b.rowlingson@lancaster.ac.uk}\\
 URL: \url{http://www.lancaster.ac.uk/fhm/about-us/people/barry-rowlingson}\\
 }
@@ -470,10 +471,10 @@ Other options include the number of replicates for Monte Carlo tests (argument
 \code{R}) if cluster assessment is done by simulation. By default, Monte Carlo
 tests are not used. \pkg{DClusterm} allows for parallel computing using several
 cores as implemented in package \pkg{parallel}.  The number of cores to use is
-defined in option \code{mc.cores} (now 4 cores are used):
+defined in option \code{mc.cores} (now 2 cores are used):
 
 <<echo = TRUE>>=
-options(mc.cores = 4)
+options(mc.cores = 2)
 @
 
 In the following example, to reduce the computational burden, we have only
@@ -510,7 +511,7 @@ ny.cl0
 Function \code{get.knclusters()} can be used to extract the indices of the
 areas in the different clusters detected.  Similarly, a vector with the cluster
 to which area belongs can be obtained with function \code{get.allknclusters()}.
-The detected clusters plus a 'no cluster' category are the levels of this 
+The detected clusters plus a ``no cluster'' category are the levels of this 
 categorical variable, which can be added to a spatial object as follows:
 
 
@@ -749,7 +750,7 @@ remain.  This may be due to the fact that the first cluster has the smallest
 SMR and risk. Hence, allowing for extra-variation will make the discrepancy
 between observed and expected less extreme and this cluster will be the first
 one to be declared as non-significant.  The two remaining clusters have the
-same size and a very similar risk than in the previous case.
+same size and a very similar risk as in the previous case.
 
 <<eval = FALSE, echo = FALSE>>=
 #Compute SMR in clusters
@@ -774,7 +775,7 @@ ny.mm1 <- glmer(Observed ~ offset(log(Expected)) + PCTOWNHOME +
 
 The estimates of the coefficients are similar to that of the fixed-effects
 model, but the associated $p$-values are somewhat higher. This is probably
-to the inclusion of  random effects in the model.
+due to the inclusion of  random effects in the model.
 
 
 <<eval = TRUE, results = hide>>=
@@ -925,7 +926,7 @@ nav.m0q <- glm(OBSERVED ~ offset(log(EXPECTED)) + 1, data = brainnav,
   family = "quasipoisson")
 @
 \noindent The dispersion parameter in the previous model is
-\Sexpr{round(summary(nav.m0q)$dispersion)}, which is
+\Sexpr{round(summary(nav.m0q)$dispersion, 2)}, which is
 higher than 1. This may mean that the Poisson distribution is not appropriate
 in this case due to the excess of zeros.
 
@@ -1099,7 +1100,7 @@ Cluster detection with function \code{DetectClustersModel()} takes arguments
 the period which is considered when looking for clusters. In this example the
 time period has been constrained to 1985--1989.  Furthermore, 
 \code{typeCluster = "ST"} is used to look for spatio-temporal clusters.  Note
-that it is also posible to look for spatial clusters by aggregating observed
+that it is also possible to look for spatial clusters by aggregating observed
 and expected cases over the whole temporal window with \code{typeCluster =
 "S"}.
 
@@ -1121,7 +1122,7 @@ nm.cl0.s
 @
 
 Hence, only \Sexpr{nrow(nm.cl0.s)} remain after removing overlapping clusters
-and these will be the only considered in the analysis.
+and these will be the only ones considered in the analysis.
 
 
 \subsubsection{Cluster detection after adjusting for covariates}
