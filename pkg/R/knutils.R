@@ -175,62 +175,6 @@ mergeknclusters <- function(datamap, knresults, indClustersPlot) {
 }
 
 
-
-##' @title Plots the clusters that do not overlap.
-##' 
-##' @description This function plots the detected clusters that do not overlap.
-##' There are as many windows as different start dates. All clusters
-##' with the same start date are represented in the same window.
-##'
-##' @param statsAllClustersNoOverlap data frame with information of the detected clusters
-##' that no overlap. Each row represents the information of one of the clusters.
-##' It contains the coordinates of the center, the size, the start
-##' and end dates, the log-likelihood ratio, a boolean indicating if it is a
-##' cluster (TRUE in all cases), and the p-value of the cluster.
-##' @param colors vector with the colors of the clusters.
-##' @param map \link{SpatialPolygonsDataFrame} with the polygons of the map.
-##'
-##' @return plots of the detected clusters for each start date.
-##'
-##' @export
-PlotClustersNoOverlap <- function(statsAllClustersNoOverlap, colors, map) {
-
-  # Name of the clusters. Cluster's order by their significance
-  nameClusters <- 1:nrow(statsAllClustersNoOverlap)
-
-  # First maps are the ones with clusters with lower minDateCluster
-  sortMinDateCluster <- sort(unique(statsAllClustersNoOverlap$minDateCluster))
-
-  lsort <- length(sortMinDateCluster)
-  for(i in 1:lsort) {
-
-    indClustersPlot <-
-     which(statsAllClustersNoOverlap$minDateCluster == sortMinDateCluster[i])
-    knslim <- statsAllClustersNoOverlap[indClustersPlot, ]
-    map$clusters <-
-     mergeknclusters(as(map, "data.frame"), knslim, indClustersPlot)
-
-    textLegend<-c("       End date:",
-     paste(nameClusters, ". ", 
-     statsAllClustersNoOverlap$maxDateCluster)[indClustersPlot])
-    colLegend<-c("white", colors[indClustersPlot])
-
-    p1 = spplot(map, "clusters",  col = "gray", col.regions = colLegend,
-     colorkey = FALSE, 
-     key = list(space = "right", 
-      points = list(pch = 19, cex = 1.8, col = colLegend), 
-      text = list(textLegend)), 
-     sp.layout = list(list("sp.text", as.matrix(knslim[, 1:2]), 
-      nameClusters[indClustersPlot], cex=1, font=2)),
-     main = paste("Start date", sortMinDateCluster[i]))
-
-    dev.new()
-
-    plot(p1)
-    #print(p1, position = c(0+(i-1)/lsort,0,i/lsort,1), more=T)
-  }
-}
-
 ##' @title Remove overlapping clusters
 ##'
 ##' @description This function slims the number of clusters down.
