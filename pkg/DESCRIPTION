@@ -12,7 +12,8 @@ Depends:
     sp,
     spacetime,
     DCluster
-Imports: methods, xts, lme4, pscl, RColorBrewer, gridExtra, latticeExtra, INLA
+Imports: methods, xts, lme4, pscl, RColorBrewer, gridExtra, latticeExtra
+Suggests: INLA
 Description: Model-based methods for the detection of disease clusters
   using GLMs, GLMMs and zero-inflated models.
 Additional_repositories: https://inla.r-inla-download.org/R/stable/

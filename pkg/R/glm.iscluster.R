@@ -9,7 +9,7 @@
 ##' For each one of these clusters, the log-likelihood ratio test statistic
 ##' for comparing the alternative model with the cluster versus the null model
 ##' of no clusters (if model is \link{glm}, \link{glmer} or \link{zeroinfl}),
-##' or the DIC (if model is \link{inla}) is calculated.
+##' or the DIC (if model is \link[INLA]{inla}) is calculated.
 ##' The cluster with maximum value of the log-likelihood ratio or
 ##' minimum DIC is returned.
 ##'
@@ -25,7 +25,7 @@
 ##' This can be "glm" for generalized linear models (\link{glm} {stats}),
 ##' "glmer" for generalized linear mixed model (\link{glmer} {lme4}),
 ##' "zeroinfl" for zero-inflated models (\link{zeroinfl} {pscl}), or
-##' "inla" for generalized linear, generalized linear mixed or zero-inflated models fitted with \link{inla}.
+##' "inla" for generalized linear, generalized linear mixed or zero-inflated models fitted with \link[INLA]{inla}.
 ##'
 ##' @return vector containing the size, the start and end dates,
 ##' the log-likelihood ratio or DIC, the p-value and the risk
@@ -185,7 +185,7 @@ glmAndZIP.iscluster <- function(stfdf, idxorder, minDateCluster,
            esperados <- exp(model0$summary.linear.predictor[, "mean"] +
             log(model0$.args$E))
          }
-         m1 <- inla(newformula, family = modelFamilyINLA, data = d0,
+         m1 <- INLA::inla(newformula, family = modelFamilyINLA, data = d0,
           E = esperados, control.inla = list(h = 0.01), 
           control.compute = list(dic = TRUE, mlik=TRUE), verbose = FALSE)
 
