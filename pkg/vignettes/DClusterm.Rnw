@@ -1238,7 +1238,7 @@ space-time, zero-inflated data and over-dispersed data.
 
 This package was initially developed by Paula Moraga as a Google Summer of Code
 project.  Virgilio G\'omez-Rubio has been supported by grant PPIC-2014-001,
-funded by Consejer\'ia de Educaci\'on, Cultura y Deportes (JCCM, Spain)) and FEDER, and
+funded by Consejer\'ia de Educaci\'on, Cultura y Deportes (JCCM, Spain) and FEDER, and
 grant MTM2016-77501-P, funded by Ministerio de Econom\'ia y Competitividad (Spain).
 
 \bibliography{DClusterm}
