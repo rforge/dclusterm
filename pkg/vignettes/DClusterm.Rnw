@@ -242,10 +242,12 @@ O_i \sim Po(E_i \theta_i) \nonumber\\
 \noindent
 Here $\mu_i$ is the mean of the Poisson distribution (which is equal to $E_i
 \theta_i$), $\log(E_i)$ denotes an offset to account for the population
-``exposure'' (age, gender, etc.) and  $\theta_i$ is the relative risk and it
-measures any deviation (increase or decrease) in the incidence of the disease
-from the expected number of cases.  Finally, $x_i$ represents a covariate
-of the outcome of interest.
+``exposure'' (age, gender, etc.), $x_i$ represents a covariate of the outcome
+of interest and  $\theta_i$ is the relative risk and it measures any deviation
+(increase or decrease) in the incidence of the disease from the expected number
+of cases.  A simple and raw estimate of the relative risk $\theta_i$ that does
+not require covariates is the standardized mortality ratio (SMR), which is
+defined as $O_i / E_i$ \citep{WallerGotway:2004}.
 
 After fitting this model, we obtain estimates $\hat\alpha$ and $\hat\beta$
 which account for the effects of non-cluster covariates in the model.  We
@@ -944,15 +946,12 @@ summary(nav.m0zip)
 @
 
 Hence, the zero-inflated Poisson model will be used now to detect clusters
-of disease. As in the example on the New York leukemia dataset, a \pkg{spacetime}
+of disease. As in the example on the New York leukemia dataset, a \pkg{sp}
 object will store all the information. The column for the expected counts must
 be named \code{Expected}, and this is our first step. Note also that,
 because only one time period is considered, data will have a single value and
 it is the 1st of January of 1990.
 
-<<>>=
-brainnav$Expected <- brainnav$EXPECTED
-@
 
 Function \code{DetectClustersModel()} will perform the cluster detection using
 a \code{zeroinfl} model. This provides a very flexible way of handling
