@@ -1,10 +1,10 @@
-%Sweave("jss_paper.Rnw", encoding = "UTF-8", keep.source = FALSE); system("pdflatex jss_paper.tex"); system("bibtex jss_paper"); system("pdflatex jss_paper.tex"); system("pdflatex jss_paper.tex")
-%system("pdflatex jss_paper.tex")
-%system("bibtex jss_paper")
+%Sweave("DClusterm.Rnw", encoding = "UTF-8", keep.source = FALSE); system("pdflatex DClusterm.tex"); system("bibtex DClusterm"); system("pdflatex DClusterm.tex"); system("pdflatex DClusterm.tex")
+%system("pdflatex DClusterm.tex")
+%system("bibtex DClusterm")
 
 <<echo = FALSE>>=
 #JSS style
-options(prompt = "R> ", continue = "+  ", width = 70, useFancyQuotes = FALSE)
+options(prompt = "R> ", continue = "+", width = 70, useFancyQuotes = FALSE)
 @
 
 \documentclass[article]{jss}
@@ -458,7 +458,7 @@ cluster \citep{Dunn:1958}.  Specifically, a cluster is declared if its $p$-value
 is smaller than alpha divided by the number of clusters tested.
 
 In addition, overlapping clusters can be removed with function
-\code{slimkncluster} (see below) so that only clusters with the greatest
+\code{slimkncluster()} (see below) so that only clusters with the greatest
 significancy are reported. This will also help to reduce the problem of
 multiple testing as only one possible cluster around a given cluster center is
 reported, similarly as the SSS.
@@ -622,7 +622,7 @@ centres are represented by blue dots.}
 \label{fig:NYcl}
 \end{figure}
 
-Finally, function \code{slimknclusters} could have been used to remove
+Finally, function \code{slimknclusters()} could have been used to remove
 overlapping clusters with less significant coefficients. This procedure will
 sort all detected clusters in decreasing order according to the value of
 \code{statistic} and remove those clusters which overlap with another cluster
@@ -631,7 +631,7 @@ SSS as this will only consider a single cluster around each area and will help
 to control for the multiple testing problem inherent to the problem of the
 detection of disease clusters.
 
-Function \code{slimknclusters} takes three arguments. The first one
+Function \code{slimknclusters()} takes three arguments. The first one
 is the spatial or spatio-temporal object used in the call to
 \code{DetectClustersModel}, the second one is the table
 with the clusters detected and the third one is the minimum cluster
@@ -1103,7 +1103,7 @@ that it is also possible to look for spatial clusters by aggregating observed
 and expected cases over the whole temporal window with \code{typeCluster =
 "S"}.
 
-<<results=hide>>=
+<<results = hide>>=
 nm.cl0 <- DetectClustersModel(brainst, NM.coords,
   minDateUser = "1985-01-01", maxDateUser = "1989-01-01",
   fractpop = 0.15, alpha = 0.05, typeCluster = "ST", R = NULL, 
