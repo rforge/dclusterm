@@ -170,7 +170,7 @@ described now. The \pkg{smerc} package \citep{smerc:2015} implements different
 scan statistics, including some for the detection of non-circular clusters.
 Package \pkg{AMOEBA} \citep{AMOEBA:2014} includes a function to detect spatial
 clusters based on the Getis-Ord statistic.  Bayesian Dirichlet processes for
-spatial clustering are implemented in the \pkg{PReMiuM} package
+spatial clustering, as developed in \citet{Molitoretal:2010}, are implemented in the \pkg{PReMiuM} package
 \citep{PReMiuM:2015}.  A version of the spatial scan statistic adapted to
 detect clusters in social networks is available in package \pkg{SNscan}
 \citep{SNscan:2016}.  Package \pkg{SpatialEpiApp} \citep{Moraga:2017} includes a
@@ -1214,7 +1214,7 @@ space-time, zero-inflated data and over-dispersed data.
 \section{Acknowledgments}
 
 This package was initially developed by Paula Moraga as a Google Summer of Code
-project.  Virgilio G\'omez-Rubio has been supported by grant PPIC-2014-001
+project.  V. G\'omez-Rubio has been supported by grants PPIC-2014-001
 and SBPLY/17/180501/000491,
 funded by Consejer\'ia de Educaci\'on, Cultura y Deportes (JCCM, Spain) and FEDER, and
 grant MTM2016-77501-P, funded by Ministerio de Econom\'ia y Competitividad (Spain).
