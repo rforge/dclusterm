@@ -1,8 +1,9 @@
 Package: DClusterm
 Type: Package
 Title: Model-Based Detection of Disease Clusters
-Version: 0.2-3
-Date: 2018-07-24
+Version: 1.0-0
+Encoding: UTF-8
+Date: 2019-08-16
 Author: Virgilio Gomez-Rubio, Paula Esther Moraga Serrano, Barry
     Rowlingson
 Maintainer: Virgilio Gomez-Rubio <virgilio.gomez@uclm.es>
@@ -25,4 +26,4 @@ Collate:
     'Functions2.R'
     'glm.iscluster.R'
     'knutils.R'
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.1
