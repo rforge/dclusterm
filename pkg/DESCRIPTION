@@ -8,7 +8,7 @@ Author: Virgilio Gomez-Rubio, Paula Esther Moraga Serrano, Barry
     Rowlingson
 Maintainer: Virgilio Gomez-Rubio <virgilio.gomez@uclm.es>
 Depends:
-    R (>= 2.9.0),
+    R (>= 3.5.0),
     parallel,
     sp,
     spacetime,
